@@ -1,2 +1,3 @@
 # isi-pemetrics-mgmt
-CRUD tooling for PE_Metrics dimensions
+
+Simple CRUD tooling for internal management of PE_Metrics dimensions and lookups.
