@@ -118,6 +118,20 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
+    -- Validate part number exists
+    IF NOT EXISTS (SELECT 1 FROM product.TLA WHERE PartNo = @PartNo)
+    BEGIN
+        RAISERROR(50041, 16, 1, 'Part number not found.');
+        RETURN;
+    END
+
+    -- Validate cell exists
+    IF NOT EXISTS (SELECT 1 FROM floor.Cell WHERE CellId = @CellId)
+    BEGIN
+        RAISERROR(50031, 16, 1, 'Cell not found.');
+        RETURN;
+    END
+
     -- Insert only if not already exists
     IF NOT EXISTS (SELECT 1 FROM floor.CellByPartNo
                    WHERE PartNo = @PartNo AND CellId = @CellId)

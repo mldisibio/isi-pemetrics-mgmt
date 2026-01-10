@@ -147,6 +147,20 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
+    -- Validate software test exists
+    IF NOT EXISTS (SELECT 1 FROM sw.SwTestMap WHERE SwTestMapId = @SwTestMapId)
+    BEGIN
+        RAISERROR(50030, 16, 1, 'Software test not found.');
+        RETURN;
+    END
+
+    -- Validate cell exists
+    IF NOT EXISTS (SELECT 1 FROM floor.Cell WHERE CellId = @CellId)
+    BEGIN
+        RAISERROR(50031, 16, 1, 'Cell not found.');
+        RETURN;
+    END
+
     -- Insert only if not already exists
     IF NOT EXISTS (SELECT 1 FROM floor.CellBySwTest
                    WHERE SwTestMapId = @SwTestMapId AND CellId = @CellId)
