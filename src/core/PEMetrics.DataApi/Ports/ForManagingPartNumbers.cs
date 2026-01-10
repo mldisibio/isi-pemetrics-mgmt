@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using PEMetrics.DataApi.Models;
 
 namespace PEMetrics.DataApi.Ports;
@@ -6,7 +7,7 @@ namespace PEMetrics.DataApi.Ports;
 public interface ForManagingPartNumbers
 {
     /// <summary>Retrieves all TLAs from mgmt.vw_TLA.</summary>
-    IReadOnlyCollection<TLA> GetAll();
+    ImmutableList<TLA> GetAll();
 
     /// <summary>Retrieves a single TLA by part number.</summary>
     /// <returns>The TLA, or null if not found.</returns>

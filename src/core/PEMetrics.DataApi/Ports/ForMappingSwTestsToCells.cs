@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using PEMetrics.DataApi.Models;
 
 namespace PEMetrics.DataApi.Ports;
@@ -6,7 +7,7 @@ namespace PEMetrics.DataApi.Ports;
 public interface ForMappingSwTestsToCells
 {
     /// <summary>Retrieves all cell mappings for a specific software test.</summary>
-    IReadOnlyCollection<CellBySwTest> GetBySwTestMapId(int swTestMapId);
+    ImmutableList<CellBySwTest> GetBySwTestMapId(int swTestMapId);
 
     /// <summary>Replaces all cell mappings for a software test. Atomic operation.</summary>
     void SetMappings(int swTestMapId, IEnumerable<int> cellIds);

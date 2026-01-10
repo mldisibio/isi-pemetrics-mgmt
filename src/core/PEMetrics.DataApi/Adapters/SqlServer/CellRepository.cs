@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using PEMetrics.DataApi.Infrastructure;
 using PEMetrics.DataApi.Models;
 using PEMetrics.DataApi.Ports;
@@ -14,7 +15,7 @@ public sealed class CellRepository : ForManagingCells
         _connectionFactory = connectionFactory ?? throw new ArgumentNullException(nameof(connectionFactory));
     }
 
-    public IReadOnlyCollection<Cell> GetAll()
+    public ImmutableList<Cell> GetAll()
     {
         throw new NotImplementedException();
     }

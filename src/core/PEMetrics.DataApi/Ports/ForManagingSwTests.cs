@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using PEMetrics.DataApi.Models;
 
 namespace PEMetrics.DataApi.Ports;
@@ -6,7 +7,7 @@ namespace PEMetrics.DataApi.Ports;
 public interface ForManagingSwTests
 {
     /// <summary>Retrieves all software tests from mgmt.vw_SwTestMap.</summary>
-    IReadOnlyCollection<SwTestMap> GetAll();
+    ImmutableList<SwTestMap> GetAll();
 
     /// <summary>Retrieves a single software test by ID.</summary>
     /// <returns>The test, or null if not found.</returns>

@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using PEMetrics.DataApi.Infrastructure;
 using PEMetrics.DataApi.Models;
 using PEMetrics.DataApi.Ports;
@@ -14,12 +15,12 @@ public sealed class PCStationRepository : ForManagingPCStations
         _connectionFactory = connectionFactory ?? throw new ArgumentNullException(nameof(connectionFactory));
     }
 
-    public IReadOnlyCollection<PCStation> GetAll()
+    public ImmutableList<PCStation> GetAll()
     {
         throw new NotImplementedException();
     }
 
-    public IReadOnlyCollection<PCStation> Search(string prefix)
+    public ImmutableList<PCStation> Search(string prefix)
     {
         throw new NotImplementedException();
     }

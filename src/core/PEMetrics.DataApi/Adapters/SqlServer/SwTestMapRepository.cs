@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using PEMetrics.DataApi.Infrastructure;
 using PEMetrics.DataApi.Models;
 using PEMetrics.DataApi.Ports;
@@ -14,7 +15,7 @@ public sealed class SwTestMapRepository : ForManagingSwTests
         _connectionFactory = connectionFactory ?? throw new ArgumentNullException(nameof(connectionFactory));
     }
 
-    public IReadOnlyCollection<SwTestMap> GetAll()
+    public ImmutableList<SwTestMap> GetAll()
     {
         throw new NotImplementedException();
     }

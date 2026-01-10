@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using PEMetrics.DataApi.Models;
 
 namespace PEMetrics.DataApi.Ports;
@@ -6,7 +7,7 @@ namespace PEMetrics.DataApi.Ports;
 public interface ForManagingCells
 {
     /// <summary>Retrieves all cells from mgmt.vw_Cell.</summary>
-    IReadOnlyCollection<Cell> GetAll();
+    ImmutableList<Cell> GetAll();
 
     /// <summary>Retrieves a single cell by ID.</summary>
     /// <returns>The cell, or null if not found.</returns>

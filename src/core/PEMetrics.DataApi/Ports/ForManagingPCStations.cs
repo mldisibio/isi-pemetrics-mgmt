@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using PEMetrics.DataApi.Models;
 
 namespace PEMetrics.DataApi.Ports;
@@ -6,11 +7,11 @@ namespace PEMetrics.DataApi.Ports;
 public interface ForManagingPCStations
 {
     /// <summary>Retrieves all PC stations from mgmt.vw_PCStation.</summary>
-    IReadOnlyCollection<PCStation> GetAll();
+    ImmutableList<PCStation> GetAll();
 
     /// <summary>Searches PC stations by name prefix (for autocomplete).</summary>
     /// <returns>Matching PC stations sorted alphabetically.</returns>
-    IReadOnlyCollection<PCStation> Search(string prefix);
+    ImmutableList<PCStation> Search(string prefix);
 
     /// <summary>Inserts a new PC station if it does not already exist. Idempotent.</summary>
     void Insert(string pcName);
