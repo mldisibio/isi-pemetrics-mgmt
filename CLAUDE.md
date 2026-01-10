@@ -10,6 +10,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - "PE" refers to "Production Engineering" and reflects the context of software that tests water quality devices with sensors in a manufacturing environment.
 - PE_Metrics is a star schema stored in MS Sql Server and consumed by Power BI. The dimensions ('Cell', 'PCStation', 'SoftwareTest', 'Product Number') each require manual maintenance which user currently does using raw sql, but it is tedious due to intentional foreign key constraints and the need to often check what already exists and then write cumbersome sql to insert new data or update existing rows.
 - This project is concerned only with the dimension table maintainence. The larger context is that fact table tracks the "Pass/Fail" outcome of each test run and this is used for manufacturing metrics such as "First Pass Yield" as broken down by each dimension.
+- All data modification operations are executed via MS Sql Server stored procedures.
+- Stored procedures and views are part of the project deliverables and are versioned in the repository.
+- The MS Sql Server `PE_Metrics` database is the source of truth for validation and enforcement of business rules.
 
 ## Technology Stack
 
@@ -27,6 +30,21 @@ As we iterate the project, business logic will be separate from the UI, so class
 Also consider that a possible future iteration would use the same business logic but the ui will be terminal based ("tui") as a learning experiment, stored under `src/tui/DimensionMangement`.
 
 If XUnit tests are added (not a strict requirement) they would be stored in a `tests` directory parallel to `src`
+
+## Database Interaction Model
+
+- All create, update, and delete operations must be executed via MS Sql Server stored procedures.
+- Stored procedures are responsible for:
+  - validating business rules
+  - enforcing invariants
+  - performing atomic writes
+- The application layer must not issue ad-hoc INSERT, UPDATE, or DELETE statements.
+
+- Read-only data for UI grids must be sourced from database views or table-valued functions designed for display purposes.
+- The inline database (DuckDB) is a read-only cache and must not be used as a write target.
+- All write operations are executed by the application layer directly against SQL Server via stored procedures.
+- Cache refresh logic is coordinated by the application layer after successful command execution.
+
 
 ## Common Commands
 
@@ -50,7 +68,10 @@ dotnet run --project src/gui/DimensionManagement/DimensionManagement.csproj
 ```bash
 dotnet clean PE_Metrics_DataMgmt.sln
 ```
-
+### Nuget Packages
+```bash
+dotnet add package DuckDB.NET.Data.Full
+```
 ### Restore Dependencies
 ```bash
 dotnet restore PE_Metrics_DataMgmt.sln

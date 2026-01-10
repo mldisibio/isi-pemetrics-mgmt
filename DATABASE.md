@@ -7,10 +7,25 @@ This document describes the database schema for PE_Metrics dimension management.
 - the primary fact is the pass or fail result of a test run against a product;
 - from this, key metrics such as 'First Pass Yield' and 'Rolled Throughput Yield' can be calculated and tracked;
 
+## Notes on Application Integration
+
+- SQL Server is the system of record.
+- Inline databases used by the application (e.g., DuckDB) are consumers of this data and are refreshed from SQL Server.
+- SQL Server stored procedures define the authoritative behavior for all data modifications.
 
 ## Connection Information
 
-<!-- Document connection string configuration, environment variables, or config files used -->
+- Microsoft Sql Server 2016
+    - `Server=.\MLD2019;Database=PE_Metrics;User Id=MikeUser;Password=UserIsMike;`
+    - use plain ADO.Net classes for dotnet interaction
+        - e.g. `using System.Data.SqlClient;`
+- DuckDb
+    - `PE_Metrics_Cache.duckdb` 
+    - use `System.Enviroment.SpecialFolder.Personal` to construct the local path with a subdirectory `PEDimMgmnt`
+        - e.g. `c:\Users\joe\Documents\PEDimMgmnt\PE_Metrics_Cache.duckdb`
+        - ensure the directory and DuckDb database exist when the caching library is initialized
+    - use `DuckDB.NET.Data.Full` nuget library for dotnet interaction
+        - e.g. `dotnet add package DuckDB.NET.Data.Full`
 
 ## Schemas
 
@@ -132,7 +147,7 @@ create unique index uq_floor_CellByPCStation on floor.CellByPCStation (CellId, P
 **Purpose**: each test or calibration software is named, has a unique numeric id, and is run for a specific product; 
 
 - however, a test can be renamed, assigned a different id, or obsoleted; 
-- 'ReportKey' is a unique string to which the same test is mapped across any names or id variations
+- 'ReportKey' is a unique string to which the same underlying test is mapped when it has name or id variations (hence the name 'SwTestMap')
 
 **Definition**:
 ```sql
@@ -147,7 +162,9 @@ create table sw.SwTestMap
     RelativePath     varchar(256),
     LastRun          date,
     Notes            varchar(256)
-)
+);
+
+create index UQ_SwTestMap_IdName on sw.SwTestMap (ConfiguredTestId, TestName);
 ```
 
 ### floor.CellBySwTest
@@ -310,6 +327,13 @@ CREATE VIEW floor.CellBySwTest_Full AS
 ```
 
 ---
+
+## Stored Procedures and Views
+
+- All data modifications are performed via stored procedures.
+- All UI-facing read operations are backed by database views.
+- Stored procedures enforce validation and transactional consistency.
+- SQL scripts for stored procedures and views are maintained in the application repository.
 
 ---
 
