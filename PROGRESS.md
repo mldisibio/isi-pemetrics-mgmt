@@ -6,7 +6,7 @@ PE_Metrics Dimension Management application - A .NET 9.0 Windows Forms applicati
 ## Phase 1: Database Layer
 All stored procedures, views, and functions are created in the `mgmt` schema.
 
-**Status: COMPLETE - AWAITING REVIEW**
+**Status: COMPLETE - APPROVED AND DEPLOYED**
 
 ### Schema Setup
 - [x] Create `mgmt` schema if not exists (`00_schema_setup.sql`)
@@ -57,51 +57,58 @@ All stored procedures, views, and functions are created in the `mgmt` schema.
 
 ### Phase 1 Review
 - [x] All SQL scripts created in `docs/sql/`
-- [ ] Scripts reviewed and approved by user
+- [x] Scripts reviewed and approved by user
+- [x] Deployed to .\MLD2019 SQL Server
 
 ---
 
 ## Phase 2: Data API Layer
 
+**Status: STUBS COMPLETE - AWAITING REVIEW**
+
 ### Project Setup
-- [ ] Create `src/core/PEMetrics.DataApi` class library project
-- [ ] Add to solution
-- [ ] Configure ADO.NET dependencies (System.Data.SqlClient)
-- [ ] Create connection string management
+- [x] Create `src/core/PEMetrics.DataApi` class library project
+- [x] Add to solution
+- [x] Configure ADO.NET dependencies (Microsoft.Data.SqlClient)
+- [x] Create connection string management (`ISqlConnectionFactory`, `SqlConnectionFactory`)
 
-### Interfaces (Ports)
-- [ ] `ICellRepository` - Cell data operations
-- [ ] `IPCStationRepository` - PCStation data operations
-- [ ] `ICellByPCStationRepository` - PC to Cell mapping operations
-- [ ] `ISwTestMapRepository` - Software test operations
-- [ ] `ICellBySwTestRepository` - SwTest to Cell mapping operations
-- [ ] `ITLARepository` - Part number operations
-- [ ] `ICellByPartNoRepository` - PartNo to Cell mapping operations
+### Domain Models (`Models/`)
+- [x] `Cell` record - immutable, with IsActive computed property
+- [x] `PCStation` record - simple PcName only
+- [x] `CellByPCStation` record - includes denormalized CellName
+- [x] `SwTestMap` record - with IsActive computed property
+- [x] `CellBySwTest` record - includes denormalized CellName
+- [x] `TLA` record - with IsUsed computed property
+- [x] `CellByPartNo` record - includes denormalized CellName
 
-### Domain Models
-- [ ] `Cell` record/class
-- [ ] `PCStation` record/class
-- [ ] `CellByPCStation` record/class
-- [ ] `SwTestMap` record/class
-- [ ] `CellBySwTest` record/class
-- [ ] `TLA` record/class
-- [ ] `CellByPartNo` record/class
+### Interfaces/Ports (`Ports/`)
+- [x] `ICellRepository` - Cell data operations
+- [x] `IPCStationRepository` - PCStation data operations
+- [x] `ICellByPCStationRepository` - PC to Cell mapping operations
+- [x] `ISwTestMapRepository` - Software test operations
+- [x] `ICellBySwTestRepository` - SwTest to Cell mapping operations
+- [x] `ITLARepository` - Part number operations
+- [x] `ICellByPartNoRepository` - PartNo to Cell mapping operations
 
-### Repository Implementations
-- [ ] `CellRepository` implementation
-- [ ] `PCStationRepository` implementation
-- [ ] `CellByPCStationRepository` implementation
-- [ ] `SwTestMapRepository` implementation
-- [ ] `CellBySwTestRepository` implementation
-- [ ] `TLARepository` implementation
-- [ ] `CellByPartNoRepository` implementation
+### Repository Implementations (`Adapters/SqlServer/`) - STUBBED
+- [x] `CellRepository` stub
+- [x] `PCStationRepository` stub
+- [x] `CellByPCStationRepository` stub
+- [x] `SwTestMapRepository` stub
+- [x] `CellBySwTestRepository` stub
+- [x] `TLARepository` stub
+- [x] `CellByPartNoRepository` stub
 
-### Error Handling
-- [ ] Custom exception types for business rule violations
-- [ ] SQL error code translation
+### Infrastructure (`Infrastructure/`)
+- [x] `ISqlConnectionFactory` - Connection factory interface
+- [x] `SqlConnectionFactory` - Connection factory implementation
+- [x] `RepositoryException` - Custom exception for business rule violations
+- [x] `SqlErrorTranslator` - SQL error code to message translation
 
 ### Phase 2 Review
-- [ ] All repository classes implemented
+- [x] All stubs created and project compiles
+- [ ] Naming and design reviewed by user
+- [ ] Full implementations written
 - [ ] Reviewed and approved by user
 
 ---
