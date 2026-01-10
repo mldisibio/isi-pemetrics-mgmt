@@ -4,19 +4,17 @@ using PEMetrics.DataApi.Ports;
 
 namespace PEMetrics.DataApi.Adapters.SqlServer;
 
-/// <summary>
-/// SQL Server implementation of ICellByPCStationRepository.
-/// </summary>
-public sealed class CellByPCStationRepository : ICellByPCStationRepository
+/// <summary>SQL Server implementation of ForMappingPCStationToCell.</summary>
+public sealed class CellByPCStationRepository : ForMappingPCStationToCell
 {
-    private readonly ISqlConnectionFactory _connectionFactory;
+    readonly ForCreatingSqlServerConnections _connectionFactory;
 
-    public CellByPCStationRepository(ISqlConnectionFactory connectionFactory)
+    public CellByPCStationRepository(ForCreatingSqlServerConnections connectionFactory)
     {
         _connectionFactory = connectionFactory ?? throw new ArgumentNullException(nameof(connectionFactory));
     }
 
-    public IEnumerable<CellByPCStation> GetAll()
+    public IReadOnlyCollection<CellByPCStation> GetAll()
     {
         throw new NotImplementedException();
     }

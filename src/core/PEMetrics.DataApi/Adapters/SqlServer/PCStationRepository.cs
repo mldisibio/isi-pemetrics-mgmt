@@ -4,24 +4,22 @@ using PEMetrics.DataApi.Ports;
 
 namespace PEMetrics.DataApi.Adapters.SqlServer;
 
-/// <summary>
-/// SQL Server implementation of IPCStationRepository.
-/// </summary>
-public sealed class PCStationRepository : IPCStationRepository
+/// <summary>SQL Server implementation of ForManagingPCStations.</summary>
+public sealed class PCStationRepository : ForManagingPCStations
 {
-    private readonly ISqlConnectionFactory _connectionFactory;
+    readonly ForCreatingSqlServerConnections _connectionFactory;
 
-    public PCStationRepository(ISqlConnectionFactory connectionFactory)
+    public PCStationRepository(ForCreatingSqlServerConnections connectionFactory)
     {
         _connectionFactory = connectionFactory ?? throw new ArgumentNullException(nameof(connectionFactory));
     }
 
-    public IEnumerable<PCStation> GetAll()
+    public IReadOnlyCollection<PCStation> GetAll()
     {
         throw new NotImplementedException();
     }
 
-    public IEnumerable<PCStation> Search(string prefix)
+    public IReadOnlyCollection<PCStation> Search(string prefix)
     {
         throw new NotImplementedException();
     }

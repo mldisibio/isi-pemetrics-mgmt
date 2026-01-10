@@ -4,19 +4,17 @@ using PEMetrics.DataApi.Ports;
 
 namespace PEMetrics.DataApi.Adapters.SqlServer;
 
-/// <summary>
-/// SQL Server implementation of ICellRepository.
-/// </summary>
-public sealed class CellRepository : ICellRepository
+/// <summary>SQL Server implementation of ForManagingCells.</summary>
+public sealed class CellRepository : ForManagingCells
 {
-    private readonly ISqlConnectionFactory _connectionFactory;
+    readonly ForCreatingSqlServerConnections _connectionFactory;
 
-    public CellRepository(ISqlConnectionFactory connectionFactory)
+    public CellRepository(ForCreatingSqlServerConnections connectionFactory)
     {
         _connectionFactory = connectionFactory ?? throw new ArgumentNullException(nameof(connectionFactory));
     }
 
-    public IEnumerable<Cell> GetAll()
+    public IReadOnlyCollection<Cell> GetAll()
     {
         throw new NotImplementedException();
     }

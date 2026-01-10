@@ -4,19 +4,17 @@ using PEMetrics.DataApi.Ports;
 
 namespace PEMetrics.DataApi.Adapters.SqlServer;
 
-/// <summary>
-/// SQL Server implementation of ICellByPartNoRepository.
-/// </summary>
-public sealed class CellByPartNoRepository : ICellByPartNoRepository
+/// <summary>SQL Server implementation of ForMappingPartNumberToCells.</summary>
+public sealed class CellByPartNoRepository : ForMappingPartNumberToCells
 {
-    private readonly ISqlConnectionFactory _connectionFactory;
+    readonly ForCreatingSqlServerConnections _connectionFactory;
 
-    public CellByPartNoRepository(ISqlConnectionFactory connectionFactory)
+    public CellByPartNoRepository(ForCreatingSqlServerConnections connectionFactory)
     {
         _connectionFactory = connectionFactory ?? throw new ArgumentNullException(nameof(connectionFactory));
     }
 
-    public IEnumerable<CellByPartNo> GetByPartNo(string partNo)
+    public IReadOnlyCollection<CellByPartNo> GetByPartNo(string partNo)
     {
         throw new NotImplementedException();
     }

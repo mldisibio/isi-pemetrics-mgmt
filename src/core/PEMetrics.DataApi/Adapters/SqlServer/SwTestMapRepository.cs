@@ -4,19 +4,17 @@ using PEMetrics.DataApi.Ports;
 
 namespace PEMetrics.DataApi.Adapters.SqlServer;
 
-/// <summary>
-/// SQL Server implementation of ISwTestMapRepository.
-/// </summary>
-public sealed class SwTestMapRepository : ISwTestMapRepository
+/// <summary>SQL Server implementation of ForManagingSwTests.</summary>
+public sealed class SwTestMapRepository : ForManagingSwTests
 {
-    private readonly ISqlConnectionFactory _connectionFactory;
+    readonly ForCreatingSqlServerConnections _connectionFactory;
 
-    public SwTestMapRepository(ISqlConnectionFactory connectionFactory)
+    public SwTestMapRepository(ForCreatingSqlServerConnections connectionFactory)
     {
         _connectionFactory = connectionFactory ?? throw new ArgumentNullException(nameof(connectionFactory));
     }
 
-    public IEnumerable<SwTestMap> GetAll()
+    public IReadOnlyCollection<SwTestMap> GetAll()
     {
         throw new NotImplementedException();
     }

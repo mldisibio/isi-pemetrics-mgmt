@@ -4,19 +4,17 @@ using PEMetrics.DataApi.Ports;
 
 namespace PEMetrics.DataApi.Adapters.SqlServer;
 
-/// <summary>
-/// SQL Server implementation of ITLARepository.
-/// </summary>
-public sealed class TLARepository : ITLARepository
+/// <summary>SQL Server implementation of ForManagingPartNumbers.</summary>
+public sealed class TLARepository : ForManagingPartNumbers
 {
-    private readonly ISqlConnectionFactory _connectionFactory;
+    readonly ForCreatingSqlServerConnections _connectionFactory;
 
-    public TLARepository(ISqlConnectionFactory connectionFactory)
+    public TLARepository(ForCreatingSqlServerConnections connectionFactory)
     {
         _connectionFactory = connectionFactory ?? throw new ArgumentNullException(nameof(connectionFactory));
     }
 
-    public IEnumerable<TLA> GetAll()
+    public IReadOnlyCollection<TLA> GetAll()
     {
         throw new NotImplementedException();
     }
