@@ -152,8 +152,8 @@ GO
 --------------------------------------------------------------------------------
 -- PROCEDURE: mgmt.TLA_Delete
 -- Purpose: Hard delete a TLA (only if not used in production tests)
+-- Behavior: Silently returns if PartNo does not exist
 -- Errors:
---   50041 - TLA not found
 --   50042 - Cannot delete: TLA is referenced in production tests
 --   50043 - Cannot delete: TLA is referenced in cell mappings
 --------------------------------------------------------------------------------
@@ -167,10 +167,9 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
-    -- Validate TLA exists
+    -- If TLA does not exist, silently return
     IF NOT EXISTS (SELECT 1 FROM product.TLA WHERE PartNo = @PartNo)
     BEGIN
-        RAISERROR(50041, 16, 1, 'Part number not found.');
         RETURN;
     END
 

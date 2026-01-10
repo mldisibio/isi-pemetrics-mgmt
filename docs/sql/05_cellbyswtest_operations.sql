@@ -5,11 +5,13 @@
     - mgmt.IntList (TYPE)                   : Table-valued parameter type for passing lists of integers
     - mgmt.CellBySwTest_GetBySwTestMapId    : Get all cell mappings for a software test
     - mgmt.CellBySwTest_SetMappings         : Replace all cell mappings for a software test
+    - mgmt.CellBySwTest_AddMapping          : Add a single cell mapping (idempotent)
+    - mgmt.CellBySwTest_DeleteMapping       : Remove a single cell mapping (idempotent)
 
     Business Rules:
     - A software test can be assigned to one or more cells
     - This is a simple join table with composite primary key (CellId, SwTestMapId)
-    - All mappings are managed as a set (replace all on update)
+    - Mappings can be managed as a set (SetMappings) or individually (Add/Delete)
 */
 
 USE PE_Metrics;
@@ -126,6 +128,53 @@ BEGIN
         ROLLBACK TRANSACTION;
         THROW;
     END CATCH
+END
+GO
+
+--------------------------------------------------------------------------------
+-- PROCEDURE: mgmt.CellBySwTest_AddMapping
+-- Purpose: Add a single cell mapping for a software test
+-- Behavior: Silently succeeds if the mapping already exists (idempotent)
+--------------------------------------------------------------------------------
+IF OBJECT_ID('mgmt.CellBySwTest_AddMapping', 'P') IS NOT NULL
+    DROP PROCEDURE mgmt.CellBySwTest_AddMapping;
+GO
+
+CREATE PROCEDURE mgmt.CellBySwTest_AddMapping
+    @SwTestMapId INT,
+    @CellId      INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Insert only if not already exists
+    IF NOT EXISTS (SELECT 1 FROM floor.CellBySwTest
+                   WHERE SwTestMapId = @SwTestMapId AND CellId = @CellId)
+    BEGIN
+        INSERT INTO floor.CellBySwTest (CellId, SwTestMapId)
+        VALUES (@CellId, @SwTestMapId);
+    END
+END
+GO
+
+--------------------------------------------------------------------------------
+-- PROCEDURE: mgmt.CellBySwTest_DeleteMapping
+-- Purpose: Remove a single cell mapping for a software test
+-- Behavior: Silently succeeds if the mapping does not exist (idempotent)
+--------------------------------------------------------------------------------
+IF OBJECT_ID('mgmt.CellBySwTest_DeleteMapping', 'P') IS NOT NULL
+    DROP PROCEDURE mgmt.CellBySwTest_DeleteMapping;
+GO
+
+CREATE PROCEDURE mgmt.CellBySwTest_DeleteMapping
+    @SwTestMapId INT,
+    @CellId      INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DELETE FROM floor.CellBySwTest
+    WHERE SwTestMapId = @SwTestMapId AND CellId = @CellId;
 END
 GO
 

@@ -11,6 +11,9 @@
     - Software tests are never hard deleted
     - LastRun suggests if a test is obsolete (used for "active" filtering)
     - A test is considered "active" if LastRun is NULL or within past 3 months
+    - The combination of (ConfiguredTestId, TestName) must be unique
+      (These values from raw transactional data are mapped to ReportKey for
+      metrics reporting; the ETL uses them to find the correct ReportKey)
 */
 
 USE PE_Metrics;
@@ -79,6 +82,8 @@ GO
 -- PROCEDURE: mgmt.SwTestMap_Insert
 -- Purpose: Insert a new software test and return the auto-generated identity
 -- Returns: The new SwTestMapId via OUTPUT parameter
+-- Errors:
+--   50032 - Duplicate (ConfiguredTestId, TestName) combination
 --------------------------------------------------------------------------------
 IF OBJECT_ID('mgmt.SwTestMap_Insert', 'P') IS NOT NULL
     DROP PROCEDURE mgmt.SwTestMap_Insert;
@@ -98,6 +103,14 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
+    -- Validate unique (ConfiguredTestId, TestName) combination
+    IF EXISTS (SELECT 1 FROM sw.SwTestMap
+               WHERE ConfiguredTestId = @ConfiguredTestId AND TestName = @TestName)
+    BEGIN
+        RAISERROR(50032, 16, 1, 'A software test with this ConfiguredTestId and TestName already exists.');
+        RETURN;
+    END
+
     -- Insert the new software test
     INSERT INTO sw.SwTestMap (ConfiguredTestId, TestApplication, TestName, ReportKey,
                               TestDirectory, RelativePath, LastRun, Notes)
@@ -113,6 +126,7 @@ GO
 -- Purpose: Update an existing software test
 -- Errors:
 --   50030 - Software test not found
+--   50032 - Duplicate (ConfiguredTestId, TestName) combination
 --------------------------------------------------------------------------------
 IF OBJECT_ID('mgmt.SwTestMap_Update', 'P') IS NOT NULL
     DROP PROCEDURE mgmt.SwTestMap_Update;
@@ -136,6 +150,15 @@ BEGIN
     IF NOT EXISTS (SELECT 1 FROM sw.SwTestMap WHERE SwTestMapId = @SwTestMapId)
     BEGIN
         RAISERROR(50030, 16, 1, 'Software test not found.');
+        RETURN;
+    END
+
+    -- Validate unique (ConfiguredTestId, TestName) combination (excluding current record)
+    IF EXISTS (SELECT 1 FROM sw.SwTestMap
+               WHERE ConfiguredTestId = @ConfiguredTestId AND TestName = @TestName
+               AND SwTestMapId <> @SwTestMapId)
+    BEGIN
+        RAISERROR(50032, 16, 1, 'A software test with this ConfiguredTestId and TestName already exists.');
         RETURN;
     END
 

@@ -2,14 +2,15 @@
     PE_Metrics Dimension Management - CellByPartNo Operations
 
     Objects created:
-    - mgmt.StringList (TYPE)                : Table-valued parameter type for passing lists of strings
     - mgmt.CellByPartNo_GetByPartNo         : Get all cell mappings for a part number
     - mgmt.CellByPartNo_SetMappings         : Replace all cell mappings for a part number
+    - mgmt.CellByPartNo_AddMapping          : Add a single cell mapping (idempotent)
+    - mgmt.CellByPartNo_DeleteMapping       : Remove a single cell mapping (idempotent)
 
     Business Rules:
     - A part number can be associated with one or more cells
     - This is a simple join table with composite primary key (CellId, PartNo)
-    - All mappings are managed as a set (replace all on update)
+    - Mappings can be managed as a set (SetMappings) or individually (Add/Delete)
 */
 
 USE PE_Metrics;
@@ -98,6 +99,53 @@ BEGIN
         ROLLBACK TRANSACTION;
         THROW;
     END CATCH
+END
+GO
+
+--------------------------------------------------------------------------------
+-- PROCEDURE: mgmt.CellByPartNo_AddMapping
+-- Purpose: Add a single cell mapping for a part number
+-- Behavior: Silently succeeds if the mapping already exists (idempotent)
+--------------------------------------------------------------------------------
+IF OBJECT_ID('mgmt.CellByPartNo_AddMapping', 'P') IS NOT NULL
+    DROP PROCEDURE mgmt.CellByPartNo_AddMapping;
+GO
+
+CREATE PROCEDURE mgmt.CellByPartNo_AddMapping
+    @PartNo VARCHAR(32),
+    @CellId INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Insert only if not already exists
+    IF NOT EXISTS (SELECT 1 FROM floor.CellByPartNo
+                   WHERE PartNo = @PartNo AND CellId = @CellId)
+    BEGIN
+        INSERT INTO floor.CellByPartNo (CellId, PartNo)
+        VALUES (@CellId, @PartNo);
+    END
+END
+GO
+
+--------------------------------------------------------------------------------
+-- PROCEDURE: mgmt.CellByPartNo_DeleteMapping
+-- Purpose: Remove a single cell mapping for a part number
+-- Behavior: Silently succeeds if the mapping does not exist (idempotent)
+--------------------------------------------------------------------------------
+IF OBJECT_ID('mgmt.CellByPartNo_DeleteMapping', 'P') IS NOT NULL
+    DROP PROCEDURE mgmt.CellByPartNo_DeleteMapping;
+GO
+
+CREATE PROCEDURE mgmt.CellByPartNo_DeleteMapping
+    @PartNo VARCHAR(32),
+    @CellId INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DELETE FROM floor.CellByPartNo
+    WHERE PartNo = @PartNo AND CellId = @CellId;
 END
 GO
 

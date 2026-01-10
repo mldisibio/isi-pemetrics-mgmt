@@ -26,9 +26,8 @@ This document lists all custom error codes used by the PE_Metrics Dimension Mana
 
 ## PCStation Errors (50010-50019)
 
-| Code | Message | Description |
-|------|---------|-------------|
-| 50010 | PC station name already exists | Attempted to insert a PCStation that already exists |
+No errors are raised for PCStation operations. The insert procedure is idempotent
+(silently succeeds if the name already exists).
 
 ---
 
@@ -49,6 +48,7 @@ This document lists all custom error codes used by the PE_Metrics Dimension Mana
 |------|---------|-------------|
 | 50030 | Software test not found | Referenced SwTestMapId does not exist in sw.SwTestMap |
 | 50031 | One or more cells not found | One or more CellIds in the mapping list do not exist |
+| 50032 | Duplicate ConfiguredTestId and TestName | A software test with this combination already exists |
 
 ---
 
@@ -57,7 +57,7 @@ This document lists all custom error codes used by the PE_Metrics Dimension Mana
 | Code | Message | Description |
 |------|---------|-------------|
 | 50040 | Part number already exists | Attempted to insert a PartNo that already exists |
-| 50041 | Part number not found | Referenced PartNo does not exist in product.TLA |
+| 50041 | Part number not found | Attempted to update a PartNo that does not exist (Delete is idempotent) |
 | 50042 | Cannot delete: referenced in production tests | Attempted to delete a PartNo that has records in activity.ProductionTest |
 | 50043 | Cannot delete: referenced in cell mappings | Attempted to delete a PartNo that still has cell mappings |
 
@@ -77,8 +77,7 @@ public static class SqlErrorMessages
         50002 => "A cell with this display name already exists. Please choose a different display name.",
         50003 => "The cell you are trying to update no longer exists.",
 
-        // PCStation
-        50010 => "This PC station name already exists in the system.",
+        // PCStation - No errors (insert is idempotent)
 
         // CellByPCStation
         50020 => "The selected cell does not exist.",
@@ -89,6 +88,7 @@ public static class SqlErrorMessages
         // SwTestMap / CellBySwTest
         50030 => "The software test you are trying to update no longer exists.",
         50031 => "One or more selected cells do not exist.",
+        50032 => "A software test with this Configured Test ID and Test Name already exists.",
 
         // TLA / CellByPartNo
         50040 => "This part number already exists in the system.",
