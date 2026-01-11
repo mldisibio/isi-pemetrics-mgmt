@@ -60,3 +60,5 @@ nunit-*.xml
 /.vs/PE_Metrics_DataMgmt/v17/DocumentLayout.backup.json
 /.vs/PE_Metrics_DataMgmt/v17/DocumentLayout.json
 /.vs/ProjectEvaluation
+/PROGRESS.md
+/STATE.md
