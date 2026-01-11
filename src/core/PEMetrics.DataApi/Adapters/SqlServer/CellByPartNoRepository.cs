@@ -15,6 +15,11 @@ public sealed class CellByPartNoRepository : ForMappingPartNumberToCells
         _connectionFactory = connectionFactory ?? throw new ArgumentNullException(nameof(connectionFactory));
     }
 
+    public ImmutableList<CellByPartNo> GetAll()
+    {
+        throw new NotImplementedException();
+    }
+
     public ImmutableList<CellByPartNo> GetByPartNo(string partNo)
     {
         throw new NotImplementedException();

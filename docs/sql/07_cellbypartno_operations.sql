@@ -2,6 +2,7 @@
     PE_Metrics Dimension Management - CellByPartNo Operations
 
     Objects created:
+    - mgmt.vw_CellByPartNo                  : View for listing all part number to cell mappings
     - mgmt.CellByPartNo_GetByPartNo         : Get all cell mappings for a part number
     - mgmt.CellByPartNo_SetMappings         : Replace all cell mappings for a part number
     - mgmt.CellByPartNo_AddMapping          : Add a single cell mapping (idempotent)
@@ -14,6 +15,29 @@
 */
 
 USE PE_Metrics;
+GO
+
+--------------------------------------------------------------------------------
+-- VIEW: mgmt.vw_CellByPartNo
+-- Purpose: Read-only view of all part number to cell mappings
+-- Returns PartNo, CellId, CellName for grid display
+--------------------------------------------------------------------------------
+IF OBJECT_ID('mgmt.vw_CellByPartNo', 'V') IS NOT NULL
+    DROP VIEW mgmt.vw_CellByPartNo;
+GO
+
+CREATE VIEW mgmt.vw_CellByPartNo
+AS
+SELECT
+    m.PartNo,
+    tla.Family,
+    tla.Subfamily,
+    tla.Description,
+    m.CellId,
+    c.CellName
+FROM floor.CellByPartNo m
+INNER JOIN product.TLA tla ON m.PartNo = tla.PartNo
+INNER JOIN floor.Cell c ON m.CellId = c.CellId;
 GO
 
 --------------------------------------------------------------------------------

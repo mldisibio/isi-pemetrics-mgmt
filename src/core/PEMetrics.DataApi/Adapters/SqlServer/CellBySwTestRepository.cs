@@ -15,6 +15,11 @@ public sealed class CellBySwTestRepository : ForMappingSwTestsToCells
         _connectionFactory = connectionFactory ?? throw new ArgumentNullException(nameof(connectionFactory));
     }
 
+    public ImmutableList<CellBySwTest> GetAll()
+    {
+        throw new NotImplementedException();
+    }
+
     public ImmutableList<CellBySwTest> GetBySwTestMapId(int swTestMapId)
     {
         throw new NotImplementedException();

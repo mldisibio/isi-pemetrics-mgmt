@@ -6,6 +6,9 @@ namespace PEMetrics.DataApi.Ports;
 /// <summary>Port for managing software test to cell mappings.</summary>
 public interface ForMappingSwTestsToCells
 {
+    /// <summary>Retrieves all software test to cell mappings from mgmt.vw_CellBySwTest.</summary>
+    ImmutableList<CellBySwTest> GetAll();
+
     /// <summary>Retrieves all cell mappings for a specific software test.</summary>
     ImmutableList<CellBySwTest> GetBySwTestMapId(int swTestMapId);
 

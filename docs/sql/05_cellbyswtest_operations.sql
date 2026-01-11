@@ -3,6 +3,7 @@
 
     Objects created:
     - mgmt.IntList (TYPE)                   : Table-valued parameter type for passing lists of integers
+    - mgmt.vw_CellBySwTest                  : View for listing all software test to cell mappings
     - mgmt.CellBySwTest_GetBySwTestMapId    : Get all cell mappings for a software test
     - mgmt.CellBySwTest_SetMappings         : Replace all cell mappings for a software test
     - mgmt.CellBySwTest_AddMapping          : Add a single cell mapping (idempotent)
@@ -15,6 +16,35 @@
 */
 
 USE PE_Metrics;
+GO
+
+--------------------------------------------------------------------------------
+-- VIEW: mgmt.vw_CellBySwTest
+-- Purpose: Read-only view of all software test to cell mappings
+-- Returns SwTestMapId, CellId, CellName for grid display
+--------------------------------------------------------------------------------
+IF OBJECT_ID('mgmt.vw_CellBySwTest', 'V') IS NOT NULL
+    DROP VIEW mgmt.vw_CellBySwTest;
+GO
+
+CREATE VIEW mgmt.vw_CellBySwTest
+AS
+SELECT
+    m.SwTestMapId,
+    sw.ConfiguredTestId,
+    sw.TestApplication,
+    sw.ReportKey,
+    sw.LastRun,
+    CASE
+        WHEN LastRun IS NULL OR LastRun >= DATEADD(MONTH, -3, CAST(GETDATE() AS DATE))
+        THEN 1
+        ELSE 0
+    END AS IsActive,
+    m.CellId,
+    c.CellName
+FROM floor.CellBySwTest m
+INNER JOIN sw.SwTestMap sw ON m.SwTestMapId = sw.SwTestMapId
+INNER JOIN floor.Cell c ON m.CellId = c.CellId;
 GO
 
 --------------------------------------------------------------------------------
