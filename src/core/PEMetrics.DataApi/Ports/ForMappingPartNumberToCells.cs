@@ -7,7 +7,7 @@ namespace PEMetrics.DataApi.Ports;
 public interface ForMappingPartNumberToCells
 {
     /// <summary>Retrieves all part number to cell mappings from mgmt.vw_CellByPartNo.</summary>
-    ImmutableList<CellByPartNo> GetAll();
+    ImmutableList<CellByPartNoView> GetAll();
 
     /// <summary>Retrieves all cell mappings for a specific part number.</summary>
     ImmutableList<CellByPartNo> GetByPartNo(string partNo);
