@@ -65,7 +65,12 @@ BEGIN
         ActiveFrom,
         ActiveTo,
         Description,
-        AlternativeNames
+        AlternativeNames,
+        CASE
+            WHEN ActiveTo IS NULL OR ActiveTo >= CAST(GETDATE() AS DATE)
+            THEN 1
+            ELSE 0
+        END AS IsActive
     FROM floor.Cell
     WHERE CellId = @CellId;
 END

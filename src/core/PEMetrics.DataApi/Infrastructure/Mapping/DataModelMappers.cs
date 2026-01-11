@@ -22,7 +22,7 @@ public sealed class DataModelMappers :
         ActiveTo = reader.GetNullableDateOnly(reader.GetOrdinal("ActiveTo")),
         Description = reader.GetNullableString(reader.GetOrdinal("Description")),
         AlternativeNames = reader.GetNullableString(reader.GetOrdinal("AlternativeNames")),
-        IsActive = reader.HasColumn("IsActive") && reader.GetInt32(reader.GetOrdinal("IsActive")) == 1
+        IsActive = reader.GetInt32(reader.GetOrdinal("IsActive")) == 1
     };
 
     public PCStation MapPCStation(DbDataReader reader) => new()
@@ -40,7 +40,7 @@ public sealed class DataModelMappers :
         ActiveFrom = reader.GetDateOnly(reader.GetOrdinal("ActiveFrom")),
         ActiveTo = reader.GetNullableDateOnly(reader.GetOrdinal("ActiveTo")),
         ExtendedName = reader.GetNullableString(reader.GetOrdinal("ExtendedName")),
-        IsActive = reader.HasColumn("IsActive") && reader.GetInt32(reader.GetOrdinal("IsActive")) == 1
+        IsActive = reader.GetInt32(reader.GetOrdinal("IsActive")) == 1
     };
 
     public SwTestMap MapSwTestMap(DbDataReader reader) => new()
@@ -54,7 +54,7 @@ public sealed class DataModelMappers :
         RelativePath = reader.GetNullableString(reader.GetOrdinal("RelativePath")),
         LastRun = reader.GetNullableDateOnly(reader.GetOrdinal("LastRun")),
         Notes = reader.GetNullableString(reader.GetOrdinal("Notes")),
-        IsActive = reader.HasColumn("IsActive") && reader.GetInt32(reader.GetOrdinal("IsActive")) == 1
+        IsActive = reader.GetInt32(reader.GetOrdinal("IsActive")) == 1
     };
 
     public CellBySwTest MapCellBySwTest(DbDataReader reader) => new()
@@ -84,7 +84,7 @@ public sealed class DataModelMappers :
         ServiceGroup = reader.GetNullableString(reader.GetOrdinal("ServiceGroup")),
         FormalDescription = reader.GetNullableString(reader.GetOrdinal("FormalDescription")),
         Description = reader.GetNullableString(reader.GetOrdinal("Description")),
-        IsUsed = reader.HasColumn("IsUsed") && reader.GetInt32(reader.GetOrdinal("IsUsed")) == 1
+        IsUsed = reader.GetInt32(reader.GetOrdinal("IsUsed")) == 1
     };
 
     public CellByPartNo MapCellByPartNo(DbDataReader reader) => new()
@@ -103,18 +103,4 @@ public sealed class DataModelMappers :
         CellId = reader.GetInt32(reader.GetOrdinal("CellId")),
         CellName = reader.GetNullableString(reader.GetOrdinal("CellName"))
     };
-}
-
-/// <summary>Extension to check if a column exists in the reader.</summary>
-file static class DbDataReaderColumnExtensions
-{
-    public static bool HasColumn(this DbDataReader reader, string columnName)
-    {
-        for (int i = 0; i < reader.FieldCount; i++)
-        {
-            if (reader.GetName(i).Equals(columnName, StringComparison.OrdinalIgnoreCase))
-                return true;
-        }
-        return false;
-    }
 }

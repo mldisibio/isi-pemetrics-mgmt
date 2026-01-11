@@ -70,7 +70,12 @@ BEGIN
         m.PcPurpose,
         m.ActiveFrom,
         m.ActiveTo,
-        m.ExtendedName
+        m.ExtendedName,
+        CASE
+            WHEN m.ActiveTo IS NULL OR m.ActiveTo >= CAST(GETDATE() AS DATE)
+            THEN 1
+            ELSE 0
+        END AS IsActive
     FROM floor.CellByPCStation m
     INNER JOIN floor.Cell c ON m.CellId = c.CellId
     WHERE m.StationMapId = @StationMapId;

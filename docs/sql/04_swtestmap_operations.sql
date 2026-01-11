@@ -72,7 +72,12 @@ BEGIN
         TestDirectory,
         RelativePath,
         LastRun,
-        Notes
+        Notes,
+        CASE
+            WHEN LastRun IS NULL OR LastRun >= DATEADD(MONTH, -3, CAST(GETDATE() AS DATE))
+            THEN 1
+            ELSE 0
+        END AS IsActive
     FROM sw.SwTestMap
     WHERE SwTestMapId = @SwTestMapId;
 END
