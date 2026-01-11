@@ -1,5 +1,8 @@
 using System.Collections.Immutable;
+using System.Data;
+using Microsoft.Data.SqlClient;
 using PEMetrics.DataApi.Infrastructure;
+using PEMetrics.DataApi.Infrastructure.Mapping;
 using PEMetrics.DataApi.Models;
 using PEMetrics.DataApi.Ports;
 
@@ -9,29 +12,76 @@ namespace PEMetrics.DataApi.Adapters.SqlServer;
 public sealed class SwTestMapRepository : ForManagingSwTests
 {
     readonly ForCreatingSqlServerConnections _connectionFactory;
+    readonly ForMappingSwTestMapModels _mapper;
 
-    public SwTestMapRepository(ForCreatingSqlServerConnections connectionFactory)
+    public SwTestMapRepository(ForCreatingSqlServerConnections connectionFactory, ForMappingSwTestMapModels mapper)
     {
         _connectionFactory = connectionFactory ?? throw new ArgumentNullException(nameof(connectionFactory));
+        _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
     }
 
     public ImmutableList<SwTestMap> GetAll()
     {
-        throw new NotImplementedException();
+        using var connection = _connectionFactory.OpenConnectionToPEMetrics();
+        using var command = connection.CreateCommand();
+        command.CommandText = "SELECT * FROM mgmt.vw_SwTestMap ORDER BY ReportKey, TestName";
+
+        using var reader = command.ExecuteReader();
+        return reader.MapAll(_mapper.MapSwTestMap);
     }
 
     public SwTestMap? GetById(int swTestMapId)
     {
-        throw new NotImplementedException();
+        using var connection = _connectionFactory.OpenConnectionToPEMetrics();
+        using var command = connection.CreateCommand();
+        command.CommandText = "mgmt.SwTestMap_GetById";
+        command.CommandType = CommandType.StoredProcedure;
+        command.Parameters.Add(new SqlParameter("@SwTestMapId", swTestMapId));
+
+        using var reader = command.ExecuteReader();
+        return reader.MapFirstOrDefault(_mapper.MapSwTestMap);
     }
 
     public int Insert(SwTestMap test)
     {
-        throw new NotImplementedException();
+        using var connection = _connectionFactory.OpenConnectionToPEMetrics();
+        using var command = connection.CreateCommand();
+        command.CommandText = "mgmt.SwTestMap_Insert";
+        command.CommandType = CommandType.StoredProcedure;
+
+        command.Parameters.Add(new SqlParameter("@ConfiguredTestId", (object?)test.ConfiguredTestId ?? DBNull.Value));
+        command.Parameters.Add(new SqlParameter("@TestApplication", (object?)test.TestApplication ?? DBNull.Value));
+        command.Parameters.Add(new SqlParameter("@TestName", (object?)test.TestName ?? DBNull.Value));
+        command.Parameters.Add(new SqlParameter("@ReportKey", (object?)test.ReportKey ?? DBNull.Value));
+        command.Parameters.Add(new SqlParameter("@TestDirectory", (object?)test.TestDirectory ?? DBNull.Value));
+        command.Parameters.Add(new SqlParameter("@RelativePath", (object?)test.RelativePath ?? DBNull.Value));
+        command.Parameters.Add(new SqlParameter("@LastRun", (object?)test.LastRun?.ToDateTime(TimeOnly.MinValue) ?? DBNull.Value));
+        command.Parameters.Add(new SqlParameter("@Notes", (object?)test.Notes ?? DBNull.Value));
+
+        var outputParam = new SqlParameter("@NewSwTestMapId", SqlDbType.Int) { Direction = ParameterDirection.Output };
+        command.Parameters.Add(outputParam);
+
+        command.ExecuteNonQuery();
+        return (int)outputParam.Value;
     }
 
     public void Update(SwTestMap test)
     {
-        throw new NotImplementedException();
+        using var connection = _connectionFactory.OpenConnectionToPEMetrics();
+        using var command = connection.CreateCommand();
+        command.CommandText = "mgmt.SwTestMap_Update";
+        command.CommandType = CommandType.StoredProcedure;
+
+        command.Parameters.Add(new SqlParameter("@SwTestMapId", test.SwTestMapId));
+        command.Parameters.Add(new SqlParameter("@ConfiguredTestId", (object?)test.ConfiguredTestId ?? DBNull.Value));
+        command.Parameters.Add(new SqlParameter("@TestApplication", (object?)test.TestApplication ?? DBNull.Value));
+        command.Parameters.Add(new SqlParameter("@TestName", (object?)test.TestName ?? DBNull.Value));
+        command.Parameters.Add(new SqlParameter("@ReportKey", (object?)test.ReportKey ?? DBNull.Value));
+        command.Parameters.Add(new SqlParameter("@TestDirectory", (object?)test.TestDirectory ?? DBNull.Value));
+        command.Parameters.Add(new SqlParameter("@RelativePath", (object?)test.RelativePath ?? DBNull.Value));
+        command.Parameters.Add(new SqlParameter("@LastRun", (object?)test.LastRun?.ToDateTime(TimeOnly.MinValue) ?? DBNull.Value));
+        command.Parameters.Add(new SqlParameter("@Notes", (object?)test.Notes ?? DBNull.Value));
+
+        command.ExecuteNonQuery();
     }
 }
