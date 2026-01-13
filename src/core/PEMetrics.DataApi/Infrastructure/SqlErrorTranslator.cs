@@ -1,4 +1,5 @@
 using Microsoft.Data.SqlClient;
+using PEMetrics.DataApi.Exceptions;
 
 namespace PEMetrics.DataApi.Infrastructure;
 

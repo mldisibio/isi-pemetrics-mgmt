@@ -1,4 +1,4 @@
-namespace PEMetrics.DataApi.Infrastructure;
+namespace PEMetrics.DataApi.Exceptions;
 
 /// <summary>
 /// Exception thrown when a repository operation fails due to a business rule violation.
