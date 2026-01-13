@@ -4,14 +4,7 @@ using PEMetrics.DataApi.Models;
 namespace PEMetrics.DataApi.Infrastructure.Mapping;
 
 /// <summary>Unified implementation of all data model mapping functions.</summary>
-public sealed class DataModelMappers :
-    ForMappingCellModels,
-    ForMappingPCStationModels,
-    ForMappingCellByPCStationModels,
-    ForMappingSwTestMapModels,
-    ForMappingCellBySwTestModels,
-    ForMappingTLAModels,
-    ForMappingCellByPartNoModels
+public sealed class DataModelMappers : ForMappingDataModels
 {
     public Cell MapCell(DbDataReader reader) => new()
     {

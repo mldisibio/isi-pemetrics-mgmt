@@ -12,9 +12,9 @@ namespace PEMetrics.DataApi.Adapters.SqlServer;
 public sealed class CellRepository : ForManagingCells
 {
     readonly ForCreatingSqlServerConnections _connectionFactory;
-    readonly ForMappingCellModels _mapper;
+    readonly ForMappingDataModels _mapper;
 
-    public CellRepository(ForCreatingSqlServerConnections connectionFactory, ForMappingCellModels mapper)
+    public CellRepository(ForCreatingSqlServerConnections connectionFactory, ForMappingDataModels mapper)
     {
         _connectionFactory = connectionFactory ?? throw new ArgumentNullException(nameof(connectionFactory));
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
@@ -28,18 +28,6 @@ public sealed class CellRepository : ForManagingCells
 
         using var reader = command.ExecuteReader();
         return reader.MapAll(_mapper.MapCell);
-    }
-
-    public Cell? GetById(int cellId)
-    {
-        using var connection = _connectionFactory.OpenConnectionToPEMetrics();
-        using var command = connection.CreateCommand();
-        command.CommandText = "mgmt.Cell_GetById";
-        command.CommandType = CommandType.StoredProcedure;
-        command.Parameters.Add(new SqlParameter("@CellId", cellId));
-
-        using var reader = command.ExecuteReader();
-        return reader.MapFirstOrDefault(_mapper.MapCell);
     }
 
     public int Insert(Cell cell)

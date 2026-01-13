@@ -1,17 +1,8 @@
-using System.Collections.Immutable;
-using PEMetrics.DataApi.Models;
-
 namespace PEMetrics.DataApi.Ports;
 
 /// <summary>Port for managing part number to cell mappings.</summary>
 public interface ForMappingPartNumberToCells
 {
-    /// <summary>Retrieves all part number to cell mappings from mgmt.vw_CellByPartNo.</summary>
-    ImmutableList<CellByPartNoView> GetAll();
-
-    /// <summary>Retrieves all cell mappings for a specific part number.</summary>
-    ImmutableList<CellByPartNo> GetByPartNo(string partNo);
-
     /// <summary>Replaces all cell mappings for a part number. Atomic operation.</summary>
     void SetMappings(string partNo, IEnumerable<int> cellIds);
 

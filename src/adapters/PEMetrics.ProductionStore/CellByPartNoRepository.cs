@@ -1,9 +1,7 @@
-using System.Collections.Immutable;
 using System.Data;
 using Microsoft.Data.SqlClient;
 using PEMetrics.DataApi.Infrastructure;
 using PEMetrics.DataApi.Infrastructure.Mapping;
-using PEMetrics.DataApi.Models;
 using PEMetrics.DataApi.Ports;
 
 namespace PEMetrics.DataApi.Adapters.SqlServer;
@@ -12,34 +10,12 @@ namespace PEMetrics.DataApi.Adapters.SqlServer;
 public sealed class CellByPartNoRepository : ForMappingPartNumberToCells
 {
     readonly ForCreatingSqlServerConnections _connectionFactory;
-    readonly ForMappingCellByPartNoModels _mapper;
+    readonly ForMappingDataModels _mapper;
 
-    public CellByPartNoRepository(ForCreatingSqlServerConnections connectionFactory, ForMappingCellByPartNoModels mapper)
+    public CellByPartNoRepository(ForCreatingSqlServerConnections connectionFactory, ForMappingDataModels mapper)
     {
         _connectionFactory = connectionFactory ?? throw new ArgumentNullException(nameof(connectionFactory));
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
-    }
-
-    public ImmutableList<CellByPartNoView> GetAll()
-    {
-        using var connection = _connectionFactory.OpenConnectionToPEMetrics();
-        using var command = connection.CreateCommand();
-        command.CommandText = "SELECT * FROM mgmt.vw_CellByPartNo ORDER BY PartNo, CellName";
-
-        using var reader = command.ExecuteReader();
-        return reader.MapAll(_mapper.MapCellByPartNoView);
-    }
-
-    public ImmutableList<CellByPartNo> GetByPartNo(string partNo)
-    {
-        using var connection = _connectionFactory.OpenConnectionToPEMetrics();
-        using var command = connection.CreateCommand();
-        command.CommandText = "mgmt.CellByPartNo_GetByPartNo";
-        command.CommandType = CommandType.StoredProcedure;
-        command.Parameters.Add(new SqlParameter("@PartNo", partNo));
-
-        using var reader = command.ExecuteReader();
-        return reader.MapAll(_mapper.MapCellByPartNo);
     }
 
     public void SetMappings(string partNo, IEnumerable<int> cellIds)

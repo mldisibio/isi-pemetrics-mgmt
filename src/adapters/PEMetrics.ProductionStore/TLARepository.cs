@@ -1,4 +1,3 @@
-using System.Collections.Immutable;
 using System.Data;
 using Microsoft.Data.SqlClient;
 using PEMetrics.DataApi.Infrastructure;
@@ -12,36 +11,13 @@ namespace PEMetrics.DataApi.Adapters.SqlServer;
 public sealed class TLARepository : ForManagingPartNumbers
 {
     readonly ForCreatingSqlServerConnections _connectionFactory;
-    readonly ForMappingTLAModels _mapper;
+    readonly ForMappingDataModels _mapper;
 
-    public TLARepository(ForCreatingSqlServerConnections connectionFactory, ForMappingTLAModels mapper)
+    public TLARepository(ForCreatingSqlServerConnections connectionFactory, ForMappingDataModels mapper)
     {
         _connectionFactory = connectionFactory ?? throw new ArgumentNullException(nameof(connectionFactory));
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
     }
-
-    public ImmutableList<TLA> GetAll()
-    {
-        using var connection = _connectionFactory.OpenConnectionToPEMetrics();
-        using var command = connection.CreateCommand();
-        command.CommandText = "SELECT * FROM mgmt.vw_TLA ORDER BY PartNo";
-
-        using var reader = command.ExecuteReader();
-        return reader.MapAll(_mapper.MapTLA);
-    }
-
-    public TLA? GetByPartNo(string partNo)
-    {
-        using var connection = _connectionFactory.OpenConnectionToPEMetrics();
-        using var command = connection.CreateCommand();
-        command.CommandText = "mgmt.TLA_GetByPartNo";
-        command.CommandType = CommandType.StoredProcedure;
-        command.Parameters.Add(new SqlParameter("@PartNo", partNo));
-
-        using var reader = command.ExecuteReader();
-        return reader.MapFirstOrDefault(_mapper.MapTLA);
-    }
-
     public void Insert(TLA tla)
     {
         using var connection = _connectionFactory.OpenConnectionToPEMetrics();

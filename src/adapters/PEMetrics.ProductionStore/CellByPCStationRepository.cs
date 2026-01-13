@@ -1,4 +1,3 @@
-using System.Collections.Immutable;
 using System.Data;
 using Microsoft.Data.SqlClient;
 using PEMetrics.DataApi.Infrastructure;
@@ -12,34 +11,12 @@ namespace PEMetrics.DataApi.Adapters.SqlServer;
 public sealed class CellByPCStationRepository : ForMappingPCStationToCell
 {
     readonly ForCreatingSqlServerConnections _connectionFactory;
-    readonly ForMappingCellByPCStationModels _mapper;
+    readonly ForMappingDataModels _mapper;
 
-    public CellByPCStationRepository(ForCreatingSqlServerConnections connectionFactory, ForMappingCellByPCStationModels mapper)
+    public CellByPCStationRepository(ForCreatingSqlServerConnections connectionFactory, ForMappingDataModels mapper)
     {
         _connectionFactory = connectionFactory ?? throw new ArgumentNullException(nameof(connectionFactory));
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
-    }
-
-    public ImmutableList<CellByPCStation> GetAll()
-    {
-        using var connection = _connectionFactory.OpenConnectionToPEMetrics();
-        using var command = connection.CreateCommand();
-        command.CommandText = "SELECT * FROM mgmt.vw_CellByPCStation ORDER BY CellName, PcName";
-
-        using var reader = command.ExecuteReader();
-        return reader.MapAll(_mapper.MapCellByPCStation);
-    }
-
-    public CellByPCStation? GetById(int stationMapId)
-    {
-        using var connection = _connectionFactory.OpenConnectionToPEMetrics();
-        using var command = connection.CreateCommand();
-        command.CommandText = "mgmt.CellByPCStation_GetById";
-        command.CommandType = CommandType.StoredProcedure;
-        command.Parameters.Add(new SqlParameter("@StationMapId", stationMapId));
-
-        using var reader = command.ExecuteReader();
-        return reader.MapFirstOrDefault(_mapper.MapCellByPCStation);
     }
 
     public int Insert(CellByPCStation mapping)

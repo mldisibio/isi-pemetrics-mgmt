@@ -1,4 +1,3 @@
-using System.Collections.Immutable;
 using PEMetrics.DataApi.Models;
 
 namespace PEMetrics.DataApi.Ports;
@@ -6,13 +5,6 @@ namespace PEMetrics.DataApi.Ports;
 /// <summary>Port for managing part numbers (TLAs).</summary>
 public interface ForManagingPartNumbers
 {
-    /// <summary>Retrieves all TLAs from mgmt.vw_TLA.</summary>
-    ImmutableList<TLA> GetAll();
-
-    /// <summary>Retrieves a single TLA by part number.</summary>
-    /// <returns>The TLA, or null if not found.</returns>
-    TLA? GetByPartNo(string partNo);
-
     /// <summary>Inserts a new TLA.</summary>
     void Insert(TLA tla);
 

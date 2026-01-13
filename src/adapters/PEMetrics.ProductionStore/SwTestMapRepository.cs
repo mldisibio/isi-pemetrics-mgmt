@@ -1,4 +1,3 @@
-using System.Collections.Immutable;
 using System.Data;
 using Microsoft.Data.SqlClient;
 using PEMetrics.DataApi.Infrastructure;
@@ -12,34 +11,12 @@ namespace PEMetrics.DataApi.Adapters.SqlServer;
 public sealed class SwTestMapRepository : ForManagingSwTests
 {
     readonly ForCreatingSqlServerConnections _connectionFactory;
-    readonly ForMappingSwTestMapModels _mapper;
+    readonly ForMappingDataModels _mapper;
 
-    public SwTestMapRepository(ForCreatingSqlServerConnections connectionFactory, ForMappingSwTestMapModels mapper)
+    public SwTestMapRepository(ForCreatingSqlServerConnections connectionFactory, ForMappingDataModels mapper)
     {
         _connectionFactory = connectionFactory ?? throw new ArgumentNullException(nameof(connectionFactory));
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
-    }
-
-    public ImmutableList<SwTestMap> GetAll()
-    {
-        using var connection = _connectionFactory.OpenConnectionToPEMetrics();
-        using var command = connection.CreateCommand();
-        command.CommandText = "SELECT * FROM mgmt.vw_SwTestMap ORDER BY ReportKey, TestName";
-
-        using var reader = command.ExecuteReader();
-        return reader.MapAll(_mapper.MapSwTestMap);
-    }
-
-    public SwTestMap? GetById(int swTestMapId)
-    {
-        using var connection = _connectionFactory.OpenConnectionToPEMetrics();
-        using var command = connection.CreateCommand();
-        command.CommandText = "mgmt.SwTestMap_GetById";
-        command.CommandType = CommandType.StoredProcedure;
-        command.Parameters.Add(new SqlParameter("@SwTestMapId", swTestMapId));
-
-        using var reader = command.ExecuteReader();
-        return reader.MapFirstOrDefault(_mapper.MapSwTestMap);
     }
 
     public int Insert(SwTestMap test)
