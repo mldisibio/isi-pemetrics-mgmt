@@ -4,60 +4,22 @@
 PE_Metrics Dimension Management application - A .NET 9.0 Windows Forms application for CRUD operations on star schema dimension tables.
 
 ## Phase 1: Database Layer
-All stored procedures, views, and functions are created in the `mgmt` schema.
 
 **Status: COMPLETE - APPROVED AND DEPLOYED**
 
-### Schema Setup
-- [x] Create `mgmt` schema if not exists (`00_schema_setup.sql`)
+All stored procedures, views, and functions created in `mgmt` schema and deployed to `.\MLD2019` SQL Server.
 
-### floor.Cell Table Operations (`01_cell_operations.sql`)
-- [x] `mgmt.vw_Cell` - View for listing all cells with IsActive flag
-- [x] `mgmt.Cell_GetById` - Get single cell by ID (includes IsActive)
-- [x] `mgmt.Cell_Insert` - Insert new cell, return identity via OUTPUT
-- [x] `mgmt.Cell_Update` - Update existing cell
-
-### floor.PCStation Table Operations (`02_pcstation_operations.sql`)
-- [x] `mgmt.vw_PCStation` - View for listing all PC stations
-- [x] `mgmt.PCStation_Search` - Search PC stations by prefix (for autocomplete)
-- [x] `mgmt.PCStation_Insert` - Insert new PC station (idempotent)
-
-### floor.CellByPCStation Table Operations (`03_cellbypcstation_operations.sql`)
-- [x] `mgmt.vw_CellByPCStation` - View for listing with Cell names and IsActive flag
-- [x] `mgmt.CellByPCStation_GetById` - Get single mapping by ID (includes IsActive)
-- [x] `mgmt.CellByPCStation_Insert` - Insert new mapping, return identity via OUTPUT
-- [x] `mgmt.CellByPCStation_Update` - Update existing mapping
-
-### sw.SwTestMap Table Operations (`04_swtestmap_operations.sql`)
-- [x] `mgmt.vw_SwTestMap` - View for listing all tests with IsActive flag (LastRun within 3 months)
-- [x] `mgmt.SwTestMap_GetById` - Get single test by ID (includes IsActive)
-- [x] `mgmt.SwTestMap_Insert` - Insert new test, return identity via OUTPUT
-- [x] `mgmt.SwTestMap_Update` - Update existing test
-
-### floor.CellBySwTest Table Operations (`05_cellbyswtest_operations.sql`)
-- [x] `mgmt.IntList` - Table-valued parameter type for passing lists of CellIds
-- [x] `mgmt.vw_CellBySwTest` - View for listing with expanded SwTestMap and Cell data
-- [x] `mgmt.CellBySwTest_GetBySwTestMapId` - Get cell mappings for a test
-- [x] `mgmt.CellBySwTest_SetMappings` - Replace all cell mappings for a test (atomic)
-- [x] `mgmt.CellBySwTest_AddMapping` - Add single mapping (idempotent, with validation)
-- [x] `mgmt.CellBySwTest_DeleteMapping` - Remove single mapping (idempotent)
-
-### product.TLA Table Operations (`06_tla_operations.sql`)
-- [x] `mgmt.vw_TLA` - View with IsUsed indicator (checks activity.ProductionTest)
-- [x] `mgmt.TLA_GetByPartNo` - Get single TLA by PartNo with IsUsed
-- [x] `mgmt.TLA_Insert` - Insert new TLA
-- [x] `mgmt.TLA_Update` - Update existing TLA
-- [x] `mgmt.TLA_Delete` - Hard delete unused TLA (idempotent if not found)
-
-### floor.CellByPartNo Table Operations (`07_cellbypartno_operations.sql`)
-- [x] `mgmt.vw_CellByPartNo` - View for listing with expanded TLA and Cell data
-- [x] `mgmt.CellByPartNo_GetByPartNo` - Get cell mappings for a part number
-- [x] `mgmt.CellByPartNo_SetMappings` - Replace all cell mappings for a part number (atomic)
-- [x] `mgmt.CellByPartNo_AddMapping` - Add single mapping (idempotent, with validation)
-- [x] `mgmt.CellByPartNo_DeleteMapping` - Remove single mapping (idempotent)
-
-### Supporting Documentation
-- [x] `ERROR_CODES.md` - Error code reference with user-friendly message mappings
+### Deliverables
+- [x] Schema setup (mgmt schema)
+- [x] Cell operations (view, GetById with IsActive, Insert, Update)
+- [x] PCStation operations (view, Search, idempotent Insert)
+- [x] CellByPCStation operations (view, GetById with IsActive, Insert, Update)
+- [x] SwTestMap operations (view with IsActive, GetById with IsActive, Insert, Update)
+- [x] CellBySwTest operations (view, GetBySwTestMapId, SetMappings, Add/DeleteMapping with validation)
+- [x] TLA operations (view with IsUsed, GetByPartNo, Insert, Update, idempotent Delete)
+- [x] CellByPartNo operations (view, GetByPartNo, SetMappings, Add/DeleteMapping with validation)
+- [x] Table-valued parameter type (mgmt.IntList)
+- [x] Error codes documentation
 
 ---
 
@@ -65,100 +27,227 @@ All stored procedures, views, and functions are created in the `mgmt` schema.
 
 **Status: COMPLETE - APPROVED**
 
-### Project Setup
-- [x] Create `src/core/PEMetrics.DataApi` class library project
-- [x] Add to solution
-- [x] Configure ADO.NET dependencies (Microsoft.Data.SqlClient)
-- [x] Add Microsoft.Extensions.Configuration.Abstractions
-- [x] Add System.Collections.Immutable
+### Architectural Restructuring (2026-01-13)
 
-### Domain Models (`Models/`)
-- [x] `Cell` record - immutable, with IsActive property
-- [x] `PCStation` record - simple PcName only
-- [x] `CellByPCStation` record - includes denormalized CellName
-- [x] `SwTestMap` record - with IsActive property
-- [x] `CellBySwTest` record - simple mapping with CellName
-- [x] `CellBySwTestView` record - expanded view data for grids
-- [x] `TLA` record - with IsUsed property
-- [x] `CellByPartNo` record - simple mapping with CellName
-- [x] `CellByPartNoView` record - expanded view data for grids
+**Hexagonal Architecture:**
+- [x] Move SQL Server repositories to separate adapter project (`PEMetrics.ProductionStore`)
+- [x] Create empty cache adapter project (`PEMetrics.DataCache`)
+- [x] Move `RepositoryException` to `Exceptions/` folder in core
+- [x] Core contains only models, ports, mapping infrastructure, and exceptions
+- [x] Adapters depend on core; core has zero dependencies on adapters
 
-### Interfaces/Ports (`Ports/`)
-- [x] `ForManagingCells` - Cell data operations
-- [x] `ForManagingPCStations` - PCStation data operations
-- [x] `ForMappingPCStationToCell` - PC to Cell mapping operations
-- [x] `ForManagingSwTests` - Software test operations
-- [x] `ForMappingSwTestsToCells` - SwTest to Cell mapping operations
-- [x] `ForManagingPartNumbers` - Part number operations
-- [x] `ForMappingPartNumberToCells` - PartNo to Cell mapping operations
+**CQRS Pattern Refactoring:**
+- [x] Create unified query interface `ForReadingPEMetricsDimensions` (14 read operations)
+- [x] Create `PEMetricsQueryRepository` implementing all reads from SQL Server
+- [x] Refactor command interfaces to write-only operations (Insert, Update, Delete, SetMappings)
+- [x] Update all command repositories to remove read operations
+- [x] Consolidate 7 mapper interfaces into single `ForMappingDataModels`
+- [x] Update `DataModelMappers` to implement unified mapper interface
+- [x] Update all repositories to use `ForMappingDataModels`
 
-### Mapper Infrastructure (`Infrastructure/Mapping/`)
-- [x] `ForMappingCellModels` - Cell mapping interface
-- [x] `ForMappingPCStationModels` - PCStation mapping interface
-- [x] `ForMappingCellByPCStationModels` - CellByPCStation mapping interface
-- [x] `ForMappingSwTestMapModels` - SwTestMap mapping interface
-- [x] `ForMappingCellBySwTestModels` - CellBySwTest + View mapping interface
-- [x] `ForMappingTLAModels` - TLA mapping interface
-- [x] `ForMappingCellByPartNoModels` - CellByPartNo + View mapping interface
-- [x] `DataModelMappers` - Single class implementing all 7 mapper interfaces
+### Project Structure
+- [x] Create `src/core/PEMetrics.DataApi` class library
+- [x] Create `src/adapters/PEMetrics.ProductionStore` adapter
+- [x] Create `src/adapters/PEMetrics.DataCache` adapter (empty)
+- [x] Add NuGet packages (Microsoft.Data.SqlClient, Configuration.Abstractions, Collections.Immutable)
 
-### Repository Implementations (`Adapters/SqlServer/`)
-- [x] `CellRepository` - Full ADO.NET implementation
-- [x] `PCStationRepository` - Full ADO.NET implementation
-- [x] `CellByPCStationRepository` - Full ADO.NET implementation
-- [x] `SwTestMapRepository` - Full ADO.NET implementation
-- [x] `CellBySwTestRepository` - Full ADO.NET implementation (includes TVP support)
-- [x] `TLARepository` - Full ADO.NET implementation
-- [x] `CellByPartNoRepository` - Full ADO.NET implementation (includes TVP support)
+### Domain Models
+- [x] All models as immutable sealed records
+- [x] View models for expanded grid data (`CellBySwTestView`, `CellByPartNoView`)
+- [x] IsActive/IsUsed computed properties
 
-### Infrastructure (`Infrastructure/`)
+### Ports/Interfaces
+
+**Query Port (Read-only):**
+- [x] `ForReadingPEMetricsDimensions` - Unified interface with 14 read operations
+
+**Command Ports (Write-only):**
+- [x] `ForManagingCells` - Insert, Update
+- [x] `ForManagingPCStations` - Insert
+- [x] `ForMappingPCStationToCell` - Insert, Update
+- [x] `ForManagingSwTests` - Insert, Update
+- [x] `ForMappingSwTestsToCells` - SetMappings, AddMapping, DeleteMapping
+- [x] `ForManagingPartNumbers` - Insert, Update, Delete
+- [x] `ForMappingPartNumberToCells` - SetMappings, AddMapping, DeleteMapping
+
+### Mapping Infrastructure
+- [x] `ForMappingDataModels` - Unified mapper interface
+- [x] `DataModelMappers` - Single implementation for all models
+- [x] `DataReaderExtensions` - MapAll, MapFirstOrDefault, nullable helpers
+
+### Repository Implementations
+
+**Query Repository:**
+- [x] `PEMetricsQueryRepository` - Full implementation of all read operations
+
+**Command Repositories:**
+- [x] `CellRepository` - Full implementation
+- [x] `PCStationRepository` - Full implementation
+- [x] `CellByPCStationRepository` - Full implementation
+- [x] `SwTestMapRepository` - Full implementation
+- [x] `CellBySwTestRepository` - Full implementation (TVP support)
+- [x] `TLARepository` - Full implementation
+- [x] `CellByPartNoRepository` - Full implementation (TVP support)
+
+### Infrastructure
 - [x] `ForCreatingSqlServerConnections` - Connection factory interface
-- [x] `SqlConnectionFactory` - Connection factory using IConfiguration
-- [x] `DataReaderExtensions` - MapAll<T>, MapFirstOrDefault<T>, nullable helpers
-- [x] `RepositoryException` - Custom exception for business rule violations
-- [x] `SqlErrorTranslator` - SQL error code to message translation
-
-### Phase 2 Review
-- [x] All implementations complete
-- [x] Mapper pattern for DuckDB reuse
-- [x] Consistent IsActive/IsUsed in all GetById procedures
-- [x] Reviewed and approved by user
+- [x] `SqlConnectionFactory` - Using IConfiguration
+- [x] `RepositoryException` - Business rule violations
+- [x] `SqlErrorTranslator` - Error code to message translation
 
 ---
 
 ## Phase 3: Caching Layer
 
-**Status: NOT STARTED**
+**Status: REQUIREMENTS FINALIZED - READY TO IMPLEMENT**
 
-### Project Setup
-- [ ] Create `src/core/PEMetrics.Cache` class library project
-- [ ] Add to solution
-- [ ] Add DuckDB.NET.Data.Full NuGet package
-- [ ] Add reference to PEMetrics.DataApi project
+### Architecture & Design (Finalized 2026-01-13)
 
-### Cache Infrastructure
-- [ ] `CacheConfiguration` - Path management, initialization
-- [ ] `DuckDbConnectionFactory` - Connection management
-- [ ] Create DuckDB tables mirroring dimension tables
+**DuckDB Cache Strategy:**
+- [ ] Use DuckDB.NET.Data.Full package
+- [ ] Use nanodbc community extension for SQL Server connectivity
+- [ ] Cache implements `ForReadingPEMetricsDimensions` (same as SQL Server)
+- [ ] Constructor injection: accepts SQL Server query repository for pass-through
+- [ ] Full table refresh strategy (datasets are small)
 
-### Cache Services
-- [ ] `ICacheService` interface
-- [ ] `CellCacheService` - Cell cache operations
-- [ ] `PCStationCacheService` - PCStation cache operations
-- [ ] `CellByPCStationCacheService` - Mapping cache operations
-- [ ] `SwTestMapCacheService` - SwTest cache operations
-- [ ] `CellBySwTestCacheService` - SwTest mapping cache
-- [ ] `TLACacheService` - TLA cache operations
-- [ ] `CellByPartNoCacheService` - PartNo mapping cache
+**Communication Method:**
+- [ ] Use nanodbc `odbc_scan` to read from SQL Server views
+- [ ] Pure SQL operations: `INSERT INTO duckdb_table SELECT * FROM odbc_scan(...)`
+- [ ] No ADO.NET reader loops or appenders
+- [ ] Fail with clear error if nanodbc unavailable (no fallback)
 
-### Cache Refresh
-- [ ] Initial population from SQL Server
-- [ ] Refresh methods for each table
-- [ ] Cache invalidation strategies
+### Configuration (Approved)
 
-### Phase 3 Review
-- [ ] All cache services implemented
-- [ ] Reviewed and approved by user
+**appsettings.json structure:**
+```json
+{
+    "CacheConfiguration": {
+        "CacheDbType": "DuckDb",
+        "CachePath": "MyDocuments\\PEDimMgmnt\\PE_Metrics_Cache.duckdb",
+        "DeleteOnExit": false,
+        "InitSqlPath": "MyDocuments\\PEDimMgmnt\\duckdb_init.sql"
+    },
+    "ConnectionStrings": {
+        "PEMetricsConnection": "Server=.\\MLD2019;...",
+        "PEMetricsODBC": "Driver={SQL Server};Server=.\\MLD2019;Database=PE_Metrics;Trusted_Connection=yes;"
+    }
+}
+```
+
+**Path Resolution Rules:**
+- [ ] `MyDocuments` prefix → `Environment.SpecialFolder.Personal`
+- [ ] Absolute paths → use as-is
+- [ ] Relative paths → relative to executable
+
+### Infrastructure Components
+
+**Configuration:**
+- [ ] `CacheConfiguration` - POCO for appsettings binding
+- [ ] `CachePathResolver` - Resolves MyDocuments, absolute, relative paths
+
+**DuckDB Setup:**
+- [ ] `DuckDbConnectionFactory` - Creates connections
+- [ ] `DuckDbInitializer` - Startup init, execute init.sql, cleanup on exit
+- [ ] Table creation in `duckdb_init.sql` (IF NOT EXISTS)
+
+**Query Repository:**
+- [ ] `DuckDbQueryRepository` - Implements `ForReadingPEMetricsDimensions`
+- [ ] Uses same `ForMappingDataModels` as SQL Server
+- [ ] Queries local DuckDB tables
+
+### Notification System
+
+**New Ports in Core:**
+- [ ] `ForNotifyingDataChanges` - Publish data change events
+  - Methods: NotifyCellChanged, NotifyPCStationChanged, etc.
+- [ ] `ForNotifyingDataCommunicationErrors` - Handle connectivity errors
+  - Methods: ProductionStoreNotReachable, UnexpectedError
+
+**Event Flow:**
+- [ ] Command repositories inject `ForNotifyingDataChanges`
+- [ ] Call notification methods after successful writes
+- [ ] Cache subscribes and queues refresh requests
+
+### Cache Refresh Service
+
+**Async Processing:**
+- [ ] Use `System.Threading.Channels.Channel<RefreshRequest>`
+- [ ] Producer/consumer pattern
+- [ ] Background service processes queue until application exit
+
+**Startup Population:**
+- [ ] Populate all tables asynchronously on startup
+- [ ] Max 4 tables in parallel (configurable)
+- [ ] Use `SemaphoreSlim` per table
+- [ ] Queries block if table population in progress
+
+**Refresh Dependencies:**
+```
+Cell update → Cell, CellByPCStation, CellBySwTest, CellByPartNo
+SwTestMap update → SwTestMap, CellBySwTest
+TLA update → TLA, CellByPartNo
+Other operations → single table refresh
+```
+
+### Error Handling
+
+**Startup Health Check:**
+- [ ] Test SQL Server connectivity once at startup
+- [ ] Timeout/network error → `ProductionStoreNotReachable`, enter offline mode
+- [ ] No exception thrown - graceful degradation
+- [ ] Offline mode: reads from cache, writes disabled in UI
+
+**Runtime Error Strategy:**
+- [ ] All errors after startup → `UnexpectedError`
+- [ ] Query operations → return empty collections
+- [ ] Command operations → return -1 or false (functional style)
+- [ ] No exception throwing - notification IS the handling
+- [ ] Required dependency (non-nullable), use no-op implementation if not needed
+
+**SQL Exception Detection:**
+- [ ] Timeout/network errors: SqlException numbers -1, -2, 2, 53
+- [ ] All other SqlExceptions → `UnexpectedError`
+
+### Implementation Tasks
+
+**Configuration & Infrastructure:**
+- [ ] Create `CacheConfiguration` class
+- [ ] Create `CachePathResolver` with MyDocuments support
+- [ ] Create `DuckDbConnectionFactory`
+- [ ] Create `DuckDbInitializer` (nanodbc, schema, cleanup)
+
+**Query Repository:**
+- [ ] Create `DuckDbQueryRepository`
+- [ ] Implement all 14 read operations
+- [ ] Add semaphore blocking for table population
+
+**Notification System:**
+- [ ] Create `ForNotifyingDataChanges` interface in core
+- [ ] Create `ForNotifyingDataCommunicationErrors` interface in core
+- [ ] Create `NoOpErrorNotifier` implementation
+- [ ] Create `DataChangeNotificationHandler` (cache subscriber)
+- [ ] Create `CacheRefreshService` (Channel consumer)
+
+**Health Check & Startup:**
+- [ ] Create `ProductionStoreHealthCheck`
+- [ ] Implement connectivity test
+- [ ] Wire into application startup
+- [ ] Implement parallel table population
+
+**Repository Updates:**
+- [ ] Inject `ForNotifyingDataCommunicationErrors` into all repositories
+- [ ] Inject `ForNotifyingDataChanges` into command repositories
+- [ ] Wrap operations with try-catch error handling
+- [ ] Call notification methods after successful writes
+- [ ] Update return types (query → empty, command → -1/false on error)
+
+**Testing:**
+- [ ] Test online mode with successful SQL Server connection
+- [ ] Test offline mode with unreachable SQL Server
+- [ ] Test cache population on startup
+- [ ] Test cache refresh on data changes
+- [ ] Test error handling and notifications
+- [ ] Verify nanodbc extension works
 
 ---
 
@@ -168,70 +257,70 @@ All stored procedures, views, and functions are created in the `mgmt` schema.
 
 ### Project Setup
 - [ ] Update existing `DimensionManagement` project
-- [ ] Add references to DataApi and Cache projects
+- [ ] Add references to DataApi and adapter projects
 - [ ] Configure dependency injection
+- [ ] Wire up error notifications (offline mode indicator)
 - [ ] Create main form with navigation
 
 ### Screen 1: Cell Management
-- [ ] Cell list DataGridView with sorting
+- [ ] Cell list DataGridView
 - [ ] Active Only filter
 - [ ] Add/Edit dialog
 - [ ] Integration with cache and data API
-- [ ] Review and approval
 
 ### Screen 2: PC Station Management
-- [ ] PC name input with autocomplete/suggestions
-- [ ] Exists check on input
+- [ ] PC name input with autocomplete
 - [ ] Add confirmation dialog
-- [ ] Review and approval
 
 ### Screen 3: PC to Cell Mapping Management
-- [ ] Mapping list DataGridView with Cell names
+- [ ] Mapping list DataGridView
 - [ ] Active Only filter
 - [ ] Add/Edit dialog with Cell picker
-- [ ] Review and approval
 
 ### Screen 4: Software Test Management
 - [ ] SwTestMap list DataGridView
-- [ ] Active filter (LastRun within 3 months)
+- [ ] Active filter
 - [ ] Add/Edit dialog with Cell checkbox list
-- [ ] Review and approval
 
 ### Screen 5: Part Number (TLA) Management
 - [ ] TLA list DataGridView with IsUsed column
-- [ ] Text search filter (Family, Subfamily, Description)
+- [ ] Text search filter
 - [ ] IsUsed filter
 - [ ] Add/Edit dialog with Cell checkbox list
 - [ ] Delete button (disabled when IsUsed)
-- [ ] Review and approval
 
 ---
 
-## Notes
+## Design Decisions & Patterns
 
-### Decisions Made
+### Phase 1 (Database)
+- Views for read-only data (not TVFs)
+- Computed IsActive/IsUsed flags in views AND GetById procedures
+- Table-valued parameters for bulk operations (mgmt.IntList)
+- Atomic SetMappings with delete-then-insert in transactions
+- Error codes organized by entity (50001-50009, etc.)
+- Idempotent operations where appropriate (Insert, Delete, Add/DeleteMapping)
 
-**Phase 1:**
-- Used views (not TVFs) for read-only grid sources - simpler and sufficient for this use case
-- Views include computed `IsActive` flags to support filtering in the UI
-- Used Table-Valued Parameters (`mgmt.IntList`) for bulk cell mapping operations
-- SetMappings procedures use atomic delete-then-insert pattern within transactions
-- Error codes organized by entity ranges (50001-50009 for Cell, etc.)
-- All RAISERROR calls use severity 16 for business rule violations
-- GetById procedures now include computed IsActive/IsUsed for editing context
+### Phase 2 (Data API)
+- **Hexagonal Architecture**: Core defines ports, adapters implement them
+- **CQRS Pattern**: Separate query (ForReadingPEMetricsDimensions) from commands
+- **Mapper Pattern**: Single ForMappingDataModels shared across adapters
+- **Interface Naming**: Cockburn/Henney style (ForDoingSomething)
+- **Immutability**: Sealed records with init properties, ImmutableList<T> returns
+- **Functional Style**: Methods return values (-1/false for errors, not void)
 
-**Phase 2:**
-- Mapper pattern: `Func<DbDataReader, T>` functions injected into repositories
-- Single `DataModelMappers` class implements all mapper interfaces (registered as Singleton)
-- Mappers reusable for DuckDB since both use `DbDataReader` base class
-- Separate view models (`CellBySwTestView`, `CellByPartNoView`) for expanded grid data
-- Interface naming follows Cockburn/Henney hexagonal style (`ForDoingSomething`)
-- Return types use `ImmutableList<T>` for immutability guarantees
+### Phase 3 (Cache - Planned)
+- **DuckDB with nanodbc**: Pure SQL operations, no ADO.NET loops
+- **CQRS Query Implementation**: DuckDB implements same ForReadingPEMetricsDimensions
+- **Notification Pattern**: Publisher (commands) / Subscriber (cache) via ports
+- **Async Refresh**: Channel-based producer/consumer pattern
+- **Error Handling**: Notifications instead of exceptions, graceful degradation
+- **Offline Mode**: Startup health check, cache serves stale data, writes disabled
 
-### Issues/Blockers
-- (None at this time)
+---
 
-### Testing Notes
-- Scripts can be deployed to PE_Metrics database using SSMS
-- Run `00_schema_setup.sql` first, then remaining scripts in numeric order
-- SQL views `vw_CellBySwTest` and `vw_CellByPartNo` need to be deployed for GetAll() methods
+## Testing Notes
+- SQL scripts deployed and tested on `.\MLD2019`
+- Build succeeds with zero warnings
+- All repositories compile and follow established patterns
+- Ready to implement Phase 3 caching layer
