@@ -1,7 +1,6 @@
 using System.Data;
 using Microsoft.Data.SqlClient;
 using PEMetrics.DataApi.Infrastructure;
-using PEMetrics.DataApi.Infrastructure.Mapping;
 using PEMetrics.DataApi.Ports;
 
 namespace PEMetrics.DataApi.Adapters.SqlServer;
@@ -10,51 +9,89 @@ namespace PEMetrics.DataApi.Adapters.SqlServer;
 public sealed class CellByPartNoRepository : ForMappingPartNumberToCells
 {
     readonly ForCreatingSqlServerConnections _connectionFactory;
-    readonly ForMappingDataModels _mapper;
+    readonly ForNotifyingDataCommunicationErrors _errorNotifier;
+    readonly ForNotifyingDataChanges _dataChangeNotifier;
 
-    public CellByPartNoRepository(ForCreatingSqlServerConnections connectionFactory, ForMappingDataModels mapper)
+    public CellByPartNoRepository(
+        ForCreatingSqlServerConnections connectionFactory,
+        ForNotifyingDataCommunicationErrors errorNotifier,
+        ForNotifyingDataChanges dataChangeNotifier)
     {
         _connectionFactory = connectionFactory ?? throw new ArgumentNullException(nameof(connectionFactory));
-        _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+        _errorNotifier = errorNotifier ?? throw new ArgumentNullException(nameof(errorNotifier));
+        _dataChangeNotifier = dataChangeNotifier ?? throw new ArgumentNullException(nameof(dataChangeNotifier));
     }
 
-    public void SetMappings(string partNo, IEnumerable<int> cellIds)
+    public bool SetMappings(string partNo, IEnumerable<int> cellIds)
     {
-        using var connection = _connectionFactory.OpenConnectionToPEMetrics();
-        using var command = connection.CreateCommand();
-        command.CommandText = "mgmt.CellByPartNo_SetMappings";
-        command.CommandType = CommandType.StoredProcedure;
+        try
+        {
+            using var connection = _connectionFactory.OpenConnectionToPEMetrics();
+            using var command = connection.CreateCommand();
+            command.CommandText = "mgmt.CellByPartNo_SetMappings";
+            command.CommandType = CommandType.StoredProcedure;
 
-        command.Parameters.Add(new SqlParameter("@PartNo", partNo));
-        command.Parameters.Add(CreateIntListParameter("@CellIds", cellIds));
+            command.Parameters.Add(new SqlParameter("@PartNo", partNo));
+            command.Parameters.Add(CreateIntListParameter("@CellIds", cellIds));
 
-        command.ExecuteNonQuery();
+            command.ExecuteNonQuery();
+
+            _dataChangeNotifier.NotifyTLAToCellMappingChanged(partNo);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _errorNotifier.UnexpectedError("CellByPartNo.SetMappings", ex);
+            return false;
+        }
     }
 
-    public void AddMapping(string partNo, int cellId)
+    public bool AddMapping(string partNo, int cellId)
     {
-        using var connection = _connectionFactory.OpenConnectionToPEMetrics();
-        using var command = connection.CreateCommand();
-        command.CommandText = "mgmt.CellByPartNo_AddMapping";
-        command.CommandType = CommandType.StoredProcedure;
+        try
+        {
+            using var connection = _connectionFactory.OpenConnectionToPEMetrics();
+            using var command = connection.CreateCommand();
+            command.CommandText = "mgmt.CellByPartNo_AddMapping";
+            command.CommandType = CommandType.StoredProcedure;
 
-        command.Parameters.Add(new SqlParameter("@PartNo", partNo));
-        command.Parameters.Add(new SqlParameter("@CellId", cellId));
+            command.Parameters.Add(new SqlParameter("@PartNo", partNo));
+            command.Parameters.Add(new SqlParameter("@CellId", cellId));
 
-        command.ExecuteNonQuery();
+            command.ExecuteNonQuery();
+
+            _dataChangeNotifier.NotifyTLAToCellMappingChanged(partNo);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _errorNotifier.UnexpectedError("CellByPartNo.AddMapping", ex);
+            return false;
+        }
     }
 
-    public void DeleteMapping(string partNo, int cellId)
+    public bool DeleteMapping(string partNo, int cellId)
     {
-        using var connection = _connectionFactory.OpenConnectionToPEMetrics();
-        using var command = connection.CreateCommand();
-        command.CommandText = "mgmt.CellByPartNo_DeleteMapping";
-        command.CommandType = CommandType.StoredProcedure;
+        try
+        {
+            using var connection = _connectionFactory.OpenConnectionToPEMetrics();
+            using var command = connection.CreateCommand();
+            command.CommandText = "mgmt.CellByPartNo_DeleteMapping";
+            command.CommandType = CommandType.StoredProcedure;
 
-        command.Parameters.Add(new SqlParameter("@PartNo", partNo));
-        command.Parameters.Add(new SqlParameter("@CellId", cellId));
+            command.Parameters.Add(new SqlParameter("@PartNo", partNo));
+            command.Parameters.Add(new SqlParameter("@CellId", cellId));
 
-        command.ExecuteNonQuery();
+            command.ExecuteNonQuery();
+
+            _dataChangeNotifier.NotifyTLAToCellMappingChanged(partNo);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _errorNotifier.UnexpectedError("CellByPartNo.DeleteMapping", ex);
+            return false;
+        }
     }
 
     static SqlParameter CreateIntListParameter(string parameterName, IEnumerable<int> values)

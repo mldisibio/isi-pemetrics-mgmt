@@ -1,7 +1,6 @@
 using System.Data;
 using Microsoft.Data.SqlClient;
 using PEMetrics.DataApi.Infrastructure;
-using PEMetrics.DataApi.Infrastructure.Mapping;
 using PEMetrics.DataApi.Ports;
 
 namespace PEMetrics.DataApi.Adapters.SqlServer;
@@ -10,51 +9,89 @@ namespace PEMetrics.DataApi.Adapters.SqlServer;
 public sealed class CellBySwTestRepository : ForMappingSwTestsToCells
 {
     readonly ForCreatingSqlServerConnections _connectionFactory;
-    readonly ForMappingDataModels _mapper;
+    readonly ForNotifyingDataCommunicationErrors _errorNotifier;
+    readonly ForNotifyingDataChanges _dataChangeNotifier;
 
-    public CellBySwTestRepository(ForCreatingSqlServerConnections connectionFactory, ForMappingDataModels mapper)
+    public CellBySwTestRepository(
+        ForCreatingSqlServerConnections connectionFactory,
+        ForNotifyingDataCommunicationErrors errorNotifier,
+        ForNotifyingDataChanges dataChangeNotifier)
     {
         _connectionFactory = connectionFactory ?? throw new ArgumentNullException(nameof(connectionFactory));
-        _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+        _errorNotifier = errorNotifier ?? throw new ArgumentNullException(nameof(errorNotifier));
+        _dataChangeNotifier = dataChangeNotifier ?? throw new ArgumentNullException(nameof(dataChangeNotifier));
     }
 
-    public void SetMappings(int swTestMapId, IEnumerable<int> cellIds)
+    public bool SetMappings(int swTestMapId, IEnumerable<int> cellIds)
     {
-        using var connection = _connectionFactory.OpenConnectionToPEMetrics();
-        using var command = connection.CreateCommand();
-        command.CommandText = "mgmt.CellBySwTest_SetMappings";
-        command.CommandType = CommandType.StoredProcedure;
+        try
+        {
+            using var connection = _connectionFactory.OpenConnectionToPEMetrics();
+            using var command = connection.CreateCommand();
+            command.CommandText = "mgmt.CellBySwTest_SetMappings";
+            command.CommandType = CommandType.StoredProcedure;
 
-        command.Parameters.Add(new SqlParameter("@SwTestMapId", swTestMapId));
-        command.Parameters.Add(CreateIntListParameter("@CellIds", cellIds));
+            command.Parameters.Add(new SqlParameter("@SwTestMapId", swTestMapId));
+            command.Parameters.Add(CreateIntListParameter("@CellIds", cellIds));
 
-        command.ExecuteNonQuery();
+            command.ExecuteNonQuery();
+
+            _dataChangeNotifier.NotifySwTestToCellMappingChanged(swTestMapId);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _errorNotifier.UnexpectedError("CellBySwTest.SetMappings", ex);
+            return false;
+        }
     }
 
-    public void AddMapping(int swTestMapId, int cellId)
+    public bool AddMapping(int swTestMapId, int cellId)
     {
-        using var connection = _connectionFactory.OpenConnectionToPEMetrics();
-        using var command = connection.CreateCommand();
-        command.CommandText = "mgmt.CellBySwTest_AddMapping";
-        command.CommandType = CommandType.StoredProcedure;
+        try
+        {
+            using var connection = _connectionFactory.OpenConnectionToPEMetrics();
+            using var command = connection.CreateCommand();
+            command.CommandText = "mgmt.CellBySwTest_AddMapping";
+            command.CommandType = CommandType.StoredProcedure;
 
-        command.Parameters.Add(new SqlParameter("@SwTestMapId", swTestMapId));
-        command.Parameters.Add(new SqlParameter("@CellId", cellId));
+            command.Parameters.Add(new SqlParameter("@SwTestMapId", swTestMapId));
+            command.Parameters.Add(new SqlParameter("@CellId", cellId));
 
-        command.ExecuteNonQuery();
+            command.ExecuteNonQuery();
+
+            _dataChangeNotifier.NotifySwTestToCellMappingChanged(swTestMapId);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _errorNotifier.UnexpectedError("CellBySwTest.AddMapping", ex);
+            return false;
+        }
     }
 
-    public void DeleteMapping(int swTestMapId, int cellId)
+    public bool DeleteMapping(int swTestMapId, int cellId)
     {
-        using var connection = _connectionFactory.OpenConnectionToPEMetrics();
-        using var command = connection.CreateCommand();
-        command.CommandText = "mgmt.CellBySwTest_DeleteMapping";
-        command.CommandType = CommandType.StoredProcedure;
+        try
+        {
+            using var connection = _connectionFactory.OpenConnectionToPEMetrics();
+            using var command = connection.CreateCommand();
+            command.CommandText = "mgmt.CellBySwTest_DeleteMapping";
+            command.CommandType = CommandType.StoredProcedure;
 
-        command.Parameters.Add(new SqlParameter("@SwTestMapId", swTestMapId));
-        command.Parameters.Add(new SqlParameter("@CellId", cellId));
+            command.Parameters.Add(new SqlParameter("@SwTestMapId", swTestMapId));
+            command.Parameters.Add(new SqlParameter("@CellId", cellId));
 
-        command.ExecuteNonQuery();
+            command.ExecuteNonQuery();
+
+            _dataChangeNotifier.NotifySwTestToCellMappingChanged(swTestMapId);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _errorNotifier.UnexpectedError("CellBySwTest.DeleteMapping", ex);
+            return false;
+        }
     }
 
     static SqlParameter CreateIntListParameter(string parameterName, IEnumerable<int> values)

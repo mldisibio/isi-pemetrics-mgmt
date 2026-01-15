@@ -99,22 +99,22 @@ All stored procedures, views, and functions created in `mgmt` schema and deploye
 
 ## Phase 3: Caching Layer
 
-**Status: REQUIREMENTS FINALIZED - READY TO IMPLEMENT**
+**Status: IMPLEMENTATION COMPLETE - AWAITING TESTING**
 
 ### Architecture & Design (Finalized 2026-01-13)
 
 **DuckDB Cache Strategy:**
-- [ ] Use DuckDB.NET.Data.Full package
-- [ ] Use nanodbc community extension for SQL Server connectivity
-- [ ] Cache implements `ForReadingPEMetricsDimensions` (same as SQL Server)
-- [ ] Constructor injection: accepts SQL Server query repository for pass-through
-- [ ] Full table refresh strategy (datasets are small)
+- [x] Use DuckDB.NET.Data.Full package
+- [x] Use nanodbc community extension for SQL Server connectivity
+- [x] Cache implements `ForReadingPEMetricsDimensions` (same as SQL Server)
+- [x] Constructor injection: accepts SQL Server query repository for pass-through
+- [x] Full table refresh strategy (datasets are small)
 
 **Communication Method:**
-- [ ] Use nanodbc `odbc_scan` to read from SQL Server views
-- [ ] Pure SQL operations: `INSERT INTO duckdb_table SELECT * FROM odbc_scan(...)`
-- [ ] No ADO.NET reader loops or appenders
-- [ ] Fail with clear error if nanodbc unavailable (no fallback)
+- [x] Use nanodbc `odbc_scan` to read from SQL Server views
+- [x] Pure SQL operations: `INSERT INTO duckdb_table SELECT * FROM odbc_scan(...)`
+- [x] No ADO.NET reader loops or appenders
+- [x] Fail with clear error if nanodbc unavailable (no fallback)
 
 ### Configuration (Approved)
 
@@ -135,111 +135,112 @@ All stored procedures, views, and functions created in `mgmt` schema and deploye
 ```
 
 **Path Resolution Rules:**
-- [ ] `MyDocuments` prefix → `Environment.SpecialFolder.Personal`
-- [ ] Absolute paths → use as-is
-- [ ] Relative paths → relative to executable
+- [x] `MyDocuments` prefix → `Environment.SpecialFolder.Personal`
+- [x] Absolute paths → use as-is
+- [x] Relative paths → relative to executable
 
 ### Infrastructure Components
 
 **Configuration:**
-- [ ] `CacheConfiguration` - POCO for appsettings binding
-- [ ] `CachePathResolver` - Resolves MyDocuments, absolute, relative paths
+- [x] `CacheConfiguration` - POCO for appsettings binding
+- [x] `CachePathResolver` - Resolves MyDocuments, absolute, relative paths
 
 **DuckDB Setup:**
-- [ ] `DuckDbConnectionFactory` - Creates connections
-- [ ] `DuckDbInitializer` - Startup init, execute init.sql, cleanup on exit
-- [ ] Table creation in `duckdb_init.sql` (IF NOT EXISTS)
+- [x] `DuckDbConnectionFactory` - Creates connections
+- [x] `DuckDbInitializer` - Startup init, execute init.sql, cleanup on exit
+- [x] Table creation in `duckdb_init.sql` (IF NOT EXISTS)
 
 **Query Repository:**
-- [ ] `DuckDbQueryRepository` - Implements `ForReadingPEMetricsDimensions`
-- [ ] Uses same `ForMappingDataModels` as SQL Server
-- [ ] Queries local DuckDB tables
+- [x] `DuckDbQueryRepository` - Implements `ForReadingPEMetricsDimensions`
+- [x] Uses same `ForMappingDataModels` as SQL Server
+- [x] Queries local DuckDB tables
 
 ### Notification System
 
 **New Ports in Core:**
-- [ ] `ForNotifyingDataChanges` - Publish data change events
+- [x] `ForNotifyingDataChanges` - Publish data change events
   - Methods: NotifyCellChanged, NotifyPCStationChanged, etc.
-- [ ] `ForNotifyingDataCommunicationErrors` - Handle connectivity errors
+- [x] `ForNotifyingDataCommunicationErrors` - Handle connectivity errors
   - Methods: ProductionStoreNotReachable, UnexpectedError
 
 **Event Flow:**
-- [ ] Command repositories inject `ForNotifyingDataChanges`
-- [ ] Call notification methods after successful writes
-- [ ] Cache subscribes and queues refresh requests
+- [x] Command repositories inject `ForNotifyingDataChanges`
+- [x] Call notification methods after successful writes
+- [x] Cache subscribes and queues refresh requests
 
 ### Cache Refresh Service
 
 **Async Processing:**
-- [ ] Use `System.Threading.Channels.Channel<RefreshRequest>`
-- [ ] Producer/consumer pattern
-- [ ] Background service processes queue until application exit
+- [x] Use `System.Threading.Channels.Channel<RefreshRequest>`
+- [x] Producer/consumer pattern
+- [x] Background service processes queue until application exit
 
 **Startup Population:**
-- [ ] Populate all tables asynchronously on startup
-- [ ] Max 4 tables in parallel (configurable)
-- [ ] Use `SemaphoreSlim` per table
-- [ ] Queries block if table population in progress
+- [x] Populate all tables asynchronously on startup
+- [x] Max 4 tables in parallel (configurable)
+- [x] Use `SemaphoreSlim` per table
+- [x] Queries block if table population in progress
 
 **Refresh Dependencies:**
 ```
-Cell update → Cell, CellByPCStation, CellBySwTest, CellByPartNo
-SwTestMap update → SwTestMap, CellBySwTest
-TLA update → TLA, CellByPartNo
+Cell update → Cell, CellByPCStation, CellBySwTest, CellBySwTestView, CellByPartNo, CellByPartNoView
+SwTestMap update → SwTestMap, CellBySwTest, CellBySwTestView
+TLA update → TLA, CellByPartNo, CellByPartNoView
 Other operations → single table refresh
 ```
 
 ### Error Handling
 
 **Startup Health Check:**
-- [ ] Test SQL Server connectivity once at startup
-- [ ] Timeout/network error → `ProductionStoreNotReachable`, enter offline mode
-- [ ] No exception thrown - graceful degradation
-- [ ] Offline mode: reads from cache, writes disabled in UI
+- [x] Test SQL Server connectivity once at startup
+- [x] Timeout/network error → `ProductionStoreNotReachable`, enter offline mode
+- [x] No exception thrown - graceful degradation
+- [x] Offline mode: reads from cache, writes disabled in UI
 
 **Runtime Error Strategy:**
-- [ ] All errors after startup → `UnexpectedError`
-- [ ] Query operations → return empty collections
-- [ ] Command operations → return -1 or false (functional style)
-- [ ] No exception throwing - notification IS the handling
-- [ ] Required dependency (non-nullable), use no-op implementation if not needed
+- [x] All errors after startup → `UnexpectedError`
+- [x] Query operations → return empty collections
+- [x] Command operations → return -1 or false (functional style)
+- [x] No exception throwing - notification IS the handling
+- [x] Required dependency (non-nullable), use no-op implementation if not needed
 
 **SQL Exception Detection:**
-- [ ] Timeout/network errors: SqlException numbers -1, -2, 2, 53
-- [ ] All other SqlExceptions → `UnexpectedError`
+- [x] Timeout/network errors: SqlException numbers -1, -2, 2, 53
+- [x] All other SqlExceptions → `UnexpectedError`
 
 ### Implementation Tasks
 
 **Configuration & Infrastructure:**
-- [ ] Create `CacheConfiguration` class
-- [ ] Create `CachePathResolver` with MyDocuments support
-- [ ] Create `DuckDbConnectionFactory`
-- [ ] Create `DuckDbInitializer` (nanodbc, schema, cleanup)
+- [x] Create `CacheConfiguration` class
+- [x] Create `CachePathResolver` with MyDocuments support
+- [x] Create `DuckDbConnectionFactory`
+- [x] Create `DuckDbInitializer` (nanodbc, schema, cleanup)
 
 **Query Repository:**
-- [ ] Create `DuckDbQueryRepository`
-- [ ] Implement all 14 read operations
-- [ ] Add semaphore blocking for table population
+- [x] Create `DuckDbQueryRepository`
+- [x] Implement all 14 read operations
+- [x] Add semaphore blocking for table population
 
 **Notification System:**
-- [ ] Create `ForNotifyingDataChanges` interface in core
-- [ ] Create `ForNotifyingDataCommunicationErrors` interface in core
-- [ ] Create `NoOpErrorNotifier` implementation
-- [ ] Create `DataChangeNotificationHandler` (cache subscriber)
-- [ ] Create `CacheRefreshService` (Channel consumer)
+- [x] Create `ForNotifyingDataChanges` interface in core
+- [x] Create `ForNotifyingDataCommunicationErrors` interface in core
+- [x] Create `NoOpErrorNotifier` implementation
+- [x] Create `NoOpDataChangeNotifier` implementation
+- [x] Create `DataChangeNotificationHandler` (cache subscriber)
+- [x] Create `CacheRefreshService` (Channel consumer)
 
 **Health Check & Startup:**
-- [ ] Create `ProductionStoreHealthCheck`
-- [ ] Implement connectivity test
-- [ ] Wire into application startup
-- [ ] Implement parallel table population
+- [x] Create `ProductionStoreHealthCheck`
+- [x] Implement connectivity test
+- [ ] Wire into application startup (Phase 4)
+- [x] Implement parallel table population
 
 **Repository Updates:**
-- [ ] Inject `ForNotifyingDataCommunicationErrors` into all repositories
-- [ ] Inject `ForNotifyingDataChanges` into command repositories
-- [ ] Wrap operations with try-catch error handling
-- [ ] Call notification methods after successful writes
-- [ ] Update return types (query → empty, command → -1/false on error)
+- [x] Inject `ForNotifyingDataCommunicationErrors` into all repositories
+- [x] Inject `ForNotifyingDataChanges` into command repositories
+- [x] Wrap operations with try-catch error handling
+- [x] Call notification methods after successful writes
+- [x] Update return types (query → empty, command → -1/false on error)
 
 **Testing:**
 - [ ] Test online mode with successful SQL Server connection
@@ -309,13 +310,14 @@ Other operations → single table refresh
 - **Immutability**: Sealed records with init properties, ImmutableList<T> returns
 - **Functional Style**: Methods return values (-1/false for errors, not void)
 
-### Phase 3 (Cache - Planned)
-- **DuckDB with nanodbc**: Pure SQL operations, no ADO.NET loops
+### Phase 3 (Cache - Implemented)
+- **DuckDB with nanodbc**: Pure SQL operations via `odbc_scan`, no ADO.NET loops
 - **CQRS Query Implementation**: DuckDB implements same ForReadingPEMetricsDimensions
 - **Notification Pattern**: Publisher (commands) / Subscriber (cache) via ports
-- **Async Refresh**: Channel-based producer/consumer pattern
+- **Async Refresh**: Channel-based producer/consumer pattern with `RefreshRequest`
 - **Error Handling**: Notifications instead of exceptions, graceful degradation
 - **Offline Mode**: Startup health check, cache serves stale data, writes disabled
+- **Table Population**: Parallel population with semaphore blocking per table
 
 ---
 
@@ -323,4 +325,5 @@ Other operations → single table refresh
 - SQL scripts deployed and tested on `.\MLD2019`
 - Build succeeds with zero warnings
 - All repositories compile and follow established patterns
-- Ready to implement Phase 3 caching layer
+- Phase 3 caching layer implemented and compiles successfully
+- Requires integration testing with actual SQL Server and DuckDB

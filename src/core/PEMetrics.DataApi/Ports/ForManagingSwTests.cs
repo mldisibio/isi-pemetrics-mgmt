@@ -6,9 +6,10 @@ namespace PEMetrics.DataApi.Ports;
 public interface ForManagingSwTests
 {
     /// <summary>Inserts a new software test.</summary>
-    /// <returns>The new SwTestMapId.</returns>
+    /// <returns>The new SwTestMapId, or -1 on error.</returns>
     int Insert(SwTestMap test);
 
     /// <summary>Updates an existing software test.</summary>
-    void Update(SwTestMap test);
+    /// <returns>True if successful, false on error.</returns>
+    bool Update(SwTestMap test);
 }

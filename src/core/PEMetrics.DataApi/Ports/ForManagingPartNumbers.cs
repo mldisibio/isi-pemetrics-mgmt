@@ -6,11 +6,14 @@ namespace PEMetrics.DataApi.Ports;
 public interface ForManagingPartNumbers
 {
     /// <summary>Inserts a new TLA.</summary>
-    void Insert(TLA tla);
+    /// <returns>True if successful, false on error.</returns>
+    bool Insert(TLA tla);
 
     /// <summary>Updates an existing TLA.</summary>
-    void Update(TLA tla);
+    /// <returns>True if successful, false on error.</returns>
+    bool Update(TLA tla);
 
-    /// <summary>Deletes a TLA if not in use. Idempotent if not found. Throws if in use.</summary>
-    void Delete(string partNo);
+    /// <summary>Deletes a TLA if not in use. Idempotent if not found.</summary>
+    /// <returns>True if successful, false on error (including if TLA is in use).</returns>
+    bool Delete(string partNo);
 }

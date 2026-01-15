@@ -4,11 +4,14 @@ namespace PEMetrics.DataApi.Ports;
 public interface ForMappingSwTestsToCells
 {
     /// <summary>Replaces all cell mappings for a software test. Atomic operation.</summary>
-    void SetMappings(int swTestMapId, IEnumerable<int> cellIds);
+    /// <returns>True if successful, false on error.</returns>
+    bool SetMappings(int swTestMapId, IEnumerable<int> cellIds);
 
     /// <summary>Adds a single cell mapping for a software test. Idempotent.</summary>
-    void AddMapping(int swTestMapId, int cellId);
+    /// <returns>True if successful, false on error.</returns>
+    bool AddMapping(int swTestMapId, int cellId);
 
     /// <summary>Removes a single cell mapping for a software test. Idempotent.</summary>
-    void DeleteMapping(int swTestMapId, int cellId);
+    /// <returns>True if successful, false on error.</returns>
+    bool DeleteMapping(int swTestMapId, int cellId);
 }
