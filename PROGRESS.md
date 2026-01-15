@@ -90,8 +90,8 @@ All stored procedures, views, and functions created in `mgmt` schema and deploye
 - [x] `CellByPartNoRepository` - Full implementation (TVP support)
 
 ### Infrastructure
-- [x] `ForCreatingSqlServerConnections` - Connection factory interface
-- [x] `SqlConnectionFactory` - Using IConfiguration
+- [x] `ForCreatingSqlServerConnections` - Connection factory interface (returns `DbConnection`)
+- [x] `SqlConnectionFactory` - Implements interface using IConfiguration
 - [x] `RepositoryException` - Business rule violations
 - [x] `SqlErrorTranslator` - Error code to message translation
 
@@ -99,7 +99,13 @@ All stored procedures, views, and functions created in `mgmt` schema and deploye
 
 ## Phase 3: Caching Layer
 
-**Status: IMPLEMENTATION COMPLETE - AWAITING TESTING**
+**Status: COMPLETE - AWAITING TESTING**
+
+### Architecture Refinements (2026-01-15)
+- [x] Move `ForCreatingDuckDbConnections` from DataCache adapter to core DataApi
+- [x] Update connection interfaces to return `System.Data.Common.DbConnection` abstraction
+- [x] Fix namespaces in ProductionStore repositories (PEMetrics.ProductionStore)
+- [x] Fix CS8604 null reference warning in DuckDbInitializer
 
 ### Architecture & Design (Finalized 2026-01-13)
 
@@ -146,7 +152,7 @@ All stored procedures, views, and functions created in `mgmt` schema and deploye
 - [x] `CachePathResolver` - Resolves MyDocuments, absolute, relative paths
 
 **DuckDB Setup:**
-- [x] `DuckDbConnectionFactory` - Creates connections
+- [x] `DuckDbConnectionFactory` - Implements `ForCreatingDuckDbConnections` (returns `DbConnection`)
 - [x] `DuckDbInitializer` - Startup init, execute init.sql, cleanup on exit
 - [x] Table creation in `duckdb_init.sql` (IF NOT EXISTS)
 
@@ -252,6 +258,39 @@ Other operations → single table refresh
 
 ---
 
+## Integration Tests (Phase 2/3 Validation)
+
+**Status: COMPLETE**
+
+### Test Project Structure
+- [x] Created `tests/PEMetrics.IntegrationTests/` with xUnit framework
+- [x] Testcontainers.MsSql for SQL Server container management
+- [x] SQL scripts for database initialization (schemas, tables, procedures, seed data)
+- [x] Test fixtures with shared container via ICollectionFixture
+
+### Test Coverage (75 tests total)
+- [x] **Query Repository Tests** (14 tests)
+  - All 14 read operations verified to return data
+  - GetById methods work correctly
+  - Search methods work correctly
+  - Computed flags (IsActive, IsUsed) verified
+- [x] **CellRepository Tests** (8 tests) - Insert, Update, notifications, error handling
+- [x] **PCStationRepository Tests** (4 tests) - Idempotent Insert, notifications
+- [x] **CellByPCStationRepository Tests** (5 tests) - Insert, Update, notifications
+- [x] **SwTestMapRepository Tests** (6 tests) - Insert, Update, duplicate handling
+- [x] **CellBySwTestRepository Tests** (10 tests) - SetMappings, AddMapping, DeleteMapping
+- [x] **TLARepository Tests** (10 tests) - Insert, Update, Delete with referential integrity
+- [x] **CellByPartNoRepository Tests** (10 tests) - SetMappings, AddMapping, DeleteMapping
+
+### Test Infrastructure
+- [x] `SqlServerContainerFixture` - Shared container with SQL script execution
+- [x] `TestConnectionFactory` - Implements `ForCreatingSqlServerConnections`
+- [x] `RecordingNotifier` - Verifies `ForNotifyingDataChanges` contract
+- [x] `RecordingErrorNotifier` - Verifies `ForNotifyingDataCommunicationErrors` contract
+- [x] SQL Scripts: 01_CreateSchemas, 02_CreateBaseTables, 03_CreateMgmtObjects, 04_SeedData
+
+---
+
 ## Phase 4: Windows Forms UI Layer
 
 **Status: NOT STARTED**
@@ -313,6 +352,7 @@ Other operations → single table refresh
 ### Phase 3 (Cache - Implemented)
 - **DuckDB with nanodbc**: Pure SQL operations via `odbc_scan`, no ADO.NET loops
 - **CQRS Query Implementation**: DuckDB implements same ForReadingPEMetricsDimensions
+- **Connection Abstraction**: Core defines ports with `System.Data.Common.DbConnection` return type
 - **Notification Pattern**: Publisher (commands) / Subscriber (cache) via ports
 - **Async Refresh**: Channel-based producer/consumer pattern with `RefreshRequest`
 - **Error Handling**: Notifications instead of exceptions, graceful degradation
@@ -326,4 +366,6 @@ Other operations → single table refresh
 - Build succeeds with zero warnings
 - All repositories compile and follow established patterns
 - Phase 3 caching layer implemented and compiles successfully
-- Requires integration testing with actual SQL Server and DuckDB
+- Architecture refined with `DbConnection` abstraction in core ports
+- **Integration tests complete**: 75 tests passing using Testcontainers for SQL Server
+- DuckDB cache layer requires manual testing with actual nanodbc extension
