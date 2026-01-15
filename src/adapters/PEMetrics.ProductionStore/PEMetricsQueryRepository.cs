@@ -6,7 +6,7 @@ using PEMetrics.DataApi.Infrastructure.Mapping;
 using PEMetrics.DataApi.Models;
 using PEMetrics.DataApi.Ports;
 
-namespace PEMetrics.DataApi.Adapters.SqlServer;
+namespace PEMetrics.ProductionStore;
 
 /// <summary>SQL Server implementation of ForReadingPEMetricsDimensions.</summary>
 public sealed class PEMetricsQueryRepository : ForReadingPEMetricsDimensions

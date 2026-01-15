@@ -1,6 +1,7 @@
 using DuckDB.NET.Data;
-using PEMetrics.DataCache.Configuration;
+using PEMetrics.DataApi.Infrastructure;
 using PEMetrics.DataApi.Ports;
+using PEMetrics.DataCache.Configuration;
 
 namespace PEMetrics.DataCache.Infrastructure;
 
@@ -33,7 +34,8 @@ public sealed class DuckDbInitializer : IDisposable
     {
         try
         {
-            using var connection = _connectionFactory.OpenConnection();
+            using var connection = _connectionFactory.OpenConnection() as DuckDBConnection
+                ?? throw new InvalidOperationException("Connection factory did not return a DuckDBConnection.");
 
             // Install and load nanodbc community extension
             InstallNanodbcExtension(connection);

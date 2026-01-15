@@ -1,7 +1,9 @@
+using System.Data.Common;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
+using PEMetrics.DataApi.Infrastructure;
 
-namespace PEMetrics.DataApi.Infrastructure;
+namespace PEMetrics.ProductionStore;
 
 /// <summary>SQL Server connection factory implementation.</summary>
 public sealed class SqlConnectionFactory : ForCreatingSqlServerConnections
@@ -13,7 +15,7 @@ public sealed class SqlConnectionFactory : ForCreatingSqlServerConnections
         _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
     }
 
-    public SqlConnection OpenConnectionToPEMetrics()
+    public DbConnection OpenConnectionToPEMetrics()
     {
         var connectionString = _configuration.GetConnectionString("PEMetricsConnection")
             ?? throw new InvalidOperationException("Connection string 'PEMetricsConnection' not found in configuration.");

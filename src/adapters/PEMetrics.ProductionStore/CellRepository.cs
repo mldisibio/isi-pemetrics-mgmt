@@ -4,7 +4,7 @@ using PEMetrics.DataApi.Infrastructure;
 using PEMetrics.DataApi.Models;
 using PEMetrics.DataApi.Ports;
 
-namespace PEMetrics.DataApi.Adapters.SqlServer;
+namespace PEMetrics.ProductionStore;
 
 /// <summary>SQL Server implementation of ForManagingCells.</summary>
 public sealed class CellRepository : ForManagingCells

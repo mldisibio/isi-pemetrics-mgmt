@@ -3,7 +3,7 @@ using Microsoft.Data.SqlClient;
 using PEMetrics.DataApi.Infrastructure;
 using PEMetrics.DataApi.Ports;
 
-namespace PEMetrics.DataApi.Adapters.SqlServer;
+namespace PEMetrics.ProductionStore;
 
 /// <summary>SQL Server implementation of ForManagingPCStations.</summary>
 public sealed class PCStationRepository : ForManagingPCStations

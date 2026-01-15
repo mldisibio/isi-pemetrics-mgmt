@@ -1,5 +1,6 @@
 using System.Threading.Channels;
 using Microsoft.Extensions.Configuration;
+using PEMetrics.DataApi.Infrastructure;
 using PEMetrics.DataApi.Ports;
 using PEMetrics.DataCache.Configuration;
 using PEMetrics.DataCache.Infrastructure;

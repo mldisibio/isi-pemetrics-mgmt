@@ -1,4 +1,6 @@
+using System.Data.Common;
 using DuckDB.NET.Data;
+using PEMetrics.DataApi.Infrastructure;
 using PEMetrics.DataCache.Configuration;
 
 namespace PEMetrics.DataCache.Infrastructure;
@@ -17,7 +19,7 @@ public sealed class DuckDbConnectionFactory : ForCreatingDuckDbConnections
         _connectionString = $"Data Source={resolvedPath}";
     }
 
-    public DuckDBConnection OpenConnection()
+    public DbConnection OpenConnection()
     {
         var connection = new DuckDBConnection(_connectionString);
         connection.Open();

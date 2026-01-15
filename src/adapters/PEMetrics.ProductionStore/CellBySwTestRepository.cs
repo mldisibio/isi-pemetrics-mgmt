@@ -3,7 +3,7 @@ using Microsoft.Data.SqlClient;
 using PEMetrics.DataApi.Infrastructure;
 using PEMetrics.DataApi.Ports;
 
-namespace PEMetrics.DataApi.Adapters.SqlServer;
+namespace PEMetrics.ProductionStore;
 
 /// <summary>SQL Server implementation of ForMappingSwTestsToCells.</summary>
 public sealed class CellBySwTestRepository : ForMappingSwTestsToCells
