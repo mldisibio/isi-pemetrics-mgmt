@@ -19,10 +19,10 @@ public sealed class DuckDbConnectionFactory : ForCreatingDuckDbConnections
         _connectionString = $"Data Source={resolvedPath}";
     }
 
-    public DbConnection OpenConnection()
+    public async Task<DbConnection> OpenConnectionAsync(CancellationToken cancellationToken = default)
     {
         var connection = new DuckDBConnection(_connectionString);
-        connection.Open();
+        await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
         return connection;
     }
 }

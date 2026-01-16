@@ -6,5 +6,5 @@ namespace PEMetrics.DataApi.Infrastructure;
 public interface ForCreatingDuckDbConnections
 {
     /// <summary>Creates and opens a connection to the DuckDB cache database.</summary>
-    DbConnection OpenConnection();
+    Task<DbConnection> OpenConnectionAsync(CancellationToken cancellationToken = default);
 }

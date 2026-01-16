@@ -5,13 +5,13 @@ public interface ForMappingPartNumberToCells
 {
     /// <summary>Replaces all cell mappings for a part number. Atomic operation.</summary>
     /// <returns>True if successful, false on error.</returns>
-    bool SetMappings(string partNo, IEnumerable<int> cellIds);
+    Task<bool> SetMappingsAsync(string partNo, IEnumerable<int> cellIds, CancellationToken cancellationToken = default);
 
     /// <summary>Adds a single cell mapping for a part number. Idempotent.</summary>
     /// <returns>True if successful, false on error.</returns>
-    bool AddMapping(string partNo, int cellId);
+    Task<bool> AddMappingAsync(string partNo, int cellId, CancellationToken cancellationToken = default);
 
     /// <summary>Removes a single cell mapping for a part number. Idempotent.</summary>
     /// <returns>True if successful, false on error.</returns>
-    bool DeleteMapping(string partNo, int cellId);
+    Task<bool> DeleteMappingAsync(string partNo, int cellId, CancellationToken cancellationToken = default);
 }

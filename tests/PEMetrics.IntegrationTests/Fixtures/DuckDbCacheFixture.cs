@@ -18,17 +18,17 @@ public sealed class DuckDbCacheFixture : IDisposable
     public ForCreatingDuckDbConnections ConnectionFactory => _connectionFactory;
 
     /// <summary>Initializes DuckDB with nanodbc and creates tables.</summary>
-    public void Initialize(string sqlServerOdbcConnectionString)
+    public async Task InitializeAsync(string sqlServerOdbcConnectionString, CancellationToken cancellationToken = default)
     {
         OdbcConnectionString = sqlServerOdbcConnectionString;
 
-        using var connection = _connectionFactory.OpenConnection();
+        await using var connection = await _connectionFactory.OpenConnectionAsync(cancellationToken);
 
         // Install and load nanodbc
-        DuckDbSchemaCreator.InstallNanodbc(connection);
+        await DuckDbSchemaCreator.InstallNanodbcAsync(connection, cancellationToken);
 
         // Create cache tables
-        DuckDbSchemaCreator.CreateTables(connection);
+        await DuckDbSchemaCreator.CreateTablesAsync(connection, cancellationToken);
     }
 
     /// <summary>Gets the ODBC connection string for connecting to SQL Server from DuckDB.</summary>

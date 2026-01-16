@@ -1,5 +1,6 @@
 using System.Collections.Immutable;
 using System.Data;
+using System.Data.Common;
 using Microsoft.Data.SqlClient;
 using PEMetrics.DataApi.Infrastructure;
 using PEMetrics.DataApi.Infrastructure.Mapping;
@@ -25,16 +26,16 @@ public sealed class PEMetricsQueryRepository : ForReadingPEMetricsDimensions
         _errorNotifier = errorNotifier ?? throw new ArgumentNullException(nameof(errorNotifier));
     }
 
-    public ImmutableList<Cell> GetCells()
+    public async Task<ImmutableList<Cell>> GetCellsAsync(CancellationToken cancellationToken = default)
     {
         try
         {
-            using var connection = _connectionFactory.OpenConnectionToPEMetrics();
-            using var command = connection.CreateCommand();
+            await using var connection = await _connectionFactory.OpenConnectionToPEMetricsAsync(cancellationToken).ConfigureAwait(false);
+            await using var command = connection.CreateCommand();
             command.CommandText = "SELECT * FROM mgmt.vw_Cell ORDER BY CellName";
 
-            using var reader = command.ExecuteReader();
-            return reader.MapAll(_mapper.MapCell);
+            await using var reader = await command.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
+            return await reader.MapAllAsync(_mapper.MapCell, cancellationToken).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
@@ -43,18 +44,18 @@ public sealed class PEMetricsQueryRepository : ForReadingPEMetricsDimensions
         }
     }
 
-    public Cell? GetCellById(int cellId)
+    public async Task<Cell?> GetCellByIdAsync(int cellId, CancellationToken cancellationToken = default)
     {
         try
         {
-            using var connection = _connectionFactory.OpenConnectionToPEMetrics();
-            using var command = connection.CreateCommand();
+            await using var connection = await _connectionFactory.OpenConnectionToPEMetricsAsync(cancellationToken).ConfigureAwait(false);
+            await using var command = connection.CreateCommand();
             command.CommandText = "mgmt.Cell_GetById";
             command.CommandType = CommandType.StoredProcedure;
-            command.Parameters.Add(new SqlParameter("@CellId", cellId));
+            ((SqlCommand)command).Parameters.Add(new SqlParameter("@CellId", cellId));
 
-            using var reader = command.ExecuteReader();
-            return reader.MapFirstOrDefault(_mapper.MapCell);
+            await using var reader = await command.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
+            return await reader.MapFirstOrDefaultAsync(_mapper.MapCell, cancellationToken).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
@@ -63,16 +64,16 @@ public sealed class PEMetricsQueryRepository : ForReadingPEMetricsDimensions
         }
     }
 
-    public ImmutableList<PCStation> GetPCStations()
+    public async Task<ImmutableList<PCStation>> GetPCStationsAsync(CancellationToken cancellationToken = default)
     {
         try
         {
-            using var connection = _connectionFactory.OpenConnectionToPEMetrics();
-            using var command = connection.CreateCommand();
+            await using var connection = await _connectionFactory.OpenConnectionToPEMetricsAsync(cancellationToken).ConfigureAwait(false);
+            await using var command = connection.CreateCommand();
             command.CommandText = "SELECT * FROM mgmt.vw_PCStation ORDER BY PcName";
 
-            using var reader = command.ExecuteReader();
-            return reader.MapAll(_mapper.MapPCStation);
+            await using var reader = await command.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
+            return await reader.MapAllAsync(_mapper.MapPCStation, cancellationToken).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
@@ -81,18 +82,18 @@ public sealed class PEMetricsQueryRepository : ForReadingPEMetricsDimensions
         }
     }
 
-    public ImmutableList<PCStation> SearchPCStations(string prefix)
+    public async Task<ImmutableList<PCStation>> SearchPCStationsAsync(string prefix, CancellationToken cancellationToken = default)
     {
         try
         {
-            using var connection = _connectionFactory.OpenConnectionToPEMetrics();
-            using var command = connection.CreateCommand();
+            await using var connection = await _connectionFactory.OpenConnectionToPEMetricsAsync(cancellationToken).ConfigureAwait(false);
+            await using var command = connection.CreateCommand();
             command.CommandText = "mgmt.PCStation_Search";
             command.CommandType = CommandType.StoredProcedure;
-            command.Parameters.Add(new SqlParameter("@SearchPrefix", prefix));
+            ((SqlCommand)command).Parameters.Add(new SqlParameter("@SearchPrefix", prefix));
 
-            using var reader = command.ExecuteReader();
-            return reader.MapAll(_mapper.MapPCStation);
+            await using var reader = await command.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
+            return await reader.MapAllAsync(_mapper.MapPCStation, cancellationToken).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
@@ -101,16 +102,16 @@ public sealed class PEMetricsQueryRepository : ForReadingPEMetricsDimensions
         }
     }
 
-    public ImmutableList<CellByPCStation> GetPcToCellMappings()
+    public async Task<ImmutableList<CellByPCStation>> GetPcToCellMappingsAsync(CancellationToken cancellationToken = default)
     {
         try
         {
-            using var connection = _connectionFactory.OpenConnectionToPEMetrics();
-            using var command = connection.CreateCommand();
+            await using var connection = await _connectionFactory.OpenConnectionToPEMetricsAsync(cancellationToken).ConfigureAwait(false);
+            await using var command = connection.CreateCommand();
             command.CommandText = "SELECT * FROM mgmt.vw_CellByPCStation ORDER BY CellName, PcName";
 
-            using var reader = command.ExecuteReader();
-            return reader.MapAll(_mapper.MapCellByPCStation);
+            await using var reader = await command.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
+            return await reader.MapAllAsync(_mapper.MapCellByPCStation, cancellationToken).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
@@ -119,18 +120,18 @@ public sealed class PEMetricsQueryRepository : ForReadingPEMetricsDimensions
         }
     }
 
-    public CellByPCStation? GetPcToCellByMapId(int stationMapId)
+    public async Task<CellByPCStation?> GetPcToCellByMapIdAsync(int stationMapId, CancellationToken cancellationToken = default)
     {
         try
         {
-            using var connection = _connectionFactory.OpenConnectionToPEMetrics();
-            using var command = connection.CreateCommand();
+            await using var connection = await _connectionFactory.OpenConnectionToPEMetricsAsync(cancellationToken).ConfigureAwait(false);
+            await using var command = connection.CreateCommand();
             command.CommandText = "mgmt.CellByPCStation_GetById";
             command.CommandType = CommandType.StoredProcedure;
-            command.Parameters.Add(new SqlParameter("@StationMapId", stationMapId));
+            ((SqlCommand)command).Parameters.Add(new SqlParameter("@StationMapId", stationMapId));
 
-            using var reader = command.ExecuteReader();
-            return reader.MapFirstOrDefault(_mapper.MapCellByPCStation);
+            await using var reader = await command.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
+            return await reader.MapFirstOrDefaultAsync(_mapper.MapCellByPCStation, cancellationToken).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
@@ -139,16 +140,16 @@ public sealed class PEMetricsQueryRepository : ForReadingPEMetricsDimensions
         }
     }
 
-    public ImmutableList<SwTestMap> GetSwTests()
+    public async Task<ImmutableList<SwTestMap>> GetSwTestsAsync(CancellationToken cancellationToken = default)
     {
         try
         {
-            using var connection = _connectionFactory.OpenConnectionToPEMetrics();
-            using var command = connection.CreateCommand();
+            await using var connection = await _connectionFactory.OpenConnectionToPEMetricsAsync(cancellationToken).ConfigureAwait(false);
+            await using var command = connection.CreateCommand();
             command.CommandText = "SELECT * FROM mgmt.vw_SwTestMap ORDER BY ReportKey, TestName";
 
-            using var reader = command.ExecuteReader();
-            return reader.MapAll(_mapper.MapSwTestMap);
+            await using var reader = await command.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
+            return await reader.MapAllAsync(_mapper.MapSwTestMap, cancellationToken).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
@@ -157,18 +158,18 @@ public sealed class PEMetricsQueryRepository : ForReadingPEMetricsDimensions
         }
     }
 
-    public SwTestMap? GetSwTestById(int swTestMapId)
+    public async Task<SwTestMap?> GetSwTestByIdAsync(int swTestMapId, CancellationToken cancellationToken = default)
     {
         try
         {
-            using var connection = _connectionFactory.OpenConnectionToPEMetrics();
-            using var command = connection.CreateCommand();
+            await using var connection = await _connectionFactory.OpenConnectionToPEMetricsAsync(cancellationToken).ConfigureAwait(false);
+            await using var command = connection.CreateCommand();
             command.CommandText = "mgmt.SwTestMap_GetById";
             command.CommandType = CommandType.StoredProcedure;
-            command.Parameters.Add(new SqlParameter("@SwTestMapId", swTestMapId));
+            ((SqlCommand)command).Parameters.Add(new SqlParameter("@SwTestMapId", swTestMapId));
 
-            using var reader = command.ExecuteReader();
-            return reader.MapFirstOrDefault(_mapper.MapSwTestMap);
+            await using var reader = await command.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
+            return await reader.MapFirstOrDefaultAsync(_mapper.MapSwTestMap, cancellationToken).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
@@ -177,16 +178,16 @@ public sealed class PEMetricsQueryRepository : ForReadingPEMetricsDimensions
         }
     }
 
-    public ImmutableList<CellBySwTestView> GetSwTestToCellMappings()
+    public async Task<ImmutableList<CellBySwTestView>> GetSwTestToCellMappingsAsync(CancellationToken cancellationToken = default)
     {
         try
         {
-            using var connection = _connectionFactory.OpenConnectionToPEMetrics();
-            using var command = connection.CreateCommand();
+            await using var connection = await _connectionFactory.OpenConnectionToPEMetricsAsync(cancellationToken).ConfigureAwait(false);
+            await using var command = connection.CreateCommand();
             command.CommandText = "SELECT * FROM mgmt.vw_CellBySwTest ORDER BY ConfiguredTestId, CellName";
 
-            using var reader = command.ExecuteReader();
-            return reader.MapAll(_mapper.MapCellBySwTestView);
+            await using var reader = await command.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
+            return await reader.MapAllAsync(_mapper.MapCellBySwTestView, cancellationToken).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
@@ -195,18 +196,18 @@ public sealed class PEMetricsQueryRepository : ForReadingPEMetricsDimensions
         }
     }
 
-    public ImmutableList<CellBySwTest> GetSwTestToCellByMapId(int swTestMapId)
+    public async Task<ImmutableList<CellBySwTest>> GetSwTestToCellByMapIdAsync(int swTestMapId, CancellationToken cancellationToken = default)
     {
         try
         {
-            using var connection = _connectionFactory.OpenConnectionToPEMetrics();
-            using var command = connection.CreateCommand();
+            await using var connection = await _connectionFactory.OpenConnectionToPEMetricsAsync(cancellationToken).ConfigureAwait(false);
+            await using var command = connection.CreateCommand();
             command.CommandText = "mgmt.CellBySwTest_GetBySwTestMapId";
             command.CommandType = CommandType.StoredProcedure;
-            command.Parameters.Add(new SqlParameter("@SwTestMapId", swTestMapId));
+            ((SqlCommand)command).Parameters.Add(new SqlParameter("@SwTestMapId", swTestMapId));
 
-            using var reader = command.ExecuteReader();
-            return reader.MapAll(_mapper.MapCellBySwTest);
+            await using var reader = await command.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
+            return await reader.MapAllAsync(_mapper.MapCellBySwTest, cancellationToken).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
@@ -215,16 +216,16 @@ public sealed class PEMetricsQueryRepository : ForReadingPEMetricsDimensions
         }
     }
 
-    public ImmutableList<TLA> GetTLACatalog()
+    public async Task<ImmutableList<TLA>> GetTLACatalogAsync(CancellationToken cancellationToken = default)
     {
         try
         {
-            using var connection = _connectionFactory.OpenConnectionToPEMetrics();
-            using var command = connection.CreateCommand();
+            await using var connection = await _connectionFactory.OpenConnectionToPEMetricsAsync(cancellationToken).ConfigureAwait(false);
+            await using var command = connection.CreateCommand();
             command.CommandText = "SELECT * FROM mgmt.vw_TLA ORDER BY PartNo";
 
-            using var reader = command.ExecuteReader();
-            return reader.MapAll(_mapper.MapTLA);
+            await using var reader = await command.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
+            return await reader.MapAllAsync(_mapper.MapTLA, cancellationToken).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
@@ -233,18 +234,18 @@ public sealed class PEMetricsQueryRepository : ForReadingPEMetricsDimensions
         }
     }
 
-    public TLA? GetTLAByPartNo(string partNo)
+    public async Task<TLA?> GetTLAByPartNoAsync(string partNo, CancellationToken cancellationToken = default)
     {
         try
         {
-            using var connection = _connectionFactory.OpenConnectionToPEMetrics();
-            using var command = connection.CreateCommand();
+            await using var connection = await _connectionFactory.OpenConnectionToPEMetricsAsync(cancellationToken).ConfigureAwait(false);
+            await using var command = connection.CreateCommand();
             command.CommandText = "mgmt.TLA_GetByPartNo";
             command.CommandType = CommandType.StoredProcedure;
-            command.Parameters.Add(new SqlParameter("@PartNo", partNo));
+            ((SqlCommand)command).Parameters.Add(new SqlParameter("@PartNo", partNo));
 
-            using var reader = command.ExecuteReader();
-            return reader.MapFirstOrDefault(_mapper.MapTLA);
+            await using var reader = await command.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
+            return await reader.MapFirstOrDefaultAsync(_mapper.MapTLA, cancellationToken).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
@@ -253,16 +254,16 @@ public sealed class PEMetricsQueryRepository : ForReadingPEMetricsDimensions
         }
     }
 
-    public ImmutableList<CellByPartNoView> GetTLAToCellMappings()
+    public async Task<ImmutableList<CellByPartNoView>> GetTLAToCellMappingsAsync(CancellationToken cancellationToken = default)
     {
         try
         {
-            using var connection = _connectionFactory.OpenConnectionToPEMetrics();
-            using var command = connection.CreateCommand();
+            await using var connection = await _connectionFactory.OpenConnectionToPEMetricsAsync(cancellationToken).ConfigureAwait(false);
+            await using var command = connection.CreateCommand();
             command.CommandText = "SELECT * FROM mgmt.vw_CellByPartNo ORDER BY PartNo, CellName";
 
-            using var reader = command.ExecuteReader();
-            return reader.MapAll(_mapper.MapCellByPartNoView);
+            await using var reader = await command.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
+            return await reader.MapAllAsync(_mapper.MapCellByPartNoView, cancellationToken).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
@@ -271,18 +272,18 @@ public sealed class PEMetricsQueryRepository : ForReadingPEMetricsDimensions
         }
     }
 
-    public ImmutableList<CellByPartNo> GetTLAToCellByPartNo(string partNo)
+    public async Task<ImmutableList<CellByPartNo>> GetTLAToCellByPartNoAsync(string partNo, CancellationToken cancellationToken = default)
     {
         try
         {
-            using var connection = _connectionFactory.OpenConnectionToPEMetrics();
-            using var command = connection.CreateCommand();
+            await using var connection = await _connectionFactory.OpenConnectionToPEMetricsAsync(cancellationToken).ConfigureAwait(false);
+            await using var command = connection.CreateCommand();
             command.CommandText = "mgmt.CellByPartNo_GetByPartNo";
             command.CommandType = CommandType.StoredProcedure;
-            command.Parameters.Add(new SqlParameter("@PartNo", partNo));
+            ((SqlCommand)command).Parameters.Add(new SqlParameter("@PartNo", partNo));
 
-            using var reader = command.ExecuteReader();
-            return reader.MapAll(_mapper.MapCellByPartNo);
+            await using var reader = await command.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
+            return await reader.MapAllAsync(_mapper.MapCellByPartNo, cancellationToken).ConfigureAwait(false);
         }
         catch (Exception ex)
         {

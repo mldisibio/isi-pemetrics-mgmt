@@ -30,18 +30,18 @@ public sealed class DuckDbInitializer : IDisposable
 
     /// <summary>Initializes DuckDB: installs nanodbc extension and executes init script.</summary>
     /// <returns>True if initialization succeeded, false otherwise.</returns>
-    public bool Initialize()
+    public async Task<bool> InitializeAsync(CancellationToken cancellationToken = default)
     {
         try
         {
-            using var connection = _connectionFactory.OpenConnection() as DuckDBConnection
+            await using var connection = await _connectionFactory.OpenConnectionAsync(cancellationToken).ConfigureAwait(false) as DuckDBConnection
                 ?? throw new InvalidOperationException("Connection factory did not return a DuckDBConnection.");
 
             // Install and load nanodbc community extension
-            InstallNanodbcExtension(connection);
+            await InstallNanodbcExtensionAsync(connection, cancellationToken).ConfigureAwait(false);
 
             // Execute initialization SQL if specified
-            ExecuteInitScript(connection);
+            await ExecuteInitScriptAsync(connection, cancellationToken).ConfigureAwait(false);
 
             return true;
         }
@@ -52,20 +52,20 @@ public sealed class DuckDbInitializer : IDisposable
         }
     }
 
-    void InstallNanodbcExtension(DuckDBConnection connection)
+    async Task InstallNanodbcExtensionAsync(DuckDBConnection connection, CancellationToken cancellationToken)
     {
-        using var command = connection.CreateCommand();
+        await using var command = connection.CreateCommand();
 
         // Install nanodbc from community extensions
         command.CommandText = "INSTALL nanodbc FROM community;";
-        command.ExecuteNonQuery();
+        await command.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
 
         // Load the extension
         command.CommandText = "LOAD nanodbc;";
-        command.ExecuteNonQuery();
+        await command.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
     }
 
-    void ExecuteInitScript(DuckDBConnection connection)
+    async Task ExecuteInitScriptAsync(DuckDBConnection connection, CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(_configuration.InitSqlPath))
             return;
@@ -74,13 +74,13 @@ public sealed class DuckDbInitializer : IDisposable
         if (!File.Exists(initSqlPath))
             return;
 
-        var initSql = File.ReadAllText(initSqlPath);
+        var initSql = await File.ReadAllTextAsync(initSqlPath, cancellationToken).ConfigureAwait(false);
         if (string.IsNullOrWhiteSpace(initSql))
             return;
 
-        using var command = connection.CreateCommand();
+        await using var command = connection.CreateCommand();
         command.CommandText = initSql;
-        command.ExecuteNonQuery();
+        await command.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
     }
 
     public void Dispose()

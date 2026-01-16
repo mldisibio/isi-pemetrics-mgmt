@@ -42,7 +42,7 @@ public sealed class SwTestMapRepositoryTests : IDisposable
     }
 
     [Fact]
-    public void Insert_ValidSwTest_ReturnsNewSwTestMapId()
+    public async Task Insert_ValidSwTest_ReturnsNewSwTestMapId()
     {
         var test = new SwTestMap
         {
@@ -53,14 +53,14 @@ public sealed class SwTestMapRepositoryTests : IDisposable
             ReportKey = "TEST_KEY"
         };
 
-        var newId = _repository.Insert(test);
+        var newId = await _repository.InsertAsync(test);
         if (newId > 0) _insertedTestIds.Add(newId);
 
         Assert.True(newId > 0);
     }
 
     [Fact]
-    public void Insert_ValidSwTest_FiresNotification()
+    public async Task Insert_ValidSwTest_FiresNotification()
     {
         var test = new SwTestMap
         {
@@ -71,14 +71,14 @@ public sealed class SwTestMapRepositoryTests : IDisposable
             ReportKey = "NOTIFY_KEY"
         };
 
-        var newId = _repository.Insert(test);
+        var newId = await _repository.InsertAsync(test);
         if (newId > 0) _insertedTestIds.Add(newId);
 
         Assert.True(_notifier.WasCalledWith(nameof(_notifier.NotifySwTestChanged), newId));
     }
 
     [Fact]
-    public void Insert_DuplicateConfiguredTestIdAndName_ReturnsNegativeOne()
+    public async Task Insert_DuplicateConfiguredTestIdAndName_ReturnsNegativeOne()
     {
         // T001 + "Sensor Calibration Test" already exists in seed data
         var test = new SwTestMap
@@ -90,13 +90,13 @@ public sealed class SwTestMapRepositoryTests : IDisposable
             ReportKey = "DUP_KEY"
         };
 
-        var result = _repository.Insert(test);
+        var result = await _repository.InsertAsync(test);
 
         Assert.Equal(-1, result);
     }
 
     [Fact]
-    public void Update_ExistingSwTest_ReturnsTrue()
+    public async Task Update_ExistingSwTest_ReturnsTrue()
     {
         var test = new SwTestMap
         {
@@ -108,7 +108,7 @@ public sealed class SwTestMapRepositoryTests : IDisposable
             Notes = "Updated notes"
         };
 
-        var result = _repository.Update(test);
+        var result = await _repository.UpdateAsync(test);
 
         Assert.True(result);
 
@@ -125,11 +125,11 @@ public sealed class SwTestMapRepositoryTests : IDisposable
             LastRun = DateOnly.Parse("2024-06-15"),
             Notes = "Primary calibration"
         };
-        _repository.Update(restore);
+        await _repository.UpdateAsync(restore);
     }
 
     [Fact]
-    public void Update_ExistingSwTest_FiresNotification()
+    public async Task Update_ExistingSwTest_FiresNotification()
     {
         var test = new SwTestMap
         {
@@ -140,13 +140,13 @@ public sealed class SwTestMapRepositoryTests : IDisposable
             ReportKey = "FINAL_VAL"
         };
 
-        _repository.Update(test);
+        await _repository.UpdateAsync(test);
 
         Assert.True(_notifier.WasCalledWith(nameof(_notifier.NotifySwTestChanged), 1002));
     }
 
     [Fact]
-    public void Update_NonExistingSwTest_ReturnsFalse()
+    public async Task Update_NonExistingSwTest_ReturnsFalse()
     {
         var test = new SwTestMap
         {
@@ -156,7 +156,7 @@ public sealed class SwTestMapRepositoryTests : IDisposable
             TestName = "NotFound Test"
         };
 
-        var result = _repository.Update(test);
+        var result = await _repository.UpdateAsync(test);
 
         Assert.False(result);
     }

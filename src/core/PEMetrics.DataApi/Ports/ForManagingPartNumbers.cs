@@ -7,13 +7,13 @@ public interface ForManagingPartNumbers
 {
     /// <summary>Inserts a new TLA.</summary>
     /// <returns>True if successful, false on error.</returns>
-    bool Insert(TLA tla);
+    Task<bool> InsertAsync(TLA tla, CancellationToken cancellationToken = default);
 
     /// <summary>Updates an existing TLA.</summary>
     /// <returns>True if successful, false on error.</returns>
-    bool Update(TLA tla);
+    Task<bool> UpdateAsync(TLA tla, CancellationToken cancellationToken = default);
 
     /// <summary>Deletes a TLA if not in use. Idempotent if not found.</summary>
     /// <returns>True if successful, false on error (including if TLA is in use).</returns>
-    bool Delete(string partNo);
+    Task<bool> DeleteAsync(string partNo, CancellationToken cancellationToken = default);
 }

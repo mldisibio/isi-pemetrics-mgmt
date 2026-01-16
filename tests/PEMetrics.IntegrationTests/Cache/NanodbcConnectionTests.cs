@@ -21,28 +21,28 @@ public sealed class NanodbcConnectionTests : IDisposable
     public void Dispose() => _duckDbFactory.Dispose();
 
     [Fact]
-    public void NanodbcExtension_InstallsAndLoads()
+    public async Task NanodbcExtension_InstallsAndLoads()
     {
-        using var connection = _duckDbFactory.OpenConnection();
+        await using var connection = await _duckDbFactory.OpenConnectionAsync();
 
-        DuckDbSchemaCreator.InstallNanodbc(connection);
+        await DuckDbSchemaCreator.InstallNanodbcAsync(connection);
 
         // Verify extension is loaded by checking duckdb_extensions()
-        using var command = connection.CreateCommand();
+        await using var command = connection.CreateCommand();
         command.CommandText = "SELECT extension_name FROM duckdb_extensions() WHERE loaded = true AND extension_name = 'nanodbc'";
-        using var reader = command.ExecuteReader();
+        await using var reader = await command.ExecuteReaderAsync();
 
-        Assert.True(reader.Read());
+        Assert.True(await reader.ReadAsync().ConfigureAwait(false));
         Assert.Equal("nanodbc", reader.GetString(0));
     }
 
     [Fact]
-    public void OdbcScan_CanQuerySqlServerCell()
+    public async Task OdbcScan_CanQuerySqlServerCell()
     {
-        using var connection = _duckDbFactory.OpenConnection();
-        DuckDbSchemaCreator.InstallNanodbc(connection);
+        await using var connection = await _duckDbFactory.OpenConnectionAsync();
+        await DuckDbSchemaCreator.InstallNanodbcAsync(connection);
 
-        using var command = connection.CreateCommand();
+        await using var command = connection.CreateCommand();
         command.CommandText = $@"
             SELECT COUNT(*) FROM odbc_scan(
                 connection='{EscapeSql(_odbcConnectionString)}',
@@ -51,18 +51,18 @@ public sealed class NanodbcConnectionTests : IDisposable
                 read_only=true
             )";
 
-        var count = Convert.ToInt64(command.ExecuteScalar());
+        var count = Convert.ToInt64(await command.ExecuteScalarAsync().ConfigureAwait(false));
 
         Assert.True(count > 0, "Expected at least one cell from SQL Server");
     }
 
     [Fact]
-    public void OdbcScan_CanQuerySqlServerPCStation()
+    public async Task OdbcScan_CanQuerySqlServerPCStation()
     {
-        using var connection = _duckDbFactory.OpenConnection();
-        DuckDbSchemaCreator.InstallNanodbc(connection);
+        await using var connection = await _duckDbFactory.OpenConnectionAsync();
+        await DuckDbSchemaCreator.InstallNanodbcAsync(connection);
 
-        using var command = connection.CreateCommand();
+        await using var command = connection.CreateCommand();
         command.CommandText = $@"
             SELECT COUNT(*) FROM odbc_scan(
                 connection='{EscapeSql(_odbcConnectionString)}',
@@ -71,18 +71,18 @@ public sealed class NanodbcConnectionTests : IDisposable
                 read_only=true
             )";
 
-        var count = Convert.ToInt64(command.ExecuteScalar());
+        var count = Convert.ToInt64(await command.ExecuteScalarAsync().ConfigureAwait(false));
 
         Assert.True(count > 0, "Expected at least one PC station from SQL Server");
     }
 
     [Fact]
-    public void OdbcScan_CanQuerySqlServerSwTestMap()
+    public async Task OdbcScan_CanQuerySqlServerSwTestMap()
     {
-        using var connection = _duckDbFactory.OpenConnection();
-        DuckDbSchemaCreator.InstallNanodbc(connection);
+        await using var connection = await _duckDbFactory.OpenConnectionAsync();
+        await DuckDbSchemaCreator.InstallNanodbcAsync(connection);
 
-        using var command = connection.CreateCommand();
+        await using var command = connection.CreateCommand();
         command.CommandText = $@"
             SELECT COUNT(*) FROM odbc_scan(
                 connection='{EscapeSql(_odbcConnectionString)}',
@@ -91,18 +91,18 @@ public sealed class NanodbcConnectionTests : IDisposable
                 read_only=true
             )";
 
-        var count = Convert.ToInt64(command.ExecuteScalar());
+        var count = Convert.ToInt64(await command.ExecuteScalarAsync().ConfigureAwait(false));
 
         Assert.True(count > 0, "Expected at least one software test from SQL Server");
     }
 
     [Fact]
-    public void OdbcScan_CanQuerySqlServerTLA()
+    public async Task OdbcScan_CanQuerySqlServerTLA()
     {
-        using var connection = _duckDbFactory.OpenConnection();
-        DuckDbSchemaCreator.InstallNanodbc(connection);
+        await using var connection = await _duckDbFactory.OpenConnectionAsync();
+        await DuckDbSchemaCreator.InstallNanodbcAsync(connection);
 
-        using var command = connection.CreateCommand();
+        await using var command = connection.CreateCommand();
         command.CommandText = $@"
             SELECT COUNT(*) FROM odbc_scan(
                 connection='{EscapeSql(_odbcConnectionString)}',
@@ -111,19 +111,19 @@ public sealed class NanodbcConnectionTests : IDisposable
                 read_only=true
             )";
 
-        var count = Convert.ToInt64(command.ExecuteScalar());
+        var count = Convert.ToInt64(await command.ExecuteScalarAsync().ConfigureAwait(false));
 
         Assert.True(count > 0, "Expected at least one TLA from SQL Server");
     }
 
     [Fact]
-    public void OdbcScan_CanInsertIntoLocalTable()
+    public async Task OdbcScan_CanInsertIntoLocalTable()
     {
-        using var connection = _duckDbFactory.OpenConnection();
-        DuckDbSchemaCreator.InstallNanodbc(connection);
-        DuckDbSchemaCreator.CreateTables(connection);
+        await using var connection = await _duckDbFactory.OpenConnectionAsync();
+        await DuckDbSchemaCreator.InstallNanodbcAsync(connection);
+        await DuckDbSchemaCreator.CreateTablesAsync(connection);
 
-        using var command = connection.CreateCommand();
+        await using var command = connection.CreateCommand();
         command.CommandText = $@"
             INSERT INTO Cell
             SELECT * FROM odbc_scan(
@@ -132,11 +132,11 @@ public sealed class NanodbcConnectionTests : IDisposable
                 table_name='vw_Cell',
                 read_only=true
             )";
-        command.ExecuteNonQuery();
+        await command.ExecuteNonQueryAsync();
 
         // Verify data was inserted
         command.CommandText = "SELECT COUNT(*) FROM Cell";
-        var count = Convert.ToInt64(command.ExecuteScalar());
+        var count = Convert.ToInt64(await command.ExecuteScalarAsync().ConfigureAwait(false));
 
         Assert.True(count > 0, "Expected cells to be populated in DuckDB table");
     }

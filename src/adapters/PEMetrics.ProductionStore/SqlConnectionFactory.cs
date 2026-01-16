@@ -15,13 +15,13 @@ public sealed class SqlConnectionFactory : ForCreatingSqlServerConnections
         _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
     }
 
-    public DbConnection OpenConnectionToPEMetrics()
+    public async Task<DbConnection> OpenConnectionToPEMetricsAsync(CancellationToken cancellationToken = default)
     {
         var connectionString = _configuration.GetConnectionString("PEMetricsConnection")
             ?? throw new InvalidOperationException("Connection string 'PEMetricsConnection' not found in configuration.");
 
         var connection = new SqlConnection(connectionString);
-        connection.Open();
+        await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
         return connection;
     }
 }

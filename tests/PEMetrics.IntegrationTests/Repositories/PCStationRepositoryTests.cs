@@ -42,42 +42,42 @@ public sealed class PCStationRepositoryTests : IDisposable
     }
 
     [Fact]
-    public void Insert_NewStation_ReturnsTrue()
+    public async Task Insert_NewStation_ReturnsTrue()
     {
         var pcName = $"PC-TEST-{Guid.NewGuid():N}";
         _insertedStations.Add(pcName);
 
-        var result = _repository.Insert(pcName);
+        var result = await _repository.InsertAsync(pcName);
 
         Assert.True(result);
     }
 
     [Fact]
-    public void Insert_NewStation_FiresNotification()
+    public async Task Insert_NewStation_FiresNotification()
     {
         var pcName = $"PC-TEST-{Guid.NewGuid():N}";
         _insertedStations.Add(pcName);
 
-        _repository.Insert(pcName);
+        await _repository.InsertAsync(pcName);
 
         Assert.True(_notifier.WasCalled(nameof(_notifier.NotifyPCStationChanged)));
         Assert.Equal(1, _notifier.CallCount(nameof(_notifier.NotifyPCStationChanged)));
     }
 
     [Fact]
-    public void Insert_ExistingStation_ReturnsTrue()
+    public async Task Insert_ExistingStation_ReturnsTrue()
     {
         // PC-ALPHA-01 already exists in seed data (idempotent operation)
-        var result = _repository.Insert("PC-ALPHA-01");
+        var result = await _repository.InsertAsync("PC-ALPHA-01");
 
         Assert.True(result);
     }
 
     [Fact]
-    public void Insert_ExistingStation_StillFiresNotification()
+    public async Task Insert_ExistingStation_StillFiresNotification()
     {
         // Idempotent insert still fires notification
-        _repository.Insert("PC-ALPHA-01");
+        await _repository.InsertAsync("PC-ALPHA-01");
 
         Assert.True(_notifier.WasCalled(nameof(_notifier.NotifyPCStationChanged)));
     }

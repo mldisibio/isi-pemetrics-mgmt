@@ -43,7 +43,7 @@ public sealed class CellRepositoryTests : IDisposable
     }
 
     [Fact]
-    public void Insert_ValidCell_ReturnsNewCellId()
+    public async Task Insert_ValidCell_ReturnsNewCellId()
     {
         var cell = new Cell
         {
@@ -53,14 +53,14 @@ public sealed class CellRepositoryTests : IDisposable
             ActiveFrom = DateOnly.FromDateTime(DateTime.Today)
         };
 
-        var newId = _repository.Insert(cell);
+        var newId = await _repository.InsertAsync(cell);
         if (newId > 0) _insertedCellIds.Add(newId);
 
         Assert.True(newId > 0, "Insert should return a positive CellId");
     }
 
     [Fact]
-    public void Insert_ValidCell_FiresNotification()
+    public async Task Insert_ValidCell_FiresNotification()
     {
         var cell = new Cell
         {
@@ -70,7 +70,7 @@ public sealed class CellRepositoryTests : IDisposable
             ActiveFrom = DateOnly.FromDateTime(DateTime.Today)
         };
 
-        var newId = _repository.Insert(cell);
+        var newId = await _repository.InsertAsync(cell);
         if (newId > 0) _insertedCellIds.Add(newId);
 
         Assert.True(_notifier.WasCalledWith(nameof(_notifier.NotifyCellChanged), newId));
@@ -78,7 +78,7 @@ public sealed class CellRepositoryTests : IDisposable
     }
 
     [Fact]
-    public void Insert_DuplicateCellName_ReturnsNegativeOne()
+    public async Task Insert_DuplicateCellName_ReturnsNegativeOne()
     {
         // TestCellA already exists in seed data
         var cell = new Cell
@@ -89,13 +89,13 @@ public sealed class CellRepositoryTests : IDisposable
             ActiveFrom = DateOnly.FromDateTime(DateTime.Today)
         };
 
-        var result = _repository.Insert(cell);
+        var result = await _repository.InsertAsync(cell);
 
         Assert.Equal(-1, result);
     }
 
     [Fact]
-    public void Insert_DuplicateCellName_DoesNotFireNotification()
+    public async Task Insert_DuplicateCellName_DoesNotFireNotification()
     {
         var cell = new Cell
         {
@@ -105,14 +105,14 @@ public sealed class CellRepositoryTests : IDisposable
             ActiveFrom = DateOnly.FromDateTime(DateTime.Today)
         };
 
-        _repository.Insert(cell);
+        await _repository.InsertAsync(cell);
 
         Assert.Empty(_notifier.Calls);
         Assert.True(_errorNotifier.WasCalled(nameof(_errorNotifier.UnexpectedError)));
     }
 
     [Fact]
-    public void Update_ExistingCell_ReturnsTrue()
+    public async Task Update_ExistingCell_ReturnsTrue()
     {
         var cell = new Cell
         {
@@ -123,7 +123,7 @@ public sealed class CellRepositoryTests : IDisposable
             Description = "Updated description"
         };
 
-        var result = _repository.Update(cell);
+        var result = await _repository.UpdateAsync(cell);
 
         Assert.True(result);
 
@@ -137,11 +137,11 @@ public sealed class CellRepositoryTests : IDisposable
             Description = "Active test cell A",
             AlternativeNames = "CellA,Alpha"
         };
-        _repository.Update(restore);
+        await _repository.UpdateAsync(restore);
     }
 
     [Fact]
-    public void Update_ExistingCell_FiresNotification()
+    public async Task Update_ExistingCell_FiresNotification()
     {
         var cell = new Cell
         {
@@ -152,13 +152,13 @@ public sealed class CellRepositoryTests : IDisposable
             Description = "Notification test"
         };
 
-        _repository.Update(cell);
+        await _repository.UpdateAsync(cell);
 
         Assert.True(_notifier.WasCalledWith(nameof(_notifier.NotifyCellChanged), 1001));
     }
 
     [Fact]
-    public void Update_NonExistingCell_ReturnsFalse()
+    public async Task Update_NonExistingCell_ReturnsFalse()
     {
         var cell = new Cell
         {
@@ -168,13 +168,13 @@ public sealed class CellRepositoryTests : IDisposable
             ActiveFrom = DateOnly.FromDateTime(DateTime.Today)
         };
 
-        var result = _repository.Update(cell);
+        var result = await _repository.UpdateAsync(cell);
 
         Assert.False(result);
     }
 
     [Fact]
-    public void Update_NonExistingCell_DoesNotFireNotification()
+    public async Task Update_NonExistingCell_DoesNotFireNotification()
     {
         var cell = new Cell
         {
@@ -184,7 +184,7 @@ public sealed class CellRepositoryTests : IDisposable
             ActiveFrom = DateOnly.FromDateTime(DateTime.Today)
         };
 
-        _repository.Update(cell);
+        await _repository.UpdateAsync(cell);
 
         Assert.Empty(_notifier.Calls);
         Assert.True(_errorNotifier.WasCalled(nameof(_errorNotifier.UnexpectedError)));

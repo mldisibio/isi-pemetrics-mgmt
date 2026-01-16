@@ -4,7 +4,16 @@
       "Bash(dotnet new:*)",
       "Bash(dotnet sln add:*)",
       "Bash(dotnet build:*)",
-      "Bash(tree:*)"
+      "Bash(tree:*)",
+      "Bash(dotnet add:*)",
+      "Bash(dir:*)",
+      "Bash(dotnet restore:*)",
+      "Bash(dotnet test:*)",
+      "Bash(docker info:*)",
+      "Bash(git add:*)",
+      "Bash(Select-Object -Last 20)",
+      "Bash(findstr:*)",
+      "Bash(powershell -Command \"$input | Select-Object -Last 15\")"
     ]
   }
 }

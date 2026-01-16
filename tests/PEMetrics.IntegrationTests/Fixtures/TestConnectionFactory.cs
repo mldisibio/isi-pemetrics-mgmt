@@ -14,10 +14,10 @@ public sealed class TestConnectionFactory : ForCreatingSqlServerConnections
         _connectionString = connectionString;
     }
 
-    public DbConnection OpenConnectionToPEMetrics()
+    public async Task<DbConnection> OpenConnectionToPEMetricsAsync(CancellationToken cancellationToken = default)
     {
         var connection = new SqlConnection(_connectionString);
-        connection.Open();
+        await connection.OpenAsync(cancellationToken);
         return connection;
     }
 }

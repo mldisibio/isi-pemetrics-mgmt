@@ -7,10 +7,10 @@ namespace PEMetrics.DataApi.Infrastructure;
 public static class DataReaderExtensions
 {
     /// <summary>Maps all rows from the reader using the provided mapping function.</summary>
-    public static ImmutableList<T> MapAll<T>(this DbDataReader reader, Func<DbDataReader, T> mapper)
+    public static async Task<ImmutableList<T>> MapAllAsync<T>(this DbDataReader reader, Func<DbDataReader, T> mapper, CancellationToken cancellationToken = default)
     {
         var builder = ImmutableList.CreateBuilder<T>();
-        while (reader.Read())
+        while (await reader.ReadAsync(cancellationToken).ConfigureAwait(false))
         {
             builder.Add(mapper(reader));
         }
@@ -18,9 +18,9 @@ public static class DataReaderExtensions
     }
 
     /// <summary>Maps a single row if present, otherwise returns default.</summary>
-    public static T? MapFirstOrDefault<T>(this DbDataReader reader, Func<DbDataReader, T> mapper) where T : class
+    public static async Task<T?> MapFirstOrDefaultAsync<T>(this DbDataReader reader, Func<DbDataReader, T> mapper, CancellationToken cancellationToken = default) where T : class
     {
-        return reader.Read() ? mapper(reader) : null;
+        return await reader.ReadAsync(cancellationToken).ConfigureAwait(false) ? mapper(reader) : null;
     }
 
     /// <summary>Gets a nullable string value from the reader.</summary>

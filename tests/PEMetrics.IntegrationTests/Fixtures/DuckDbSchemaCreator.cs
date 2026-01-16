@@ -6,28 +6,28 @@ namespace PEMetrics.IntegrationTests.Fixtures;
 public static class DuckDbSchemaCreator
 {
     /// <summary>Creates all cache tables in DuckDB using the production duckdb_init.sql script.</summary>
-    public static void CreateTables(DbConnection connection)
+    public static async Task CreateTablesAsync(DbConnection connection, CancellationToken cancellationToken = default)
     {
         var scriptPath = Path.Combine(AppContext.BaseDirectory, "DuckDbScripts", "duckdb_init.sql");
         if (!File.Exists(scriptPath))
             throw new FileNotFoundException($"DuckDB init script not found at: {scriptPath}");
 
-        var sql = File.ReadAllText(scriptPath);
+        var sql = await File.ReadAllTextAsync(scriptPath, cancellationToken);
 
-        using var command = connection.CreateCommand();
+        await using var command = connection.CreateCommand();
         command.CommandText = sql;
-        command.ExecuteNonQuery();
+        await command.ExecuteNonQueryAsync(cancellationToken);
     }
 
     /// <summary>Installs and loads the nanodbc extension.</summary>
-    public static void InstallNanodbc(DbConnection connection)
+    public static async Task InstallNanodbcAsync(DbConnection connection, CancellationToken cancellationToken = default)
     {
-        using var command = connection.CreateCommand();
+        await using var command = connection.CreateCommand();
 
         command.CommandText = "INSTALL nanodbc FROM community;";
-        command.ExecuteNonQuery();
+        await command.ExecuteNonQueryAsync(cancellationToken);
 
         command.CommandText = "LOAD nanodbc;";
-        command.ExecuteNonQuery();
+        await command.ExecuteNonQueryAsync(cancellationToken);
     }
 }

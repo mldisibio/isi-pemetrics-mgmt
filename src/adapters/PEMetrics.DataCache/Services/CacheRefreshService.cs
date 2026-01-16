@@ -75,10 +75,10 @@ public sealed class CacheRefreshService : IDisposable
 
         var tasks = tables.Select(async table =>
         {
-            await semaphore.WaitAsync(cancellationToken);
+            await semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
-                await PopulateTableAsync(table, cancellationToken);
+                await PopulateTableAsync(table, cancellationToken).ConfigureAwait(false);
             }
             finally
             {
@@ -86,16 +86,16 @@ public sealed class CacheRefreshService : IDisposable
             }
         });
 
-        await Task.WhenAll(tasks);
+        await Task.WhenAll(tasks).ConfigureAwait(false);
     }
 
     async Task ProcessRefreshRequestsAsync(CancellationToken cancellationToken)
     {
-        await foreach (var request in _channel.Reader.ReadAllAsync(cancellationToken))
+        await foreach (var request in _channel.Reader.ReadAllAsync(cancellationToken).ConfigureAwait(false))
         {
             foreach (var table in request.Tables)
             {
-                await PopulateTableAsync(table, cancellationToken);
+                await PopulateTableAsync(table, cancellationToken).ConfigureAwait(false);
             }
         }
     }
@@ -105,19 +105,19 @@ public sealed class CacheRefreshService : IDisposable
         if (!TableViewMappings.TryGetValue(tableName, out var viewName))
             return;
 
-        using var semaphoreLock = await _populationTracker.AcquireAsync(tableName, cancellationToken);
+        using var semaphoreLock = await _populationTracker.AcquireAsync(tableName, cancellationToken).ConfigureAwait(false);
 
         try
         {
             // Parse schema.view format into separate components
             var (schemaName, objectName) = ParseSchemaAndObject(viewName);
 
-            using var connection = _connectionFactory.OpenConnection();
-            using var command = connection.CreateCommand();
+            await using var connection = await _connectionFactory.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
+            await using var command = connection.CreateCommand();
 
             // Delete existing data
             command.CommandText = $"DELETE FROM {tableName}";
-            command.ExecuteNonQuery();
+            await command.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
 
             // Use nanodbc odbc_scan to populate from SQL Server view
             command.CommandText = $@"
@@ -128,7 +128,7 @@ SELECT * FROM odbc_scan(
     table_name='{objectName}',
     read_only=true
 )";
-            await Task.Run(() => command.ExecuteNonQuery(), cancellationToken);
+            await command.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
         }
         catch (Exception ex)
         {

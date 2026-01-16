@@ -7,9 +7,9 @@ public interface ForMappingPCStationToCell
 {
     /// <summary>Inserts a new PC-to-Cell mapping.</summary>
     /// <returns>The new StationMapId, or -1 on error.</returns>
-    int Insert(CellByPCStation mapping);
+    Task<int> InsertAsync(CellByPCStation mapping, CancellationToken cancellationToken = default);
 
     /// <summary>Updates an existing PC-to-Cell mapping.</summary>
     /// <returns>True if successful, false on error.</returns>
-    bool Update(CellByPCStation mapping);
+    Task<bool> UpdateAsync(CellByPCStation mapping, CancellationToken cancellationToken = default);
 }

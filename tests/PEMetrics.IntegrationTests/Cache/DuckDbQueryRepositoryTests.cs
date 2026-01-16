@@ -49,10 +49,10 @@ public sealed class DuckDbQueryRepositoryTests : IAsyncLifetime
     public async Task InitializeAsync()
     {
         // Initialize DuckDB with nanodbc and tables
-        _duckDbFactory.InstallNanodbc();
-        using (var conn = _duckDbFactory.OpenConnection())
+        await _duckDbFactory.InstallNanodbcAsync();
+        await using (var conn = await _duckDbFactory.OpenConnectionAsync().ConfigureAwait(false))
         {
-            DuckDbSchemaCreator.CreateTables(conn);
+            await DuckDbSchemaCreator.CreateTablesAsync(conn);
         }
 
         // Populate all tables from SQL Server
@@ -77,18 +77,18 @@ public sealed class DuckDbQueryRepositoryTests : IAsyncLifetime
 
     // Cell tests
     [Fact]
-    public void GetCells_ReturnsMultipleRecords()
+    public async Task GetCells_ReturnsMultipleRecords()
     {
-        var cells = _repository.GetCells();
+        var cells = await _repository.GetCellsAsync();
 
         Assert.NotEmpty(cells);
         Assert.True(cells.Count >= 3, "Expected at least 3 cells from seed data");
     }
 
     [Fact]
-    public void GetCells_ReturnsCellsWithExpectedProperties()
+    public async Task GetCells_ReturnsCellsWithExpectedProperties()
     {
-        var cells = _repository.GetCells();
+        var cells = await _repository.GetCellsAsync();
 
         var firstCell = cells.First();
         Assert.True(firstCell.CellId > 0);
@@ -97,12 +97,12 @@ public sealed class DuckDbQueryRepositoryTests : IAsyncLifetime
     }
 
     [Fact]
-    public void GetCellById_ExistingCell_ReturnsCell()
+    public async Task GetCellById_ExistingCell_ReturnsCell()
     {
-        var cells = _repository.GetCells();
+        var cells = await _repository.GetCellsAsync();
         var expectedCell = cells.First();
 
-        var cell = _repository.GetCellById(expectedCell.CellId);
+        var cell = await _repository.GetCellByIdAsync(expectedCell.CellId);
 
         Assert.NotNull(cell);
         Assert.Equal(expectedCell.CellId, cell.CellId);
@@ -110,119 +110,119 @@ public sealed class DuckDbQueryRepositoryTests : IAsyncLifetime
     }
 
     [Fact]
-    public void GetCellById_NonExistingCell_ReturnsNull()
+    public async Task GetCellById_NonExistingCell_ReturnsNull()
     {
-        var cell = _repository.GetCellById(99999);
+        var cell = await _repository.GetCellByIdAsync(99999);
 
         Assert.Null(cell);
     }
 
     // PCStation tests
     [Fact]
-    public void GetPCStations_ReturnsMultipleRecords()
+    public async Task GetPCStations_ReturnsMultipleRecords()
     {
-        var stations = _repository.GetPCStations();
+        var stations = await _repository.GetPCStationsAsync();
 
         Assert.NotEmpty(stations);
         Assert.True(stations.Count >= 4, "Expected at least 4 PC stations from seed data");
     }
 
     [Fact]
-    public void SearchPCStations_MatchingPrefix_ReturnsResults()
+    public async Task SearchPCStations_MatchingPrefix_ReturnsResults()
     {
-        var allStations = _repository.GetPCStations();
+        var allStations = await _repository.GetPCStationsAsync();
         var firstStation = allStations.First();
         var prefix = firstStation.PcName[..3];
 
-        var results = _repository.SearchPCStations(prefix);
+        var results = await _repository.SearchPCStationsAsync(prefix);
 
         Assert.NotEmpty(results);
         Assert.All(results, s => Assert.StartsWith(prefix, s.PcName));
     }
 
     [Fact]
-    public void SearchPCStations_NoMatch_ReturnsEmpty()
+    public async Task SearchPCStations_NoMatch_ReturnsEmpty()
     {
-        var results = _repository.SearchPCStations("ZZZZZZZ");
+        var results = await _repository.SearchPCStationsAsync("ZZZZZZZ");
 
         Assert.Empty(results);
     }
 
     // CellByPCStation tests
     [Fact]
-    public void GetPcToCellMappings_ReturnsMultipleRecords()
+    public async Task GetPcToCellMappings_ReturnsMultipleRecords()
     {
-        var mappings = _repository.GetPcToCellMappings();
+        var mappings = await _repository.GetPcToCellMappingsAsync();
 
         Assert.NotEmpty(mappings);
     }
 
     [Fact]
-    public void GetPcToCellByMapId_ExistingMapping_ReturnsMapping()
+    public async Task GetPcToCellByMapId_ExistingMapping_ReturnsMapping()
     {
-        var mappings = _repository.GetPcToCellMappings();
+        var mappings = await _repository.GetPcToCellMappingsAsync();
         var expected = mappings.First();
 
-        var mapping = _repository.GetPcToCellByMapId(expected.StationMapId);
+        var mapping = await _repository.GetPcToCellByMapIdAsync(expected.StationMapId);
 
         Assert.NotNull(mapping);
         Assert.Equal(expected.StationMapId, mapping.StationMapId);
     }
 
     [Fact]
-    public void GetPcToCellByMapId_NonExisting_ReturnsNull()
+    public async Task GetPcToCellByMapId_NonExisting_ReturnsNull()
     {
-        var mapping = _repository.GetPcToCellByMapId(99999);
+        var mapping = await _repository.GetPcToCellByMapIdAsync(99999);
 
         Assert.Null(mapping);
     }
 
     // SwTestMap tests
     [Fact]
-    public void GetSwTests_ReturnsMultipleRecords()
+    public async Task GetSwTests_ReturnsMultipleRecords()
     {
-        var tests = _repository.GetSwTests();
+        var tests = await _repository.GetSwTestsAsync();
 
         Assert.NotEmpty(tests);
         Assert.True(tests.Count >= 4, "Expected at least 4 software tests from seed data");
     }
 
     [Fact]
-    public void GetSwTestById_ExistingTest_ReturnsTest()
+    public async Task GetSwTestById_ExistingTest_ReturnsTest()
     {
-        var tests = _repository.GetSwTests();
+        var tests = await _repository.GetSwTestsAsync();
         var expected = tests.First();
 
-        var test = _repository.GetSwTestById(expected.SwTestMapId);
+        var test = await _repository.GetSwTestByIdAsync(expected.SwTestMapId);
 
         Assert.NotNull(test);
         Assert.Equal(expected.SwTestMapId, test.SwTestMapId);
     }
 
     [Fact]
-    public void GetSwTestById_NonExisting_ReturnsNull()
+    public async Task GetSwTestById_NonExisting_ReturnsNull()
     {
-        var test = _repository.GetSwTestById(99999);
+        var test = await _repository.GetSwTestByIdAsync(99999);
 
         Assert.Null(test);
     }
 
     // CellBySwTest tests
     [Fact]
-    public void GetSwTestToCellMappings_ReturnsMultipleRecords()
+    public async Task GetSwTestToCellMappings_ReturnsMultipleRecords()
     {
-        var mappings = _repository.GetSwTestToCellMappings();
+        var mappings = await _repository.GetSwTestToCellMappingsAsync();
 
         Assert.NotEmpty(mappings);
     }
 
     [Fact]
-    public void GetSwTestToCellByMapId_ExistingTest_ReturnsMappings()
+    public async Task GetSwTestToCellByMapId_ExistingTest_ReturnsMappings()
     {
-        var tests = _repository.GetSwTests();
+        var tests = await _repository.GetSwTestsAsync();
         var testWithMappings = tests.First();
 
-        var mappings = _repository.GetSwTestToCellByMapId(testWithMappings.SwTestMapId);
+        var mappings = await _repository.GetSwTestToCellByMapIdAsync(testWithMappings.SwTestMapId);
 
         Assert.NotEmpty(mappings);
         Assert.All(mappings, m => Assert.Equal(testWithMappings.SwTestMapId, m.SwTestMapId));
@@ -230,50 +230,50 @@ public sealed class DuckDbQueryRepositoryTests : IAsyncLifetime
 
     // TLA tests
     [Fact]
-    public void GetTLACatalog_ReturnsMultipleRecords()
+    public async Task GetTLACatalog_ReturnsMultipleRecords()
     {
-        var tlas = _repository.GetTLACatalog();
+        var tlas = await _repository.GetTLACatalogAsync();
 
         Assert.NotEmpty(tlas);
         Assert.True(tlas.Count >= 4, "Expected at least 4 TLAs from seed data");
     }
 
     [Fact]
-    public void GetTLAByPartNo_ExistingTLA_ReturnsTLA()
+    public async Task GetTLAByPartNo_ExistingTLA_ReturnsTLA()
     {
-        var tlas = _repository.GetTLACatalog();
+        var tlas = await _repository.GetTLACatalogAsync();
         var expected = tlas.First();
 
-        var tla = _repository.GetTLAByPartNo(expected.PartNo);
+        var tla = await _repository.GetTLAByPartNoAsync(expected.PartNo);
 
         Assert.NotNull(tla);
         Assert.Equal(expected.PartNo, tla.PartNo);
     }
 
     [Fact]
-    public void GetTLAByPartNo_NonExisting_ReturnsNull()
+    public async Task GetTLAByPartNo_NonExisting_ReturnsNull()
     {
-        var tla = _repository.GetTLAByPartNo("NONEXISTENT-PART-99999");
+        var tla = await _repository.GetTLAByPartNoAsync("NONEXISTENT-PART-99999");
 
         Assert.Null(tla);
     }
 
     // CellByPartNo tests
     [Fact]
-    public void GetTLAToCellMappings_ReturnsMultipleRecords()
+    public async Task GetTLAToCellMappings_ReturnsMultipleRecords()
     {
-        var mappings = _repository.GetTLAToCellMappings();
+        var mappings = await _repository.GetTLAToCellMappingsAsync();
 
         Assert.NotEmpty(mappings);
     }
 
     [Fact]
-    public void GetTLAToCellByPartNo_ExistingTLA_ReturnsMappings()
+    public async Task GetTLAToCellByPartNo_ExistingTLA_ReturnsMappings()
     {
-        var tlas = _repository.GetTLACatalog();
+        var tlas = await _repository.GetTLACatalogAsync();
         var tlaWithMappings = tlas.First();
 
-        var mappings = _repository.GetTLAToCellByPartNo(tlaWithMappings.PartNo);
+        var mappings = await _repository.GetTLAToCellByPartNoAsync(tlaWithMappings.PartNo);
 
         // May or may not have mappings, but should not error
         Assert.NotNull(mappings);
@@ -281,15 +281,15 @@ public sealed class DuckDbQueryRepositoryTests : IAsyncLifetime
 
     // Error handling tests
     [Fact]
-    public void AllOperations_NoUnexpectedErrors()
+    public async Task AllOperations_NoUnexpectedErrors()
     {
-        _repository.GetCells();
-        _repository.GetPCStations();
-        _repository.GetPcToCellMappings();
-        _repository.GetSwTests();
-        _repository.GetSwTestToCellMappings();
-        _repository.GetTLACatalog();
-        _repository.GetTLAToCellMappings();
+        await _repository.GetCellsAsync();
+        await _repository.GetPCStationsAsync();
+        await _repository.GetPcToCellMappingsAsync();
+        await _repository.GetSwTestsAsync();
+        await _repository.GetSwTestToCellMappingsAsync();
+        await _repository.GetTLACatalogAsync();
+        await _repository.GetTLAToCellMappingsAsync();
 
         Assert.False(_errorNotifier.WasCalled(nameof(_errorNotifier.UnexpectedError)),
             "Expected no errors from query operations");

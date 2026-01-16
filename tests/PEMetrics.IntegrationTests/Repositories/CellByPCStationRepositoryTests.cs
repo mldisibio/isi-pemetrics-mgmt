@@ -42,7 +42,7 @@ public sealed class CellByPCStationRepositoryTests : IDisposable
     }
 
     [Fact]
-    public void Insert_ValidMapping_ReturnsNewStationMapId()
+    public async Task Insert_ValidMapping_ReturnsNewStationMapId()
     {
         // PC-UNUSED-01 exists but has no mappings
         var mapping = new CellByPCStation
@@ -55,14 +55,14 @@ public sealed class CellByPCStationRepositoryTests : IDisposable
             ActiveFrom = DateOnly.FromDateTime(DateTime.Today)
         };
 
-        var newId = _repository.Insert(mapping);
+        var newId = await _repository.InsertAsync(mapping);
         if (newId > 0) _insertedMapIds.Add(newId);
 
         Assert.True(newId > 0);
     }
 
     [Fact]
-    public void Insert_ValidMapping_FiresNotification()
+    public async Task Insert_ValidMapping_FiresNotification()
     {
         var mapping = new CellByPCStation
         {
@@ -74,14 +74,14 @@ public sealed class CellByPCStationRepositoryTests : IDisposable
             ActiveFrom = DateOnly.Parse("2025-01-01")
         };
 
-        var newId = _repository.Insert(mapping);
+        var newId = await _repository.InsertAsync(mapping);
         if (newId > 0) _insertedMapIds.Add(newId);
 
         Assert.True(_notifier.WasCalledWith(nameof(_notifier.NotifyPCToCellMappingChanged), newId));
     }
 
     [Fact]
-    public void Update_ExistingMapping_ReturnsTrue()
+    public async Task Update_ExistingMapping_ReturnsTrue()
     {
         var mapping = new CellByPCStation
         {
@@ -93,7 +93,7 @@ public sealed class CellByPCStationRepositoryTests : IDisposable
             ActiveFrom = DateOnly.Parse("2020-01-01")
         };
 
-        var result = _repository.Update(mapping);
+        var result = await _repository.UpdateAsync(mapping);
 
         Assert.True(result);
 
@@ -107,11 +107,11 @@ public sealed class CellByPCStationRepositoryTests : IDisposable
             PcPurpose = "Main test station",
             ActiveFrom = DateOnly.Parse("2020-01-01")
         };
-        _repository.Update(restore);
+        await _repository.UpdateAsync(restore);
     }
 
     [Fact]
-    public void Update_ExistingMapping_FiresNotification()
+    public async Task Update_ExistingMapping_FiresNotification()
     {
         var mapping = new CellByPCStation
         {
@@ -122,13 +122,13 @@ public sealed class CellByPCStationRepositoryTests : IDisposable
             ActiveFrom = DateOnly.Parse("2020-01-01")
         };
 
-        _repository.Update(mapping);
+        await _repository.UpdateAsync(mapping);
 
         Assert.True(_notifier.WasCalledWith(nameof(_notifier.NotifyPCToCellMappingChanged), 1001));
     }
 
     [Fact]
-    public void Update_NonExistingMapping_ReturnsFalse()
+    public async Task Update_NonExistingMapping_ReturnsFalse()
     {
         var mapping = new CellByPCStation
         {
@@ -139,7 +139,7 @@ public sealed class CellByPCStationRepositoryTests : IDisposable
             ActiveFrom = DateOnly.FromDateTime(DateTime.Today)
         };
 
-        var result = _repository.Update(mapping);
+        var result = await _repository.UpdateAsync(mapping);
 
         Assert.False(result);
     }

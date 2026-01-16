@@ -42,44 +42,44 @@ public sealed class TLARepositoryTests : IDisposable
     }
 
     [Fact]
-    public void Insert_ValidTLA_ReturnsTrue()
+    public async Task Insert_ValidTLA_ReturnsTrue()
     {
         var partNo = $"PN-TEST-{Guid.NewGuid():N}"[..32];
         _insertedPartNos.Add(partNo);
 
         var tla = new TLA { PartNo = partNo, Family = "TestFamily" };
 
-        var result = _repository.Insert(tla);
+        var result = await _repository.InsertAsync(tla);
 
         Assert.True(result);
     }
 
     [Fact]
-    public void Insert_ValidTLA_FiresNotification()
+    public async Task Insert_ValidTLA_FiresNotification()
     {
         var partNo = $"PN-TEST-{Guid.NewGuid():N}"[..32];
         _insertedPartNos.Add(partNo);
 
         var tla = new TLA { PartNo = partNo, Family = "TestFamily" };
 
-        _repository.Insert(tla);
+        await _repository.InsertAsync(tla);
 
         Assert.True(_notifier.WasCalledWith(nameof(_notifier.NotifyTLAChanged), partNo));
     }
 
     [Fact]
-    public void Insert_DuplicatePartNo_ReturnsFalse()
+    public async Task Insert_DuplicatePartNo_ReturnsFalse()
     {
         // PN-001-A already exists in seed data
         var tla = new TLA { PartNo = "PN-001-A", Family = "Duplicate" };
 
-        var result = _repository.Insert(tla);
+        var result = await _repository.InsertAsync(tla);
 
         Assert.False(result);
     }
 
     [Fact]
-    public void Update_ExistingTLA_ReturnsTrue()
+    public async Task Update_ExistingTLA_ReturnsTrue()
     {
         var tla = new TLA
         {
@@ -89,7 +89,7 @@ public sealed class TLARepositoryTests : IDisposable
             ServiceGroup = "SG-PH"
         };
 
-        var result = _repository.Update(tla);
+        var result = await _repository.UpdateAsync(tla);
 
         Assert.True(result);
 
@@ -103,34 +103,34 @@ public sealed class TLARepositoryTests : IDisposable
             FormalDescription = "pH Sensor Model B",
             Description = "Premium pH sensor"
         };
-        _repository.Update(restore);
+        await _repository.UpdateAsync(restore);
     }
 
     [Fact]
-    public void Update_ExistingTLA_FiresNotification()
+    public async Task Update_ExistingTLA_FiresNotification()
     {
         var tla = new TLA { PartNo = "PN-001-B", Family = "Sensors" };
 
-        _repository.Update(tla);
+        await _repository.UpdateAsync(tla);
 
         Assert.True(_notifier.WasCalledWith(nameof(_notifier.NotifyTLAChanged), "PN-001-B"));
     }
 
     [Fact]
-    public void Update_NonExistingTLA_ReturnsFalse()
+    public async Task Update_NonExistingTLA_ReturnsFalse()
     {
         var tla = new TLA { PartNo = "NOT-FOUND", Family = "Test" };
 
-        var result = _repository.Update(tla);
+        var result = await _repository.UpdateAsync(tla);
 
         Assert.False(result);
     }
 
     [Fact]
-    public void Delete_UnusedTLA_ReturnsTrue()
+    public async Task Delete_UnusedTLA_ReturnsTrue()
     {
         // PN-UNUSED has no production tests or cell mappings
-        var result = _repository.Delete("PN-UNUSED");
+        var result = await _repository.DeleteAsync("PN-UNUSED");
 
         Assert.True(result);
 
@@ -144,7 +144,7 @@ public sealed class TLARepositoryTests : IDisposable
     }
 
     [Fact]
-    public void Delete_UnusedTLA_FiresNotification()
+    public async Task Delete_UnusedTLA_FiresNotification()
     {
         // Create a temporary TLA to delete
         var tempPartNo = $"PN-DEL-{Guid.NewGuid():N}"[..32];
@@ -155,25 +155,25 @@ public sealed class TLARepositoryTests : IDisposable
             cmd.ExecuteNonQuery();
         }
 
-        _repository.Delete(tempPartNo);
+        await _repository.DeleteAsync(tempPartNo);
 
         Assert.True(_notifier.WasCalledWith(nameof(_notifier.NotifyTLAChanged), tempPartNo));
     }
 
     [Fact]
-    public void Delete_UsedTLA_ReturnsFalse()
+    public async Task Delete_UsedTLA_ReturnsFalse()
     {
         // PN-001-A has production test record
-        var result = _repository.Delete("PN-001-A");
+        var result = await _repository.DeleteAsync("PN-001-A");
 
         Assert.False(result);
     }
 
     [Fact]
-    public void Delete_TLAWithCellMappings_ReturnsFalse()
+    public async Task Delete_TLAWithCellMappings_ReturnsFalse()
     {
         // PN-001-B has cell mappings but no production tests
-        var result = _repository.Delete("PN-001-B");
+        var result = await _repository.DeleteAsync("PN-001-B");
 
         Assert.False(result);
     }

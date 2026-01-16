@@ -23,28 +23,29 @@ public sealed class SwTestMapRepository : ForManagingSwTests
         _dataChangeNotifier = dataChangeNotifier ?? throw new ArgumentNullException(nameof(dataChangeNotifier));
     }
 
-    public int Insert(SwTestMap test)
+    public async Task<int> InsertAsync(SwTestMap test, CancellationToken cancellationToken = default)
     {
         try
         {
-            using var connection = _connectionFactory.OpenConnectionToPEMetrics();
-            using var command = connection.CreateCommand();
+            await using var connection = await _connectionFactory.OpenConnectionToPEMetricsAsync(cancellationToken).ConfigureAwait(false);
+            await using var command = connection.CreateCommand();
             command.CommandText = "mgmt.SwTestMap_Insert";
             command.CommandType = CommandType.StoredProcedure;
 
-            command.Parameters.Add(new SqlParameter("@ConfiguredTestId", (object?)test.ConfiguredTestId ?? DBNull.Value));
-            command.Parameters.Add(new SqlParameter("@TestApplication", (object?)test.TestApplication ?? DBNull.Value));
-            command.Parameters.Add(new SqlParameter("@TestName", (object?)test.TestName ?? DBNull.Value));
-            command.Parameters.Add(new SqlParameter("@ReportKey", (object?)test.ReportKey ?? DBNull.Value));
-            command.Parameters.Add(new SqlParameter("@TestDirectory", (object?)test.TestDirectory ?? DBNull.Value));
-            command.Parameters.Add(new SqlParameter("@RelativePath", (object?)test.RelativePath ?? DBNull.Value));
-            command.Parameters.Add(new SqlParameter("@LastRun", (object?)test.LastRun?.ToDateTime(TimeOnly.MinValue) ?? DBNull.Value));
-            command.Parameters.Add(new SqlParameter("@Notes", (object?)test.Notes ?? DBNull.Value));
+            var sqlCommand = (SqlCommand)command;
+            sqlCommand.Parameters.Add(new SqlParameter("@ConfiguredTestId", (object?)test.ConfiguredTestId ?? DBNull.Value));
+            sqlCommand.Parameters.Add(new SqlParameter("@TestApplication", (object?)test.TestApplication ?? DBNull.Value));
+            sqlCommand.Parameters.Add(new SqlParameter("@TestName", (object?)test.TestName ?? DBNull.Value));
+            sqlCommand.Parameters.Add(new SqlParameter("@ReportKey", (object?)test.ReportKey ?? DBNull.Value));
+            sqlCommand.Parameters.Add(new SqlParameter("@TestDirectory", (object?)test.TestDirectory ?? DBNull.Value));
+            sqlCommand.Parameters.Add(new SqlParameter("@RelativePath", (object?)test.RelativePath ?? DBNull.Value));
+            sqlCommand.Parameters.Add(new SqlParameter("@LastRun", (object?)test.LastRun?.ToDateTime(TimeOnly.MinValue) ?? DBNull.Value));
+            sqlCommand.Parameters.Add(new SqlParameter("@Notes", (object?)test.Notes ?? DBNull.Value));
 
             var outputParam = new SqlParameter("@NewSwTestMapId", SqlDbType.Int) { Direction = ParameterDirection.Output };
-            command.Parameters.Add(outputParam);
+            sqlCommand.Parameters.Add(outputParam);
 
-            command.ExecuteNonQuery();
+            await command.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
             var newSwTestMapId = (int)outputParam.Value;
 
             _dataChangeNotifier.NotifySwTestChanged(newSwTestMapId);
@@ -57,26 +58,27 @@ public sealed class SwTestMapRepository : ForManagingSwTests
         }
     }
 
-    public bool Update(SwTestMap test)
+    public async Task<bool> UpdateAsync(SwTestMap test, CancellationToken cancellationToken = default)
     {
         try
         {
-            using var connection = _connectionFactory.OpenConnectionToPEMetrics();
-            using var command = connection.CreateCommand();
+            await using var connection = await _connectionFactory.OpenConnectionToPEMetricsAsync(cancellationToken).ConfigureAwait(false);
+            await using var command = connection.CreateCommand();
             command.CommandText = "mgmt.SwTestMap_Update";
             command.CommandType = CommandType.StoredProcedure;
 
-            command.Parameters.Add(new SqlParameter("@SwTestMapId", test.SwTestMapId));
-            command.Parameters.Add(new SqlParameter("@ConfiguredTestId", (object?)test.ConfiguredTestId ?? DBNull.Value));
-            command.Parameters.Add(new SqlParameter("@TestApplication", (object?)test.TestApplication ?? DBNull.Value));
-            command.Parameters.Add(new SqlParameter("@TestName", (object?)test.TestName ?? DBNull.Value));
-            command.Parameters.Add(new SqlParameter("@ReportKey", (object?)test.ReportKey ?? DBNull.Value));
-            command.Parameters.Add(new SqlParameter("@TestDirectory", (object?)test.TestDirectory ?? DBNull.Value));
-            command.Parameters.Add(new SqlParameter("@RelativePath", (object?)test.RelativePath ?? DBNull.Value));
-            command.Parameters.Add(new SqlParameter("@LastRun", (object?)test.LastRun?.ToDateTime(TimeOnly.MinValue) ?? DBNull.Value));
-            command.Parameters.Add(new SqlParameter("@Notes", (object?)test.Notes ?? DBNull.Value));
+            var sqlCommand = (SqlCommand)command;
+            sqlCommand.Parameters.Add(new SqlParameter("@SwTestMapId", test.SwTestMapId));
+            sqlCommand.Parameters.Add(new SqlParameter("@ConfiguredTestId", (object?)test.ConfiguredTestId ?? DBNull.Value));
+            sqlCommand.Parameters.Add(new SqlParameter("@TestApplication", (object?)test.TestApplication ?? DBNull.Value));
+            sqlCommand.Parameters.Add(new SqlParameter("@TestName", (object?)test.TestName ?? DBNull.Value));
+            sqlCommand.Parameters.Add(new SqlParameter("@ReportKey", (object?)test.ReportKey ?? DBNull.Value));
+            sqlCommand.Parameters.Add(new SqlParameter("@TestDirectory", (object?)test.TestDirectory ?? DBNull.Value));
+            sqlCommand.Parameters.Add(new SqlParameter("@RelativePath", (object?)test.RelativePath ?? DBNull.Value));
+            sqlCommand.Parameters.Add(new SqlParameter("@LastRun", (object?)test.LastRun?.ToDateTime(TimeOnly.MinValue) ?? DBNull.Value));
+            sqlCommand.Parameters.Add(new SqlParameter("@Notes", (object?)test.Notes ?? DBNull.Value));
 
-            command.ExecuteNonQuery();
+            await command.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
 
             _dataChangeNotifier.NotifySwTestChanged(test.SwTestMapId);
             return true;

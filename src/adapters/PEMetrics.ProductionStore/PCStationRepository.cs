@@ -22,17 +22,17 @@ public sealed class PCStationRepository : ForManagingPCStations
         _dataChangeNotifier = dataChangeNotifier ?? throw new ArgumentNullException(nameof(dataChangeNotifier));
     }
 
-    public bool Insert(string pcName)
+    public async Task<bool> InsertAsync(string pcName, CancellationToken cancellationToken = default)
     {
         try
         {
-            using var connection = _connectionFactory.OpenConnectionToPEMetrics();
-            using var command = connection.CreateCommand();
+            await using var connection = await _connectionFactory.OpenConnectionToPEMetricsAsync(cancellationToken).ConfigureAwait(false);
+            await using var command = connection.CreateCommand();
             command.CommandText = "mgmt.PCStation_Insert";
             command.CommandType = CommandType.StoredProcedure;
-            command.Parameters.Add(new SqlParameter("@PcName", pcName));
+            ((SqlCommand)command).Parameters.Add(new SqlParameter("@PcName", pcName));
 
-            command.ExecuteNonQuery();
+            await command.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
 
             _dataChangeNotifier.NotifyPCStationChanged();
             return true;

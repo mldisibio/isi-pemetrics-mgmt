@@ -21,30 +21,30 @@ public sealed class TestDuckDbConnectionFactory : ForCreatingDuckDbConnections, 
     public string DatabasePath => _dbPath;
 
     /// <summary>Installs nanodbc extension (call once before using odbc_scan).</summary>
-    public void InstallNanodbc()
+    public async Task InstallNanodbcAsync(CancellationToken cancellationToken = default)
     {
         if (_nanodbcInstalled)
             return;
 
-        using var connection = new DuckDBConnection(_connectionString);
-        connection.Open();
-        using var command = connection.CreateCommand();
+        await using var connection = new DuckDBConnection(_connectionString);
+        await connection.OpenAsync(cancellationToken);
+        await using var command = connection.CreateCommand();
         command.CommandText = "INSTALL nanodbc FROM community;";
-        command.ExecuteNonQuery();
+        await command.ExecuteNonQueryAsync(cancellationToken);
         _nanodbcInstalled = true;
     }
 
-    public DbConnection OpenConnection()
+    public async Task<DbConnection> OpenConnectionAsync(CancellationToken cancellationToken = default)
     {
         var connection = new DuckDBConnection(_connectionString);
-        connection.Open();
+        await connection.OpenAsync(cancellationToken);
 
         // Auto-load nanodbc if it was installed
         if (_nanodbcInstalled)
         {
-            using var command = connection.CreateCommand();
+            await using var command = connection.CreateCommand();
             command.CommandText = "LOAD nanodbc;";
-            command.ExecuteNonQuery();
+            await command.ExecuteNonQueryAsync(cancellationToken);
         }
 
         return connection;

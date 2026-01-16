@@ -7,9 +7,9 @@ public interface ForManagingSwTests
 {
     /// <summary>Inserts a new software test.</summary>
     /// <returns>The new SwTestMapId, or -1 on error.</returns>
-    int Insert(SwTestMap test);
+    Task<int> InsertAsync(SwTestMap test, CancellationToken cancellationToken = default);
 
     /// <summary>Updates an existing software test.</summary>
     /// <returns>True if successful, false on error.</returns>
-    bool Update(SwTestMap test);
+    Task<bool> UpdateAsync(SwTestMap test, CancellationToken cancellationToken = default);
 }

@@ -23,26 +23,27 @@ public sealed class CellRepository : ForManagingCells
         _dataChangeNotifier = dataChangeNotifier ?? throw new ArgumentNullException(nameof(dataChangeNotifier));
     }
 
-    public int Insert(Cell cell)
+    public async Task<int> InsertAsync(Cell cell, CancellationToken cancellationToken = default)
     {
         try
         {
-            using var connection = _connectionFactory.OpenConnectionToPEMetrics();
-            using var command = connection.CreateCommand();
+            await using var connection = await _connectionFactory.OpenConnectionToPEMetricsAsync(cancellationToken).ConfigureAwait(false);
+            await using var command = connection.CreateCommand();
             command.CommandText = "mgmt.Cell_Insert";
             command.CommandType = CommandType.StoredProcedure;
 
-            command.Parameters.Add(new SqlParameter("@CellName", cell.CellName));
-            command.Parameters.Add(new SqlParameter("@DisplayName", cell.DisplayName));
-            command.Parameters.Add(new SqlParameter("@ActiveFrom", cell.ActiveFrom.ToDateTime(TimeOnly.MinValue)));
-            command.Parameters.Add(new SqlParameter("@ActiveTo", (object?)cell.ActiveTo?.ToDateTime(TimeOnly.MinValue) ?? DBNull.Value));
-            command.Parameters.Add(new SqlParameter("@Description", (object?)cell.Description ?? DBNull.Value));
-            command.Parameters.Add(new SqlParameter("@AlternativeNames", (object?)cell.AlternativeNames ?? DBNull.Value));
+            var sqlCommand = (SqlCommand)command;
+            sqlCommand.Parameters.Add(new SqlParameter("@CellName", cell.CellName));
+            sqlCommand.Parameters.Add(new SqlParameter("@DisplayName", cell.DisplayName));
+            sqlCommand.Parameters.Add(new SqlParameter("@ActiveFrom", cell.ActiveFrom.ToDateTime(TimeOnly.MinValue)));
+            sqlCommand.Parameters.Add(new SqlParameter("@ActiveTo", (object?)cell.ActiveTo?.ToDateTime(TimeOnly.MinValue) ?? DBNull.Value));
+            sqlCommand.Parameters.Add(new SqlParameter("@Description", (object?)cell.Description ?? DBNull.Value));
+            sqlCommand.Parameters.Add(new SqlParameter("@AlternativeNames", (object?)cell.AlternativeNames ?? DBNull.Value));
 
             var outputParam = new SqlParameter("@NewCellId", SqlDbType.Int) { Direction = ParameterDirection.Output };
-            command.Parameters.Add(outputParam);
+            sqlCommand.Parameters.Add(outputParam);
 
-            command.ExecuteNonQuery();
+            await command.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
             var newCellId = (int)outputParam.Value;
 
             _dataChangeNotifier.NotifyCellChanged(newCellId);
@@ -55,24 +56,25 @@ public sealed class CellRepository : ForManagingCells
         }
     }
 
-    public bool Update(Cell cell)
+    public async Task<bool> UpdateAsync(Cell cell, CancellationToken cancellationToken = default)
     {
         try
         {
-            using var connection = _connectionFactory.OpenConnectionToPEMetrics();
-            using var command = connection.CreateCommand();
+            await using var connection = await _connectionFactory.OpenConnectionToPEMetricsAsync(cancellationToken).ConfigureAwait(false);
+            await using var command = connection.CreateCommand();
             command.CommandText = "mgmt.Cell_Update";
             command.CommandType = CommandType.StoredProcedure;
 
-            command.Parameters.Add(new SqlParameter("@CellId", cell.CellId));
-            command.Parameters.Add(new SqlParameter("@CellName", cell.CellName));
-            command.Parameters.Add(new SqlParameter("@DisplayName", cell.DisplayName));
-            command.Parameters.Add(new SqlParameter("@ActiveFrom", cell.ActiveFrom.ToDateTime(TimeOnly.MinValue)));
-            command.Parameters.Add(new SqlParameter("@ActiveTo", (object?)cell.ActiveTo?.ToDateTime(TimeOnly.MinValue) ?? DBNull.Value));
-            command.Parameters.Add(new SqlParameter("@Description", (object?)cell.Description ?? DBNull.Value));
-            command.Parameters.Add(new SqlParameter("@AlternativeNames", (object?)cell.AlternativeNames ?? DBNull.Value));
+            var sqlCommand = (SqlCommand)command;
+            sqlCommand.Parameters.Add(new SqlParameter("@CellId", cell.CellId));
+            sqlCommand.Parameters.Add(new SqlParameter("@CellName", cell.CellName));
+            sqlCommand.Parameters.Add(new SqlParameter("@DisplayName", cell.DisplayName));
+            sqlCommand.Parameters.Add(new SqlParameter("@ActiveFrom", cell.ActiveFrom.ToDateTime(TimeOnly.MinValue)));
+            sqlCommand.Parameters.Add(new SqlParameter("@ActiveTo", (object?)cell.ActiveTo?.ToDateTime(TimeOnly.MinValue) ?? DBNull.Value));
+            sqlCommand.Parameters.Add(new SqlParameter("@Description", (object?)cell.Description ?? DBNull.Value));
+            sqlCommand.Parameters.Add(new SqlParameter("@AlternativeNames", (object?)cell.AlternativeNames ?? DBNull.Value));
 
-            command.ExecuteNonQuery();
+            await command.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
 
             _dataChangeNotifier.NotifyCellChanged(cell.CellId);
             return true;

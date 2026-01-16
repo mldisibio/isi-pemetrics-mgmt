@@ -82,6 +82,29 @@ dotnet restore PE_Metrics_DataMgmt.sln
 - `REQUIREMENTS.md` - Functional requirements and specifications for the application
 - `DATABASE.md` - Database schema and table structures for PE_Metrics dimensions
 
+## Async Programming
+
+This project follows async patterns throughout the data layer. When implementing new features:
+
+- **Prefer async over sync**: Use async methods even if not explicitly stated in requirements
+- **Use `.ConfigureAwait(false)`**: All `await` calls in library code should use `.ConfigureAwait(false)` per Microsoft best practices
+- **Propagate CancellationToken**: All async methods should accept `CancellationToken cancellationToken = default`
+- **Use async disposal**: Prefer `await using` over `using` for disposable async resources
+- **Async ADO.NET methods**: Use `OpenAsync`, `ExecuteReaderAsync`, `ExecuteNonQueryAsync`, `ExecuteScalarAsync`
+- **Naming convention**: Async methods should have the `Async` suffix
+
+Example pattern:
+```csharp
+public async Task<ImmutableList<T>> GetItemsAsync(CancellationToken cancellationToken = default)
+{
+    await using var connection = await _connectionFactory.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
+    await using var command = connection.CreateCommand();
+    command.CommandText = "SELECT * FROM Items";
+    await using var reader = await command.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
+    return await reader.MapAllAsync(mapper, cancellationToken).ConfigureAwait(false);
+}
+```
+
 ## Development Notes
 
 - The solution uses Visual Studio 2017 format (Version 17.0+) but the IDE is Visual Studio 2022

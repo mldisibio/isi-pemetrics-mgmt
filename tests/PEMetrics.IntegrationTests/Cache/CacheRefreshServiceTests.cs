@@ -8,7 +8,7 @@ namespace PEMetrics.IntegrationTests.Cache;
 
 /// <summary>Tests verifying CacheRefreshService populates DuckDB tables from SQL Server.</summary>
 [Collection("SqlServerCollection")]
-public sealed class CacheRefreshServiceTests : IDisposable
+public sealed class CacheRefreshServiceTests : IAsyncLifetime
 {
     readonly SqlServerContainerFixture _sqlFixture;
     readonly TestDuckDbConnectionFactory _duckDbFactory;
@@ -34,13 +34,6 @@ public sealed class CacheRefreshServiceTests : IDisposable
             })
             .Build();
 
-        // Initialize DuckDB with nanodbc and tables
-        _duckDbFactory.InstallNanodbc();
-        using (var conn = _duckDbFactory.OpenConnection())
-        {
-            DuckDbSchemaCreator.CreateTables(conn);
-        }
-
         _refreshService = new CacheRefreshService(
             _duckDbFactory,
             _errorNotifier,
@@ -49,10 +42,21 @@ public sealed class CacheRefreshServiceTests : IDisposable
             _configuration);
     }
 
-    public void Dispose()
+    public async Task InitializeAsync()
+    {
+        // Initialize DuckDB with nanodbc and tables
+        await _duckDbFactory.InstallNanodbcAsync();
+        await using (var conn = await _duckDbFactory.OpenConnectionAsync().ConfigureAwait(false))
+        {
+            await DuckDbSchemaCreator.CreateTablesAsync(conn);
+        }
+    }
+
+    public Task DisposeAsync()
     {
         _refreshService.Dispose();
         _duckDbFactory.Dispose();
+        return Task.CompletedTask;
     }
 
     [Fact]
@@ -60,10 +64,10 @@ public sealed class CacheRefreshServiceTests : IDisposable
     {
         await _refreshService.PopulateAllTablesAsync();
 
-        using var connection = _duckDbFactory.OpenConnection();
-        using var command = connection.CreateCommand();
+        await using var connection = await _duckDbFactory.OpenConnectionAsync();
+        await using var command = connection.CreateCommand();
         command.CommandText = "SELECT COUNT(*) FROM Cell";
-        var count = Convert.ToInt64(command.ExecuteScalar());
+        var count = Convert.ToInt64(await command.ExecuteScalarAsync().ConfigureAwait(false));
 
         Assert.True(count > 0, "Expected Cell table to be populated");
     }
@@ -73,10 +77,10 @@ public sealed class CacheRefreshServiceTests : IDisposable
     {
         await _refreshService.PopulateAllTablesAsync();
 
-        using var connection = _duckDbFactory.OpenConnection();
-        using var command = connection.CreateCommand();
+        await using var connection = await _duckDbFactory.OpenConnectionAsync();
+        await using var command = connection.CreateCommand();
         command.CommandText = "SELECT COUNT(*) FROM PCStation";
-        var count = Convert.ToInt64(command.ExecuteScalar());
+        var count = Convert.ToInt64(await command.ExecuteScalarAsync().ConfigureAwait(false));
 
         Assert.True(count > 0, "Expected PCStation table to be populated");
     }
@@ -86,10 +90,10 @@ public sealed class CacheRefreshServiceTests : IDisposable
     {
         await _refreshService.PopulateAllTablesAsync();
 
-        using var connection = _duckDbFactory.OpenConnection();
-        using var command = connection.CreateCommand();
+        await using var connection = await _duckDbFactory.OpenConnectionAsync();
+        await using var command = connection.CreateCommand();
         command.CommandText = "SELECT COUNT(*) FROM CellByPCStation";
-        var count = Convert.ToInt64(command.ExecuteScalar());
+        var count = Convert.ToInt64(await command.ExecuteScalarAsync().ConfigureAwait(false));
 
         Assert.True(count > 0, "Expected CellByPCStation table to be populated");
     }
@@ -99,10 +103,10 @@ public sealed class CacheRefreshServiceTests : IDisposable
     {
         await _refreshService.PopulateAllTablesAsync();
 
-        using var connection = _duckDbFactory.OpenConnection();
-        using var command = connection.CreateCommand();
+        await using var connection = await _duckDbFactory.OpenConnectionAsync();
+        await using var command = connection.CreateCommand();
         command.CommandText = "SELECT COUNT(*) FROM SwTestMap";
-        var count = Convert.ToInt64(command.ExecuteScalar());
+        var count = Convert.ToInt64(await command.ExecuteScalarAsync().ConfigureAwait(false));
 
         Assert.True(count > 0, "Expected SwTestMap table to be populated");
     }
@@ -112,10 +116,10 @@ public sealed class CacheRefreshServiceTests : IDisposable
     {
         await _refreshService.PopulateAllTablesAsync();
 
-        using var connection = _duckDbFactory.OpenConnection();
-        using var command = connection.CreateCommand();
+        await using var connection = await _duckDbFactory.OpenConnectionAsync();
+        await using var command = connection.CreateCommand();
         command.CommandText = "SELECT COUNT(*) FROM CellBySwTest";
-        var count = Convert.ToInt64(command.ExecuteScalar());
+        var count = Convert.ToInt64(await command.ExecuteScalarAsync().ConfigureAwait(false));
 
         Assert.True(count > 0, "Expected CellBySwTest table to be populated");
     }
@@ -125,10 +129,10 @@ public sealed class CacheRefreshServiceTests : IDisposable
     {
         await _refreshService.PopulateAllTablesAsync();
 
-        using var connection = _duckDbFactory.OpenConnection();
-        using var command = connection.CreateCommand();
+        await using var connection = await _duckDbFactory.OpenConnectionAsync();
+        await using var command = connection.CreateCommand();
         command.CommandText = "SELECT COUNT(*) FROM TLA";
-        var count = Convert.ToInt64(command.ExecuteScalar());
+        var count = Convert.ToInt64(await command.ExecuteScalarAsync().ConfigureAwait(false));
 
         Assert.True(count > 0, "Expected TLA table to be populated");
     }
@@ -138,10 +142,10 @@ public sealed class CacheRefreshServiceTests : IDisposable
     {
         await _refreshService.PopulateAllTablesAsync();
 
-        using var connection = _duckDbFactory.OpenConnection();
-        using var command = connection.CreateCommand();
+        await using var connection = await _duckDbFactory.OpenConnectionAsync();
+        await using var command = connection.CreateCommand();
         command.CommandText = "SELECT COUNT(*) FROM CellByPartNo";
-        var count = Convert.ToInt64(command.ExecuteScalar());
+        var count = Convert.ToInt64(await command.ExecuteScalarAsync().ConfigureAwait(false));
 
         Assert.True(count > 0, "Expected CellByPartNo table to be populated");
     }
@@ -161,16 +165,16 @@ public sealed class CacheRefreshServiceTests : IDisposable
         // First population
         await _refreshService.PopulateAllTablesAsync();
 
-        using var connection = _duckDbFactory.OpenConnection();
-        using var command = connection.CreateCommand();
+        await using var connection = await _duckDbFactory.OpenConnectionAsync();
+        await using var command = connection.CreateCommand();
         command.CommandText = "SELECT COUNT(*) FROM Cell";
-        var firstCount = Convert.ToInt64(command.ExecuteScalar());
+        var firstCount = Convert.ToInt64(await command.ExecuteScalarAsync().ConfigureAwait(false));
 
         // Second population (should replace data)
         await _refreshService.PopulateAllTablesAsync();
 
         command.CommandText = "SELECT COUNT(*) FROM Cell";
-        var secondCount = Convert.ToInt64(command.ExecuteScalar());
+        var secondCount = Convert.ToInt64(await command.ExecuteScalarAsync().ConfigureAwait(false));
 
         Assert.Equal(firstCount, secondCount);
     }

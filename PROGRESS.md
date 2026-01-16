@@ -101,6 +101,18 @@ All stored procedures, views, and functions created in `mgmt` schema and deploye
 
 **Status: COMPLETE - TESTED**
 
+### Async Refactoring (2026-01-15)
+- [x] Refactor all interfaces to async pattern with `CancellationToken` support
+- [x] Update `ForCreatingSqlServerConnections` to `OpenConnectionToPEMetricsAsync()`
+- [x] Update `ForCreatingDuckDbConnections` to `OpenConnectionAsync()`
+- [x] Update `ForReadingPEMetricsDimensions` - all 14 methods async
+- [x] Update all 7 command interfaces to async methods
+- [x] Add `DataReaderExtensions.MapAllAsync()` and `MapFirstOrDefaultAsync()`
+- [x] Update all SQL Server repositories with `.ConfigureAwait(false)`
+- [x] Update all DuckDB repositories with `.ConfigureAwait(false)`
+- [x] Update `DuckDbInitializer` to `InitializeAsync()`
+- [x] Update all integration tests to async pattern
+
 ### Architecture Refinements (2026-01-15)
 - [x] Move `ForCreatingDuckDbConnections` from DataCache adapter to core DataApi
 - [x] Update connection interfaces to return `System.Data.Common.DbConnection` abstraction
@@ -268,7 +280,7 @@ Other operations → single table refresh
 - [x] SQL scripts for database initialization (schemas, tables, procedures, seed data)
 - [x] Test fixtures with shared container via ICollectionFixture
 
-### Test Coverage (112 tests total)
+### Test Coverage (111 tests total)
 
 **SQL Server Repository Tests (75 tests):**
 - [x] **Query Repository Tests** (14 tests)
@@ -389,12 +401,13 @@ Other operations → single table refresh
 
 ## Testing Notes
 - SQL scripts deployed and tested on `.\MLD2019`
-- Build succeeds with zero warnings
+- Build succeeds (173 xUnit analyzer warnings for `.ConfigureAwait(false)` in test code)
 - All repositories compile and follow established patterns
 - Phase 3 caching layer implemented and compiles successfully
 - Architecture refined with `DbConnection` abstraction in core ports
-- **Integration tests complete**: 112 tests passing using Testcontainers for SQL Server
-  - 75 SQL Server repository tests (Phase 2 validation)
+- **Async refactoring complete**: All data layer operations use async/await with `.ConfigureAwait(false)`
+- **Integration tests complete**: 111 tests passing using Testcontainers for SQL Server
+  - 74 SQL Server repository tests (Phase 2 validation)
   - 37 DuckDB cache layer tests (Phase 3 validation)
 - DuckDB cache tests verify nanodbc extension, cache population, and query operations
 - Cache tests use same SQL Server container via ODBC connection

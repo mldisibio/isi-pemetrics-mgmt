@@ -22,19 +22,20 @@ public sealed class CellByPartNoRepository : ForMappingPartNumberToCells
         _dataChangeNotifier = dataChangeNotifier ?? throw new ArgumentNullException(nameof(dataChangeNotifier));
     }
 
-    public bool SetMappings(string partNo, IEnumerable<int> cellIds)
+    public async Task<bool> SetMappingsAsync(string partNo, IEnumerable<int> cellIds, CancellationToken cancellationToken = default)
     {
         try
         {
-            using var connection = _connectionFactory.OpenConnectionToPEMetrics();
-            using var command = connection.CreateCommand();
+            await using var connection = await _connectionFactory.OpenConnectionToPEMetricsAsync(cancellationToken).ConfigureAwait(false);
+            await using var command = connection.CreateCommand();
             command.CommandText = "mgmt.CellByPartNo_SetMappings";
             command.CommandType = CommandType.StoredProcedure;
 
-            command.Parameters.Add(new SqlParameter("@PartNo", partNo));
-            command.Parameters.Add(CreateIntListParameter("@CellIds", cellIds));
+            var sqlCommand = (SqlCommand)command;
+            sqlCommand.Parameters.Add(new SqlParameter("@PartNo", partNo));
+            sqlCommand.Parameters.Add(CreateIntListParameter("@CellIds", cellIds));
 
-            command.ExecuteNonQuery();
+            await command.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
 
             _dataChangeNotifier.NotifyTLAToCellMappingChanged(partNo);
             return true;
@@ -46,19 +47,20 @@ public sealed class CellByPartNoRepository : ForMappingPartNumberToCells
         }
     }
 
-    public bool AddMapping(string partNo, int cellId)
+    public async Task<bool> AddMappingAsync(string partNo, int cellId, CancellationToken cancellationToken = default)
     {
         try
         {
-            using var connection = _connectionFactory.OpenConnectionToPEMetrics();
-            using var command = connection.CreateCommand();
+            await using var connection = await _connectionFactory.OpenConnectionToPEMetricsAsync(cancellationToken).ConfigureAwait(false);
+            await using var command = connection.CreateCommand();
             command.CommandText = "mgmt.CellByPartNo_AddMapping";
             command.CommandType = CommandType.StoredProcedure;
 
-            command.Parameters.Add(new SqlParameter("@PartNo", partNo));
-            command.Parameters.Add(new SqlParameter("@CellId", cellId));
+            var sqlCommand = (SqlCommand)command;
+            sqlCommand.Parameters.Add(new SqlParameter("@PartNo", partNo));
+            sqlCommand.Parameters.Add(new SqlParameter("@CellId", cellId));
 
-            command.ExecuteNonQuery();
+            await command.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
 
             _dataChangeNotifier.NotifyTLAToCellMappingChanged(partNo);
             return true;
@@ -70,19 +72,20 @@ public sealed class CellByPartNoRepository : ForMappingPartNumberToCells
         }
     }
 
-    public bool DeleteMapping(string partNo, int cellId)
+    public async Task<bool> DeleteMappingAsync(string partNo, int cellId, CancellationToken cancellationToken = default)
     {
         try
         {
-            using var connection = _connectionFactory.OpenConnectionToPEMetrics();
-            using var command = connection.CreateCommand();
+            await using var connection = await _connectionFactory.OpenConnectionToPEMetricsAsync(cancellationToken).ConfigureAwait(false);
+            await using var command = connection.CreateCommand();
             command.CommandText = "mgmt.CellByPartNo_DeleteMapping";
             command.CommandType = CommandType.StoredProcedure;
 
-            command.Parameters.Add(new SqlParameter("@PartNo", partNo));
-            command.Parameters.Add(new SqlParameter("@CellId", cellId));
+            var sqlCommand = (SqlCommand)command;
+            sqlCommand.Parameters.Add(new SqlParameter("@PartNo", partNo));
+            sqlCommand.Parameters.Add(new SqlParameter("@CellId", cellId));
 
-            command.ExecuteNonQuery();
+            await command.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
 
             _dataChangeNotifier.NotifyTLAToCellMappingChanged(partNo);
             return true;

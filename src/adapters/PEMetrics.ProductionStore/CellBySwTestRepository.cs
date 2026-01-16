@@ -22,19 +22,20 @@ public sealed class CellBySwTestRepository : ForMappingSwTestsToCells
         _dataChangeNotifier = dataChangeNotifier ?? throw new ArgumentNullException(nameof(dataChangeNotifier));
     }
 
-    public bool SetMappings(int swTestMapId, IEnumerable<int> cellIds)
+    public async Task<bool> SetMappingsAsync(int swTestMapId, IEnumerable<int> cellIds, CancellationToken cancellationToken = default)
     {
         try
         {
-            using var connection = _connectionFactory.OpenConnectionToPEMetrics();
-            using var command = connection.CreateCommand();
+            await using var connection = await _connectionFactory.OpenConnectionToPEMetricsAsync(cancellationToken).ConfigureAwait(false);
+            await using var command = connection.CreateCommand();
             command.CommandText = "mgmt.CellBySwTest_SetMappings";
             command.CommandType = CommandType.StoredProcedure;
 
-            command.Parameters.Add(new SqlParameter("@SwTestMapId", swTestMapId));
-            command.Parameters.Add(CreateIntListParameter("@CellIds", cellIds));
+            var sqlCommand = (SqlCommand)command;
+            sqlCommand.Parameters.Add(new SqlParameter("@SwTestMapId", swTestMapId));
+            sqlCommand.Parameters.Add(CreateIntListParameter("@CellIds", cellIds));
 
-            command.ExecuteNonQuery();
+            await command.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
 
             _dataChangeNotifier.NotifySwTestToCellMappingChanged(swTestMapId);
             return true;
@@ -46,19 +47,20 @@ public sealed class CellBySwTestRepository : ForMappingSwTestsToCells
         }
     }
 
-    public bool AddMapping(int swTestMapId, int cellId)
+    public async Task<bool> AddMappingAsync(int swTestMapId, int cellId, CancellationToken cancellationToken = default)
     {
         try
         {
-            using var connection = _connectionFactory.OpenConnectionToPEMetrics();
-            using var command = connection.CreateCommand();
+            await using var connection = await _connectionFactory.OpenConnectionToPEMetricsAsync(cancellationToken).ConfigureAwait(false);
+            await using var command = connection.CreateCommand();
             command.CommandText = "mgmt.CellBySwTest_AddMapping";
             command.CommandType = CommandType.StoredProcedure;
 
-            command.Parameters.Add(new SqlParameter("@SwTestMapId", swTestMapId));
-            command.Parameters.Add(new SqlParameter("@CellId", cellId));
+            var sqlCommand = (SqlCommand)command;
+            sqlCommand.Parameters.Add(new SqlParameter("@SwTestMapId", swTestMapId));
+            sqlCommand.Parameters.Add(new SqlParameter("@CellId", cellId));
 
-            command.ExecuteNonQuery();
+            await command.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
 
             _dataChangeNotifier.NotifySwTestToCellMappingChanged(swTestMapId);
             return true;
@@ -70,19 +72,20 @@ public sealed class CellBySwTestRepository : ForMappingSwTestsToCells
         }
     }
 
-    public bool DeleteMapping(int swTestMapId, int cellId)
+    public async Task<bool> DeleteMappingAsync(int swTestMapId, int cellId, CancellationToken cancellationToken = default)
     {
         try
         {
-            using var connection = _connectionFactory.OpenConnectionToPEMetrics();
-            using var command = connection.CreateCommand();
+            await using var connection = await _connectionFactory.OpenConnectionToPEMetricsAsync(cancellationToken).ConfigureAwait(false);
+            await using var command = connection.CreateCommand();
             command.CommandText = "mgmt.CellBySwTest_DeleteMapping";
             command.CommandType = CommandType.StoredProcedure;
 
-            command.Parameters.Add(new SqlParameter("@SwTestMapId", swTestMapId));
-            command.Parameters.Add(new SqlParameter("@CellId", cellId));
+            var sqlCommand = (SqlCommand)command;
+            sqlCommand.Parameters.Add(new SqlParameter("@SwTestMapId", swTestMapId));
+            sqlCommand.Parameters.Add(new SqlParameter("@CellId", cellId));
 
-            command.ExecuteNonQuery();
+            await command.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
 
             _dataChangeNotifier.NotifySwTestToCellMappingChanged(swTestMapId);
             return true;

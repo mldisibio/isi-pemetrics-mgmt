@@ -23,23 +23,24 @@ public sealed class TLARepository : ForManagingPartNumbers
         _dataChangeNotifier = dataChangeNotifier ?? throw new ArgumentNullException(nameof(dataChangeNotifier));
     }
 
-    public bool Insert(TLA tla)
+    public async Task<bool> InsertAsync(TLA tla, CancellationToken cancellationToken = default)
     {
         try
         {
-            using var connection = _connectionFactory.OpenConnectionToPEMetrics();
-            using var command = connection.CreateCommand();
+            await using var connection = await _connectionFactory.OpenConnectionToPEMetricsAsync(cancellationToken).ConfigureAwait(false);
+            await using var command = connection.CreateCommand();
             command.CommandText = "mgmt.TLA_Insert";
             command.CommandType = CommandType.StoredProcedure;
 
-            command.Parameters.Add(new SqlParameter("@PartNo", tla.PartNo));
-            command.Parameters.Add(new SqlParameter("@Family", (object?)tla.Family ?? DBNull.Value));
-            command.Parameters.Add(new SqlParameter("@Subfamily", (object?)tla.Subfamily ?? DBNull.Value));
-            command.Parameters.Add(new SqlParameter("@ServiceGroup", (object?)tla.ServiceGroup ?? DBNull.Value));
-            command.Parameters.Add(new SqlParameter("@FormalDescription", (object?)tla.FormalDescription ?? DBNull.Value));
-            command.Parameters.Add(new SqlParameter("@Description", (object?)tla.Description ?? DBNull.Value));
+            var sqlCommand = (SqlCommand)command;
+            sqlCommand.Parameters.Add(new SqlParameter("@PartNo", tla.PartNo));
+            sqlCommand.Parameters.Add(new SqlParameter("@Family", (object?)tla.Family ?? DBNull.Value));
+            sqlCommand.Parameters.Add(new SqlParameter("@Subfamily", (object?)tla.Subfamily ?? DBNull.Value));
+            sqlCommand.Parameters.Add(new SqlParameter("@ServiceGroup", (object?)tla.ServiceGroup ?? DBNull.Value));
+            sqlCommand.Parameters.Add(new SqlParameter("@FormalDescription", (object?)tla.FormalDescription ?? DBNull.Value));
+            sqlCommand.Parameters.Add(new SqlParameter("@Description", (object?)tla.Description ?? DBNull.Value));
 
-            command.ExecuteNonQuery();
+            await command.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
 
             _dataChangeNotifier.NotifyTLAChanged(tla.PartNo);
             return true;
@@ -51,23 +52,24 @@ public sealed class TLARepository : ForManagingPartNumbers
         }
     }
 
-    public bool Update(TLA tla)
+    public async Task<bool> UpdateAsync(TLA tla, CancellationToken cancellationToken = default)
     {
         try
         {
-            using var connection = _connectionFactory.OpenConnectionToPEMetrics();
-            using var command = connection.CreateCommand();
+            await using var connection = await _connectionFactory.OpenConnectionToPEMetricsAsync(cancellationToken).ConfigureAwait(false);
+            await using var command = connection.CreateCommand();
             command.CommandText = "mgmt.TLA_Update";
             command.CommandType = CommandType.StoredProcedure;
 
-            command.Parameters.Add(new SqlParameter("@PartNo", tla.PartNo));
-            command.Parameters.Add(new SqlParameter("@Family", (object?)tla.Family ?? DBNull.Value));
-            command.Parameters.Add(new SqlParameter("@Subfamily", (object?)tla.Subfamily ?? DBNull.Value));
-            command.Parameters.Add(new SqlParameter("@ServiceGroup", (object?)tla.ServiceGroup ?? DBNull.Value));
-            command.Parameters.Add(new SqlParameter("@FormalDescription", (object?)tla.FormalDescription ?? DBNull.Value));
-            command.Parameters.Add(new SqlParameter("@Description", (object?)tla.Description ?? DBNull.Value));
+            var sqlCommand = (SqlCommand)command;
+            sqlCommand.Parameters.Add(new SqlParameter("@PartNo", tla.PartNo));
+            sqlCommand.Parameters.Add(new SqlParameter("@Family", (object?)tla.Family ?? DBNull.Value));
+            sqlCommand.Parameters.Add(new SqlParameter("@Subfamily", (object?)tla.Subfamily ?? DBNull.Value));
+            sqlCommand.Parameters.Add(new SqlParameter("@ServiceGroup", (object?)tla.ServiceGroup ?? DBNull.Value));
+            sqlCommand.Parameters.Add(new SqlParameter("@FormalDescription", (object?)tla.FormalDescription ?? DBNull.Value));
+            sqlCommand.Parameters.Add(new SqlParameter("@Description", (object?)tla.Description ?? DBNull.Value));
 
-            command.ExecuteNonQuery();
+            await command.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
 
             _dataChangeNotifier.NotifyTLAChanged(tla.PartNo);
             return true;
@@ -79,17 +81,17 @@ public sealed class TLARepository : ForManagingPartNumbers
         }
     }
 
-    public bool Delete(string partNo)
+    public async Task<bool> DeleteAsync(string partNo, CancellationToken cancellationToken = default)
     {
         try
         {
-            using var connection = _connectionFactory.OpenConnectionToPEMetrics();
-            using var command = connection.CreateCommand();
+            await using var connection = await _connectionFactory.OpenConnectionToPEMetricsAsync(cancellationToken).ConfigureAwait(false);
+            await using var command = connection.CreateCommand();
             command.CommandText = "mgmt.TLA_Delete";
             command.CommandType = CommandType.StoredProcedure;
-            command.Parameters.Add(new SqlParameter("@PartNo", partNo));
+            ((SqlCommand)command).Parameters.Add(new SqlParameter("@PartNo", partNo));
 
-            command.ExecuteNonQuery();
+            await command.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
 
             _dataChangeNotifier.NotifyTLAChanged(partNo);
             return true;

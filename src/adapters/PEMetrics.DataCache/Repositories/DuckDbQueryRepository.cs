@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using System.Data.Common;
 using PEMetrics.DataApi.Infrastructure;
 using PEMetrics.DataApi.Infrastructure.Mapping;
 using PEMetrics.DataApi.Models;
@@ -27,18 +28,18 @@ public sealed class DuckDbQueryRepository : ForReadingPEMetricsDimensions
         _populationTracker = populationTracker ?? throw new ArgumentNullException(nameof(populationTracker));
     }
 
-    public ImmutableList<Cell> GetCells()
+    public async Task<ImmutableList<Cell>> GetCellsAsync(CancellationToken cancellationToken = default)
     {
         try
         {
-            _populationTracker.WaitForTableAsync("Cell").GetAwaiter().GetResult();
+            await _populationTracker.WaitForTableAsync("Cell", cancellationToken).ConfigureAwait(false);
 
-            using var connection = _connectionFactory.OpenConnection();
-            using var command = connection.CreateCommand();
+            await using var connection = await _connectionFactory.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
+            await using var command = connection.CreateCommand();
             command.CommandText = "SELECT * FROM Cell ORDER BY CellName";
 
-            using var reader = command.ExecuteReader();
-            return reader.MapAll(_mapper.MapCell);
+            await using var reader = await command.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
+            return await reader.MapAllAsync(_mapper.MapCell, cancellationToken).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
@@ -47,21 +48,21 @@ public sealed class DuckDbQueryRepository : ForReadingPEMetricsDimensions
         }
     }
 
-    public Cell? GetCellById(int cellId)
+    public async Task<Cell?> GetCellByIdAsync(int cellId, CancellationToken cancellationToken = default)
     {
         try
         {
-            _populationTracker.WaitForTableAsync("Cell").GetAwaiter().GetResult();
+            await _populationTracker.WaitForTableAsync("Cell", cancellationToken).ConfigureAwait(false);
 
-            using var connection = _connectionFactory.OpenConnection();
-            using var command = connection.CreateCommand();
+            await using var connection = await _connectionFactory.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
+            await using var command = connection.CreateCommand();
             command.CommandText = "SELECT * FROM Cell WHERE CellId = ?";
             var param = command.CreateParameter();
             param.Value = cellId;
             command.Parameters.Add(param);
 
-            using var reader = command.ExecuteReader();
-            return reader.MapFirstOrDefault(_mapper.MapCell);
+            await using var reader = await command.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
+            return await reader.MapFirstOrDefaultAsync(_mapper.MapCell, cancellationToken).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
@@ -70,18 +71,18 @@ public sealed class DuckDbQueryRepository : ForReadingPEMetricsDimensions
         }
     }
 
-    public ImmutableList<PCStation> GetPCStations()
+    public async Task<ImmutableList<PCStation>> GetPCStationsAsync(CancellationToken cancellationToken = default)
     {
         try
         {
-            _populationTracker.WaitForTableAsync("PCStation").GetAwaiter().GetResult();
+            await _populationTracker.WaitForTableAsync("PCStation", cancellationToken).ConfigureAwait(false);
 
-            using var connection = _connectionFactory.OpenConnection();
-            using var command = connection.CreateCommand();
+            await using var connection = await _connectionFactory.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
+            await using var command = connection.CreateCommand();
             command.CommandText = "SELECT * FROM PCStation ORDER BY PcName";
 
-            using var reader = command.ExecuteReader();
-            return reader.MapAll(_mapper.MapPCStation);
+            await using var reader = await command.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
+            return await reader.MapAllAsync(_mapper.MapPCStation, cancellationToken).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
@@ -90,21 +91,21 @@ public sealed class DuckDbQueryRepository : ForReadingPEMetricsDimensions
         }
     }
 
-    public ImmutableList<PCStation> SearchPCStations(string prefix)
+    public async Task<ImmutableList<PCStation>> SearchPCStationsAsync(string prefix, CancellationToken cancellationToken = default)
     {
         try
         {
-            _populationTracker.WaitForTableAsync("PCStation").GetAwaiter().GetResult();
+            await _populationTracker.WaitForTableAsync("PCStation", cancellationToken).ConfigureAwait(false);
 
-            using var connection = _connectionFactory.OpenConnection();
-            using var command = connection.CreateCommand();
+            await using var connection = await _connectionFactory.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
+            await using var command = connection.CreateCommand();
             command.CommandText = "SELECT * FROM PCStation WHERE PcName LIKE ? || '%' ORDER BY PcName";
             var param = command.CreateParameter();
             param.Value = prefix ?? "";
             command.Parameters.Add(param);
 
-            using var reader = command.ExecuteReader();
-            return reader.MapAll(_mapper.MapPCStation);
+            await using var reader = await command.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
+            return await reader.MapAllAsync(_mapper.MapPCStation, cancellationToken).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
@@ -113,18 +114,18 @@ public sealed class DuckDbQueryRepository : ForReadingPEMetricsDimensions
         }
     }
 
-    public ImmutableList<CellByPCStation> GetPcToCellMappings()
+    public async Task<ImmutableList<CellByPCStation>> GetPcToCellMappingsAsync(CancellationToken cancellationToken = default)
     {
         try
         {
-            _populationTracker.WaitForTableAsync("CellByPCStation").GetAwaiter().GetResult();
+            await _populationTracker.WaitForTableAsync("CellByPCStation", cancellationToken).ConfigureAwait(false);
 
-            using var connection = _connectionFactory.OpenConnection();
-            using var command = connection.CreateCommand();
+            await using var connection = await _connectionFactory.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
+            await using var command = connection.CreateCommand();
             command.CommandText = "SELECT * FROM CellByPCStation ORDER BY CellName, PcName";
 
-            using var reader = command.ExecuteReader();
-            return reader.MapAll(_mapper.MapCellByPCStation);
+            await using var reader = await command.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
+            return await reader.MapAllAsync(_mapper.MapCellByPCStation, cancellationToken).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
@@ -133,21 +134,21 @@ public sealed class DuckDbQueryRepository : ForReadingPEMetricsDimensions
         }
     }
 
-    public CellByPCStation? GetPcToCellByMapId(int stationMapId)
+    public async Task<CellByPCStation?> GetPcToCellByMapIdAsync(int stationMapId, CancellationToken cancellationToken = default)
     {
         try
         {
-            _populationTracker.WaitForTableAsync("CellByPCStation").GetAwaiter().GetResult();
+            await _populationTracker.WaitForTableAsync("CellByPCStation", cancellationToken).ConfigureAwait(false);
 
-            using var connection = _connectionFactory.OpenConnection();
-            using var command = connection.CreateCommand();
+            await using var connection = await _connectionFactory.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
+            await using var command = connection.CreateCommand();
             command.CommandText = "SELECT * FROM CellByPCStation WHERE StationMapId = ?";
             var param = command.CreateParameter();
             param.Value = stationMapId;
             command.Parameters.Add(param);
 
-            using var reader = command.ExecuteReader();
-            return reader.MapFirstOrDefault(_mapper.MapCellByPCStation);
+            await using var reader = await command.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
+            return await reader.MapFirstOrDefaultAsync(_mapper.MapCellByPCStation, cancellationToken).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
@@ -156,18 +157,18 @@ public sealed class DuckDbQueryRepository : ForReadingPEMetricsDimensions
         }
     }
 
-    public ImmutableList<SwTestMap> GetSwTests()
+    public async Task<ImmutableList<SwTestMap>> GetSwTestsAsync(CancellationToken cancellationToken = default)
     {
         try
         {
-            _populationTracker.WaitForTableAsync("SwTestMap").GetAwaiter().GetResult();
+            await _populationTracker.WaitForTableAsync("SwTestMap", cancellationToken).ConfigureAwait(false);
 
-            using var connection = _connectionFactory.OpenConnection();
-            using var command = connection.CreateCommand();
+            await using var connection = await _connectionFactory.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
+            await using var command = connection.CreateCommand();
             command.CommandText = "SELECT * FROM SwTestMap ORDER BY ReportKey, TestName";
 
-            using var reader = command.ExecuteReader();
-            return reader.MapAll(_mapper.MapSwTestMap);
+            await using var reader = await command.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
+            return await reader.MapAllAsync(_mapper.MapSwTestMap, cancellationToken).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
@@ -176,21 +177,21 @@ public sealed class DuckDbQueryRepository : ForReadingPEMetricsDimensions
         }
     }
 
-    public SwTestMap? GetSwTestById(int swTestMapId)
+    public async Task<SwTestMap?> GetSwTestByIdAsync(int swTestMapId, CancellationToken cancellationToken = default)
     {
         try
         {
-            _populationTracker.WaitForTableAsync("SwTestMap").GetAwaiter().GetResult();
+            await _populationTracker.WaitForTableAsync("SwTestMap", cancellationToken).ConfigureAwait(false);
 
-            using var connection = _connectionFactory.OpenConnection();
-            using var command = connection.CreateCommand();
+            await using var connection = await _connectionFactory.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
+            await using var command = connection.CreateCommand();
             command.CommandText = "SELECT * FROM SwTestMap WHERE SwTestMapId = ?";
             var param = command.CreateParameter();
             param.Value = swTestMapId;
             command.Parameters.Add(param);
 
-            using var reader = command.ExecuteReader();
-            return reader.MapFirstOrDefault(_mapper.MapSwTestMap);
+            await using var reader = await command.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
+            return await reader.MapFirstOrDefaultAsync(_mapper.MapSwTestMap, cancellationToken).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
@@ -199,18 +200,18 @@ public sealed class DuckDbQueryRepository : ForReadingPEMetricsDimensions
         }
     }
 
-    public ImmutableList<CellBySwTestView> GetSwTestToCellMappings()
+    public async Task<ImmutableList<CellBySwTestView>> GetSwTestToCellMappingsAsync(CancellationToken cancellationToken = default)
     {
         try
         {
-            _populationTracker.WaitForTableAsync("CellBySwTestView").GetAwaiter().GetResult();
+            await _populationTracker.WaitForTableAsync("CellBySwTestView", cancellationToken).ConfigureAwait(false);
 
-            using var connection = _connectionFactory.OpenConnection();
-            using var command = connection.CreateCommand();
+            await using var connection = await _connectionFactory.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
+            await using var command = connection.CreateCommand();
             command.CommandText = "SELECT * FROM CellBySwTestView ORDER BY ConfiguredTestId, CellName";
 
-            using var reader = command.ExecuteReader();
-            return reader.MapAll(_mapper.MapCellBySwTestView);
+            await using var reader = await command.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
+            return await reader.MapAllAsync(_mapper.MapCellBySwTestView, cancellationToken).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
@@ -219,21 +220,21 @@ public sealed class DuckDbQueryRepository : ForReadingPEMetricsDimensions
         }
     }
 
-    public ImmutableList<CellBySwTest> GetSwTestToCellByMapId(int swTestMapId)
+    public async Task<ImmutableList<CellBySwTest>> GetSwTestToCellByMapIdAsync(int swTestMapId, CancellationToken cancellationToken = default)
     {
         try
         {
-            _populationTracker.WaitForTableAsync("CellBySwTest").GetAwaiter().GetResult();
+            await _populationTracker.WaitForTableAsync("CellBySwTest", cancellationToken).ConfigureAwait(false);
 
-            using var connection = _connectionFactory.OpenConnection();
-            using var command = connection.CreateCommand();
+            await using var connection = await _connectionFactory.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
+            await using var command = connection.CreateCommand();
             command.CommandText = "SELECT * FROM CellBySwTest WHERE SwTestMapId = ?";
             var param = command.CreateParameter();
             param.Value = swTestMapId;
             command.Parameters.Add(param);
 
-            using var reader = command.ExecuteReader();
-            return reader.MapAll(_mapper.MapCellBySwTest);
+            await using var reader = await command.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
+            return await reader.MapAllAsync(_mapper.MapCellBySwTest, cancellationToken).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
@@ -242,18 +243,18 @@ public sealed class DuckDbQueryRepository : ForReadingPEMetricsDimensions
         }
     }
 
-    public ImmutableList<TLA> GetTLACatalog()
+    public async Task<ImmutableList<TLA>> GetTLACatalogAsync(CancellationToken cancellationToken = default)
     {
         try
         {
-            _populationTracker.WaitForTableAsync("TLA").GetAwaiter().GetResult();
+            await _populationTracker.WaitForTableAsync("TLA", cancellationToken).ConfigureAwait(false);
 
-            using var connection = _connectionFactory.OpenConnection();
-            using var command = connection.CreateCommand();
+            await using var connection = await _connectionFactory.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
+            await using var command = connection.CreateCommand();
             command.CommandText = "SELECT * FROM TLA ORDER BY PartNo";
 
-            using var reader = command.ExecuteReader();
-            return reader.MapAll(_mapper.MapTLA);
+            await using var reader = await command.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
+            return await reader.MapAllAsync(_mapper.MapTLA, cancellationToken).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
@@ -262,21 +263,21 @@ public sealed class DuckDbQueryRepository : ForReadingPEMetricsDimensions
         }
     }
 
-    public TLA? GetTLAByPartNo(string partNo)
+    public async Task<TLA?> GetTLAByPartNoAsync(string partNo, CancellationToken cancellationToken = default)
     {
         try
         {
-            _populationTracker.WaitForTableAsync("TLA").GetAwaiter().GetResult();
+            await _populationTracker.WaitForTableAsync("TLA", cancellationToken).ConfigureAwait(false);
 
-            using var connection = _connectionFactory.OpenConnection();
-            using var command = connection.CreateCommand();
+            await using var connection = await _connectionFactory.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
+            await using var command = connection.CreateCommand();
             command.CommandText = "SELECT * FROM TLA WHERE PartNo = ?";
             var param = command.CreateParameter();
             param.Value = partNo;
             command.Parameters.Add(param);
 
-            using var reader = command.ExecuteReader();
-            return reader.MapFirstOrDefault(_mapper.MapTLA);
+            await using var reader = await command.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
+            return await reader.MapFirstOrDefaultAsync(_mapper.MapTLA, cancellationToken).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
@@ -285,18 +286,18 @@ public sealed class DuckDbQueryRepository : ForReadingPEMetricsDimensions
         }
     }
 
-    public ImmutableList<CellByPartNoView> GetTLAToCellMappings()
+    public async Task<ImmutableList<CellByPartNoView>> GetTLAToCellMappingsAsync(CancellationToken cancellationToken = default)
     {
         try
         {
-            _populationTracker.WaitForTableAsync("CellByPartNoView").GetAwaiter().GetResult();
+            await _populationTracker.WaitForTableAsync("CellByPartNoView", cancellationToken).ConfigureAwait(false);
 
-            using var connection = _connectionFactory.OpenConnection();
-            using var command = connection.CreateCommand();
+            await using var connection = await _connectionFactory.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
+            await using var command = connection.CreateCommand();
             command.CommandText = "SELECT * FROM CellByPartNoView ORDER BY PartNo, CellName";
 
-            using var reader = command.ExecuteReader();
-            return reader.MapAll(_mapper.MapCellByPartNoView);
+            await using var reader = await command.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
+            return await reader.MapAllAsync(_mapper.MapCellByPartNoView, cancellationToken).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
@@ -305,21 +306,21 @@ public sealed class DuckDbQueryRepository : ForReadingPEMetricsDimensions
         }
     }
 
-    public ImmutableList<CellByPartNo> GetTLAToCellByPartNo(string partNo)
+    public async Task<ImmutableList<CellByPartNo>> GetTLAToCellByPartNoAsync(string partNo, CancellationToken cancellationToken = default)
     {
         try
         {
-            _populationTracker.WaitForTableAsync("CellByPartNo").GetAwaiter().GetResult();
+            await _populationTracker.WaitForTableAsync("CellByPartNo", cancellationToken).ConfigureAwait(false);
 
-            using var connection = _connectionFactory.OpenConnection();
-            using var command = connection.CreateCommand();
+            await using var connection = await _connectionFactory.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
+            await using var command = connection.CreateCommand();
             command.CommandText = "SELECT * FROM CellByPartNo WHERE PartNo = ?";
             var param = command.CreateParameter();
             param.Value = partNo;
             command.Parameters.Add(param);
 
-            using var reader = command.ExecuteReader();
-            return reader.MapAll(_mapper.MapCellByPartNo);
+            await using var reader = await command.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
+            return await reader.MapAllAsync(_mapper.MapCellByPartNo, cancellationToken).ConfigureAwait(false);
         }
         catch (Exception ex)
         {

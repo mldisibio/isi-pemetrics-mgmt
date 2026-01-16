@@ -7,9 +7,9 @@ public interface ForManagingCells
 {
     /// <summary>Inserts a new cell.</summary>
     /// <returns>The new CellId, or -1 on error.</returns>
-    int Insert(Cell cell);
+    Task<int> InsertAsync(Cell cell, CancellationToken cancellationToken = default);
 
     /// <summary>Updates an existing cell.</summary>
     /// <returns>True if successful, false on error.</returns>
-    bool Update(Cell cell);
+    Task<bool> UpdateAsync(Cell cell, CancellationToken cancellationToken = default);
 }

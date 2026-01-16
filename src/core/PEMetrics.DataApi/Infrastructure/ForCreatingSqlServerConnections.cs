@@ -6,5 +6,5 @@ namespace PEMetrics.DataApi.Infrastructure;
 public interface ForCreatingSqlServerConnections
 {
     /// <summary>Creates and opens a connection to the PE_Metrics database.</summary>
-    DbConnection OpenConnectionToPEMetrics();
+    Task<DbConnection> OpenConnectionToPEMetricsAsync(CancellationToken cancellationToken = default);
 }
