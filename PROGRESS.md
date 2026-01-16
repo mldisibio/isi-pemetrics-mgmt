@@ -99,7 +99,7 @@ All stored procedures, views, and functions created in `mgmt` schema and deploye
 
 ## Phase 3: Caching Layer
 
-**Status: COMPLETE - AWAITING TESTING**
+**Status: COMPLETE - TESTED**
 
 ### Architecture Refinements (2026-01-15)
 - [x] Move `ForCreatingDuckDbConnections` from DataCache adapter to core DataApi
@@ -249,12 +249,12 @@ Other operations → single table refresh
 - [x] Update return types (query → empty, command → -1/false on error)
 
 **Testing:**
-- [ ] Test online mode with successful SQL Server connection
+- [x] Test online mode with successful SQL Server connection
 - [ ] Test offline mode with unreachable SQL Server
-- [ ] Test cache population on startup
+- [x] Test cache population on startup
 - [ ] Test cache refresh on data changes
-- [ ] Test error handling and notifications
-- [ ] Verify nanodbc extension works
+- [x] Test error handling and notifications
+- [x] Verify nanodbc extension works
 
 ---
 
@@ -268,7 +268,9 @@ Other operations → single table refresh
 - [x] SQL scripts for database initialization (schemas, tables, procedures, seed data)
 - [x] Test fixtures with shared container via ICollectionFixture
 
-### Test Coverage (75 tests total)
+### Test Coverage (112 tests total)
+
+**SQL Server Repository Tests (75 tests):**
 - [x] **Query Repository Tests** (14 tests)
   - All 14 read operations verified to return data
   - GetById methods work correctly
@@ -282,12 +284,36 @@ Other operations → single table refresh
 - [x] **TLARepository Tests** (10 tests) - Insert, Update, Delete with referential integrity
 - [x] **CellByPartNoRepository Tests** (10 tests) - SetMappings, AddMapping, DeleteMapping
 
+**DuckDB Cache Layer Tests (37 tests):**
+- [x] **NanodbcConnectionTests** (6 tests)
+  - nanodbc extension install/load verification
+  - odbc_scan queries against SQL Server views (Cell, PCStation, SwTestMap, TLA)
+  - Insert from odbc_scan into local DuckDB tables
+- [x] **CacheRefreshServiceTests** (9 tests)
+  - PopulateAllTablesAsync populates all 7 cache tables
+  - Parallel population with configurable max parallelism
+  - No errors during population
+  - Refresh can run multiple times (idempotent)
+- [x] **DuckDbQueryRepositoryTests** (22 tests)
+  - All 14 read operations work from populated cache
+  - GetById methods return correct data
+  - Search methods work correctly
+  - Computed flags (IsActive, IsUsed) mapped correctly
+  - Error handling verified
+
 ### Test Infrastructure
+
+**SQL Server Fixtures:**
 - [x] `SqlServerContainerFixture` - Shared container with SQL script execution
 - [x] `TestConnectionFactory` - Implements `ForCreatingSqlServerConnections`
 - [x] `RecordingNotifier` - Verifies `ForNotifyingDataChanges` contract
 - [x] `RecordingErrorNotifier` - Verifies `ForNotifyingDataCommunicationErrors` contract
 - [x] SQL Scripts: 01_CreateSchemas, 02_CreateBaseTables, 03_CreateMgmtObjects, 04_SeedData
+
+**DuckDB Cache Fixtures:**
+- [x] `TestDuckDbConnectionFactory` - File-based DuckDB with auto nanodbc loading
+- [x] `DuckDbSchemaCreator` - Creates DuckDB tables matching SQL Server view schemas
+- [x] `OdbcConnectionStringBuilder` - Converts ADO.NET connection strings to ODBC format
 
 ---
 
@@ -367,5 +393,8 @@ Other operations → single table refresh
 - All repositories compile and follow established patterns
 - Phase 3 caching layer implemented and compiles successfully
 - Architecture refined with `DbConnection` abstraction in core ports
-- **Integration tests complete**: 75 tests passing using Testcontainers for SQL Server
-- DuckDB cache layer requires manual testing with actual nanodbc extension
+- **Integration tests complete**: 112 tests passing using Testcontainers for SQL Server
+  - 75 SQL Server repository tests (Phase 2 validation)
+  - 37 DuckDB cache layer tests (Phase 3 validation)
+- DuckDB cache tests verify nanodbc extension, cache population, and query operations
+- Cache tests use same SQL Server container via ODBC connection

@@ -109,6 +109,9 @@ public sealed class CacheRefreshService : IDisposable
 
         try
         {
+            // Parse schema.view format into separate components
+            var (schemaName, objectName) = ParseSchemaAndObject(viewName);
+
             using var connection = _connectionFactory.OpenConnection();
             using var command = connection.CreateCommand();
 
@@ -120,8 +123,10 @@ public sealed class CacheRefreshService : IDisposable
             command.CommandText = $@"
 INSERT INTO {tableName}
 SELECT * FROM odbc_scan(
-    '{EscapeSqlString(_odbcConnectionString)}',
-    '{viewName}'
+    connection='{EscapeSqlString(_odbcConnectionString)}',
+    schema_name='{schemaName}',
+    table_name='{objectName}',
+    read_only=true
 )";
             await Task.Run(() => command.ExecuteNonQuery(), cancellationToken);
         }
@@ -129,6 +134,12 @@ SELECT * FROM odbc_scan(
         {
             _errorNotifier.UnexpectedError($"PopulateTable({tableName})", ex);
         }
+    }
+
+    static (string Schema, string Object) ParseSchemaAndObject(string qualifiedName)
+    {
+        var parts = qualifiedName.Split('.');
+        return parts.Length == 2 ? (parts[0], parts[1]) : ("dbo", qualifiedName);
     }
 
     static string EscapeSqlString(string value) => value.Replace("'", "''");

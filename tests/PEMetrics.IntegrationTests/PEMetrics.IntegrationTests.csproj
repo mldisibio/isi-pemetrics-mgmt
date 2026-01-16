@@ -21,6 +21,11 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\core\PEMetrics.DataApi\PEMetrics.DataApi.csproj" />
     <ProjectReference Include="..\..\src\adapters\PEMetrics.ProductionStore\PEMetrics.ProductionStore.csproj" />
+    <ProjectReference Include="..\..\src\adapters\PEMetrics.DataCache\PEMetrics.DataCache.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.2" />
   </ItemGroup>
 
   <ItemGroup>
