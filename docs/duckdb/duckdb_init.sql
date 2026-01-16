@@ -20,15 +20,17 @@ CREATE TABLE IF NOT EXISTS PCStation (
 );
 
 -- CellByPCStation table (maps to mgmt.vw_CellByPCStation)
+-- Column order must match SQL Server view for SELECT * inserts:
+-- StationMapId, CellId, CellName, PcName, PcPurpose, ActiveFrom, ActiveTo, ExtendedName, IsActive
 CREATE TABLE IF NOT EXISTS CellByPCStation (
     StationMapId INTEGER NOT NULL PRIMARY KEY,
     CellId INTEGER NOT NULL,
+    CellName VARCHAR,
     PcName VARCHAR NOT NULL,
     PcPurpose VARCHAR,
     ActiveFrom DATE NOT NULL,
     ActiveTo DATE,
     ExtendedName VARCHAR,
-    CellName VARCHAR,
     IsActive INTEGER NOT NULL
 );
 
@@ -46,16 +48,23 @@ CREATE TABLE IF NOT EXISTS SwTestMap (
     IsActive INTEGER NOT NULL
 );
 
--- CellBySwTest table (maps to mgmt.CellBySwTest_GetBySwTestMapId result)
--- No view for this, only used for specific lookups
+-- CellBySwTest table (maps to mgmt.vw_CellBySwTest)
+-- Column order must match SQL Server view for SELECT * inserts:
+-- SwTestMapId, ConfiguredTestId, TestApplication, ReportKey, LastRun, IsActive, CellId, CellName
 CREATE TABLE IF NOT EXISTS CellBySwTest (
     SwTestMapId INTEGER NOT NULL,
+    ConfiguredTestId VARCHAR,
+    TestApplication VARCHAR,
+    ReportKey VARCHAR,
+    LastRun DATE,
+    IsActive INTEGER NOT NULL,
     CellId INTEGER NOT NULL,
     CellName VARCHAR,
     PRIMARY KEY (SwTestMapId, CellId)
 );
 
 -- CellBySwTestView table (maps to mgmt.vw_CellBySwTest expanded view)
+-- Same column order as CellBySwTest - both populated from same view
 CREATE TABLE IF NOT EXISTS CellBySwTestView (
     SwTestMapId INTEGER NOT NULL,
     ConfiguredTestId VARCHAR,
@@ -79,16 +88,21 @@ CREATE TABLE IF NOT EXISTS TLA (
     IsUsed INTEGER NOT NULL
 );
 
--- CellByPartNo table (maps to mgmt.CellByPartNo_GetByPartNo result)
--- No view for this, only used for specific lookups
+-- CellByPartNo table (maps to mgmt.vw_CellByPartNo)
+-- Column order must match SQL Server view for SELECT * inserts:
+-- PartNo, Family, Subfamily, Description, CellId, CellName
 CREATE TABLE IF NOT EXISTS CellByPartNo (
     PartNo VARCHAR NOT NULL,
+    Family VARCHAR,
+    Subfamily VARCHAR,
+    Description VARCHAR,
     CellId INTEGER NOT NULL,
     CellName VARCHAR,
     PRIMARY KEY (PartNo, CellId)
 );
 
 -- CellByPartNoView table (maps to mgmt.vw_CellByPartNo expanded view)
+-- Same column order as CellByPartNo - both populated from same view
 CREATE TABLE IF NOT EXISTS CellByPartNoView (
     PartNo VARCHAR NOT NULL,
     Family VARCHAR,

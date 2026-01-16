@@ -34,4 +34,10 @@
     </None>
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="..\..\docs\duckdb\duckdb_init.sql" Link="DuckDbScripts\duckdb_init.sql">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
