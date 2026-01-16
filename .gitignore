@@ -52,14 +52,6 @@ CodeCoverage/
 *.VisualState.xml
 TestResult.xml
 nunit-*.xml
-/.vs/PE_Metrics_DataMgmt/CopilotIndices/17.14.1561.44479
-/.vs/PE_Metrics_DataMgmt/DesignTimeBuild
-/.vs/PE_Metrics_DataMgmt/FileContentIndex
-/.vs/PE_Metrics_DataMgmt/v17/.futdcache.v2
-/.vs/PE_Metrics_DataMgmt/v17/.suo
-/.vs/PE_Metrics_DataMgmt/v17/DocumentLayout.backup.json
-/.vs/PE_Metrics_DataMgmt/v17/DocumentLayout.json
-/.vs/ProjectEvaluation
+.vs/
 /PROGRESS.md
 /STATE.md
-/.vs/PE_Metrics_DataMgmt/CopilotIndices/17.14.1569.27729
