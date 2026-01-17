@@ -82,7 +82,8 @@ public partial class MainForm : Form
 
         try
         {
-            await InitializeCacheAsync();
+            // Run heavy I/O on background thread to keep UI responsive
+            await Task.Run(InitializeCacheAsync);
 
             if (_cellControl != null && !_isOffline)
                 await _cellControl.LoadDataAsync();
