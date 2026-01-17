@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using DimensionManagement.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using PEMetrics.DataApi.Models;
 using PEMetrics.DataApi.Ports;
@@ -171,19 +172,64 @@ public sealed class CellMaintenanceControl : UserControl
         Controls.Add(toolbarPanel);
     }
 
-    public async Task LoadDataAsync()
+    public async Task LoadDataAsync(int? selectCellId = null)
     {
         _allCells = await _queryRepo.GetCellsAsync();
-        ApplyFilter();
+        ApplyFilter(selectCellId);
     }
 
-    void ApplyFilter()
+    void ApplyFilter(int? selectCellId = null)
     {
+        // Preserve current sort state
+        var sortColumn = _grid.SortedColumn;
+        var sortOrder = _grid.SortOrder;
+
+        // Capture current selection if no override provided
+        var cellIdToSelect = selectCellId
+            ?? (_grid.CurrentRow?.DataBoundItem as Cell)?.CellId;
+
         var filtered = _activeOnlyCheckbox.Checked
             ? _allCells.Where(c => c.IsActive).ToList()
             : _allCells.ToList();
 
-        _grid.DataSource = filtered;
+        _grid.DataSource = new SortableBindingList<Cell>(filtered);
+
+        // Re-apply sort if one was active
+        if (sortColumn != null && sortOrder != SortOrder.None)
+        {
+            var direction = sortOrder == SortOrder.Ascending
+                ? System.ComponentModel.ListSortDirection.Ascending
+                : System.ComponentModel.ListSortDirection.Descending;
+            _grid.Sort(sortColumn, direction);
+        }
+
+        // Re-select the target row
+        SelectRowByCellId(cellIdToSelect);
+    }
+
+    void SelectRowByCellId(int? cellId)
+    {
+        if (_grid.Rows.Count == 0) return;
+
+        // Find and select the row with matching CellId
+        if (cellId.HasValue)
+        {
+            foreach (DataGridViewRow row in _grid.Rows)
+            {
+                if (row.DataBoundItem is Cell cell && cell.CellId == cellId.Value)
+                {
+                    _grid.ClearSelection();
+                    row.Selected = true;
+                    _grid.CurrentCell = row.Cells[0];
+                    return;
+                }
+            }
+        }
+
+        // Fallback: select first row
+        _grid.ClearSelection();
+        _grid.Rows[0].Selected = true;
+        _grid.CurrentCell = _grid.Rows[0].Cells[0];
     }
 
     void Grid_CellDoubleClick(object? sender, DataGridViewCellEventArgs e)
@@ -301,7 +347,7 @@ public sealed class CellMaintenanceControl : UserControl
                 {
                     HideDetailPanel();
                     await Task.Delay(500);
-                    await LoadDataAsync();
+                    await LoadDataAsync(newId);
                 }
                 else
                 {
@@ -315,7 +361,7 @@ public sealed class CellMaintenanceControl : UserControl
                 {
                     HideDetailPanel();
                     await Task.Delay(500);
-                    await LoadDataAsync();
+                    await LoadDataAsync(cell.CellId);
                 }
                 else
                 {
