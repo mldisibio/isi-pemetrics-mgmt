@@ -14,6 +14,7 @@ public partial class MainForm : Form
     readonly ToolStripStatusLabel _modeLabel;
     bool _isOffline;
     CellMaintenanceControl? _cellControl;
+    PCStationMaintenanceControl? _pcStationControl;
 
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public IServiceProvider? Services { get; set; }
@@ -68,8 +69,16 @@ public partial class MainForm : Form
         cellsTab.Controls.Add(_cellControl);
         _tabControl.TabPages.Add(cellsTab);
 
+        // Add PC Stations tab
+        var pcStationsTab = new TabPage("PC Stations");
+        _pcStationControl = new PCStationMaintenanceControl(Services)
+        {
+            Dock = DockStyle.Fill
+        };
+        pcStationsTab.Controls.Add(_pcStationControl);
+        _tabControl.TabPages.Add(pcStationsTab);
+
         // Placeholder tabs for other features
-        _tabControl.TabPages.Add(new TabPage("PC Stations"));
         _tabControl.TabPages.Add(new TabPage("PC to Cell"));
         _tabControl.TabPages.Add(new TabPage("Software Tests"));
         _tabControl.TabPages.Add(new TabPage("Part Numbers"));
@@ -85,8 +94,13 @@ public partial class MainForm : Form
             // Run heavy I/O on background thread to keep UI responsive
             await Task.Run(InitializeCacheAsync);
 
-            if (_cellControl != null && !_isOffline)
-                await _cellControl.LoadDataAsync();
+            if (!_isOffline)
+            {
+                if (_cellControl != null)
+                    await _cellControl.LoadDataAsync();
+                if (_pcStationControl != null)
+                    await _pcStationControl.LoadDataAsync();
+            }
         }
         catch (Exception ex)
         {
