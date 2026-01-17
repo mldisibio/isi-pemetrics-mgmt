@@ -331,41 +331,92 @@ Other operations → single table refresh
 
 ## Phase 4: Windows Forms UI Layer
 
-**Status: NOT STARTED**
+**Status: IN PROGRESS - Cell Tab Complete**
 
 ### Project Setup
-- [ ] Update existing `DimensionManagement` project
-- [ ] Add references to DataApi and adapter projects
-- [ ] Configure dependency injection
-- [ ] Wire up error notifications (offline mode indicator)
-- [ ] Create main form with navigation
+- [x] Update existing `DimensionManagement` project
+- [x] Add references to DataApi and adapter projects
+- [x] Configure dependency injection in Program.cs
+- [x] Wire up error notifications (offline mode indicator via UIErrorNotifier)
+- [x] Create MainForm with TabControl navigation and StatusStrip
+- [x] Create appsettings.json with connection strings and cache configuration
 
-### Screen 1: Cell Management
-- [ ] Cell list DataGridView
-- [ ] Active Only filter
-- [ ] Add/Edit dialog
-- [ ] Integration with cache and data API
+### Infrastructure Components Created
+- [x] `Infrastructure/UIErrorNotifier.cs` - Status bar error notifications
+- [x] `Infrastructure/SortableBindingList<T>.cs` - Generic sortable binding for grids
+
+### Screen 1: Cell Management - COMPLETE
+- [x] CellMaintenanceControl with DataGridView
+- [x] Active Only filter checkbox
+- [x] Detail panel (not modal) for Add/Edit
+- [x] Lucida Console 8pt font for data display
+- [x] YYYY-MM-DD date format with centered columns
+- [x] TextBox for date input (not DateTimePicker)
+- [x] Sortable columns (click header to sort)
+- [x] Sort preservation across refresh
+- [x] Selection preservation (re-select after edit/insert/filter)
+- [x] No success message boxes - grid refresh is visual cue
+- [x] Background thread for cache initialization (responsive UI)
+- [x] Integration with cache and data API
 
 ### Screen 2: PC Station Management
-- [ ] PC name input with autocomplete
-- [ ] Add confirmation dialog
+- [ ] PCStationMaintenanceControl (follow Cell tab patterns)
+- [ ] PC name input
+- [ ] Add functionality (idempotent insert)
+- [ ] Use SortableBindingList<PCStation>
 
 ### Screen 3: PC to Cell Mapping Management
+- [ ] CellByPCStationMaintenanceControl (follow Cell tab patterns)
 - [ ] Mapping list DataGridView
 - [ ] Active Only filter
-- [ ] Add/Edit dialog with Cell picker
+- [ ] Detail panel with Cell picker
+- [ ] Use SortableBindingList<CellByPCStation>
 
 ### Screen 4: Software Test Management
+- [ ] SwTestMaintenanceControl (follow Cell tab patterns)
 - [ ] SwTestMap list DataGridView
 - [ ] Active filter
-- [ ] Add/Edit dialog with Cell checkbox list
+- [ ] Detail panel with Cell checkbox list
+- [ ] Use SortableBindingList<SwTestMap>
 
 ### Screen 5: Part Number (TLA) Management
+- [ ] TLAMaintenanceControl (follow Cell tab patterns)
 - [ ] TLA list DataGridView with IsUsed column
 - [ ] Text search filter
 - [ ] IsUsed filter
-- [ ] Add/Edit dialog with Cell checkbox list
+- [ ] Detail panel with Cell checkbox list
 - [ ] Delete button (disabled when IsUsed)
+- [ ] Use SortableBindingList<TLA>
+
+### UI Patterns (Apply to All Tabs)
+
+**Reference Implementation:** `Controls/CellMaintenanceControl.cs`
+
+**Font & Display:**
+- Lucida Console 8pt for grids and input fields
+- YYYY-MM-DD date format, centered columns
+- TextBox for date input (not calendar widgets)
+
+**Grid Behavior:**
+- Use `SortableBindingList<T>` for click-to-sort
+- Preserve sort column/direction across refresh
+- Preserve selection across refresh (re-select by ID)
+- Select new row after insert
+
+**Layout:**
+- Toolbar docked top (filters, action buttons)
+- Grid fills center
+- Detail panel docked bottom (hidden until needed)
+
+**Async:**
+- `async void` for event handlers
+- `Task.Run()` for heavy I/O
+- `InvokeRequired`/`Invoke()` for cross-thread UI updates
+
+**User Feedback:**
+- No success message boxes
+- MessageBox for validation/operation errors
+- Status bar for progress/errors
 
 ---
 
@@ -411,3 +462,19 @@ Other operations → single table refresh
   - 37 DuckDB cache layer tests (Phase 3 validation)
 - DuckDB cache tests verify nanodbc extension, cache population, and query operations
 - Cache tests use same SQL Server container via ODBC connection
+
+## Phase 4 Implementation Notes (2026-01-16)
+
+**DuckDB Connection Management:**
+- Single long-lived DuckDB connection (in-process database)
+- `NonDisposingConnectionWrapper` prevents premature disposal of shared connection
+- nanodbc extension installed and loaded once at startup
+
+**Channel Wiring for Cache Refresh:**
+- `CacheRefreshService` creates its own internal channel
+- `DataChangeNotificationHandler` must use `CacheRefreshService.Writer` (not a separate channel)
+- This ensures notifications flow to the refresh processor
+
+**UI Responsiveness:**
+- Cache initialization wrapped in `Task.Run()` to avoid freezing form during startup
+- `ShowStatusMessage` and `SetOfflineMode` handle cross-thread marshaling via `InvokeRequired`
