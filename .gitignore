@@ -55,3 +55,4 @@ nunit-*.xml
 .vs/
 /PROGRESS.md
 /STATE.md
+*csproj.user
