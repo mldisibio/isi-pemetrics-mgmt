@@ -56,3 +56,4 @@ nunit-*.xml
 /PROGRESS.md
 /STATE.md
 *.csproj.user
+/src/gui/DimensionManagement/DimensionManagement.csproj.user
