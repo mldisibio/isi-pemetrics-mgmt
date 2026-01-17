@@ -346,7 +346,6 @@ public sealed class CellMaintenanceControl : UserControl
                 if (newId > 0)
                 {
                     HideDetailPanel();
-                    await Task.Delay(500);
                     await LoadDataAsync(newId);
                 }
                 else
@@ -360,7 +359,6 @@ public sealed class CellMaintenanceControl : UserControl
                 if (success)
                 {
                     HideDetailPanel();
-                    await Task.Delay(500);
                     await LoadDataAsync(cell.CellId);
                 }
                 else

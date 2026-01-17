@@ -37,7 +37,7 @@ public sealed class CellBySwTestRepository : ForMappingSwTestsToCells
 
             await command.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
 
-            _dataChangeNotifier.NotifySwTestToCellMappingChanged(swTestMapId);
+            await _dataChangeNotifier.NotifySwTestToCellMappingChangedAsync(swTestMapId).ConfigureAwait(false);
             return true;
         }
         catch (Exception ex)
@@ -62,7 +62,7 @@ public sealed class CellBySwTestRepository : ForMappingSwTestsToCells
 
             await command.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
 
-            _dataChangeNotifier.NotifySwTestToCellMappingChanged(swTestMapId);
+            await _dataChangeNotifier.NotifySwTestToCellMappingChangedAsync(swTestMapId).ConfigureAwait(false);
             return true;
         }
         catch (Exception ex)
@@ -87,7 +87,7 @@ public sealed class CellBySwTestRepository : ForMappingSwTestsToCells
 
             await command.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
 
-            _dataChangeNotifier.NotifySwTestToCellMappingChanged(swTestMapId);
+            await _dataChangeNotifier.NotifySwTestToCellMappingChangedAsync(swTestMapId).ConfigureAwait(false);
             return true;
         }
         catch (Exception ex)

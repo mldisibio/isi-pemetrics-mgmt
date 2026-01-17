@@ -46,7 +46,7 @@ public sealed class CellByPCStationRepository : ForMappingPCStationToCell
             await command.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
             var newStationMapId = (int)outputParam.Value;
 
-            _dataChangeNotifier.NotifyPCToCellMappingChanged(newStationMapId);
+            await _dataChangeNotifier.NotifyPCToCellMappingChangedAsync(newStationMapId).ConfigureAwait(false);
             return newStationMapId;
         }
         catch (Exception ex)
@@ -76,7 +76,7 @@ public sealed class CellByPCStationRepository : ForMappingPCStationToCell
 
             await command.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
 
-            _dataChangeNotifier.NotifyPCToCellMappingChanged(mapping.StationMapId);
+            await _dataChangeNotifier.NotifyPCToCellMappingChangedAsync(mapping.StationMapId).ConfigureAwait(false);
             return true;
         }
         catch (Exception ex)

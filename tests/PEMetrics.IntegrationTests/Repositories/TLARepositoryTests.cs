@@ -64,7 +64,7 @@ public sealed class TLARepositoryTests : IDisposable
 
         await _repository.InsertAsync(tla);
 
-        Assert.True(_notifier.WasCalledWith(nameof(_notifier.NotifyTLAChanged), partNo));
+        Assert.True(_notifier.WasCalledWith(nameof(_notifier.NotifyTLAChangedAsync), partNo));
     }
 
     [Fact]
@@ -113,7 +113,7 @@ public sealed class TLARepositoryTests : IDisposable
 
         await _repository.UpdateAsync(tla);
 
-        Assert.True(_notifier.WasCalledWith(nameof(_notifier.NotifyTLAChanged), "PN-001-B"));
+        Assert.True(_notifier.WasCalledWith(nameof(_notifier.NotifyTLAChangedAsync), "PN-001-B"));
     }
 
     [Fact]
@@ -157,7 +157,7 @@ public sealed class TLARepositoryTests : IDisposable
 
         await _repository.DeleteAsync(tempPartNo);
 
-        Assert.True(_notifier.WasCalledWith(nameof(_notifier.NotifyTLAChanged), tempPartNo));
+        Assert.True(_notifier.WasCalledWith(nameof(_notifier.NotifyTLAChangedAsync), tempPartNo));
     }
 
     [Fact]

@@ -73,8 +73,8 @@ public sealed class CellRepositoryTests : IDisposable
         var newId = await _repository.InsertAsync(cell);
         if (newId > 0) _insertedCellIds.Add(newId);
 
-        Assert.True(_notifier.WasCalledWith(nameof(_notifier.NotifyCellChanged), newId));
-        Assert.Equal(1, _notifier.CallCount(nameof(_notifier.NotifyCellChanged)));
+        Assert.True(_notifier.WasCalledWith(nameof(_notifier.NotifyCellChangedAsync), newId));
+        Assert.Equal(1, _notifier.CallCount(nameof(_notifier.NotifyCellChangedAsync)));
     }
 
     [Fact]
@@ -154,7 +154,7 @@ public sealed class CellRepositoryTests : IDisposable
 
         await _repository.UpdateAsync(cell);
 
-        Assert.True(_notifier.WasCalledWith(nameof(_notifier.NotifyCellChanged), 1001));
+        Assert.True(_notifier.WasCalledWith(nameof(_notifier.NotifyCellChangedAsync), 1001));
     }
 
     [Fact]

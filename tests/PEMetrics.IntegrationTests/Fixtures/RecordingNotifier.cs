@@ -11,26 +11,47 @@ public sealed class RecordingNotifier : ForNotifyingDataChanges
 
     public void Clear() => _calls.Clear();
 
-    public void NotifyCellChanged(int cellId)
-        => _calls.Add((nameof(NotifyCellChanged), cellId));
+    public Task NotifyCellChangedAsync(int cellId)
+    {
+        _calls.Add((nameof(NotifyCellChangedAsync), cellId));
+        return Task.CompletedTask;
+    }
 
-    public void NotifyPCStationChanged()
-        => _calls.Add((nameof(NotifyPCStationChanged), null));
+    public Task NotifyPCStationChangedAsync()
+    {
+        _calls.Add((nameof(NotifyPCStationChangedAsync), null));
+        return Task.CompletedTask;
+    }
 
-    public void NotifyPCToCellMappingChanged(int stationMapId)
-        => _calls.Add((nameof(NotifyPCToCellMappingChanged), stationMapId));
+    public Task NotifyPCToCellMappingChangedAsync(int stationMapId)
+    {
+        _calls.Add((nameof(NotifyPCToCellMappingChangedAsync), stationMapId));
+        return Task.CompletedTask;
+    }
 
-    public void NotifySwTestChanged(int swTestMapId)
-        => _calls.Add((nameof(NotifySwTestChanged), swTestMapId));
+    public Task NotifySwTestChangedAsync(int swTestMapId)
+    {
+        _calls.Add((nameof(NotifySwTestChangedAsync), swTestMapId));
+        return Task.CompletedTask;
+    }
 
-    public void NotifySwTestToCellMappingChanged(int swTestMapId)
-        => _calls.Add((nameof(NotifySwTestToCellMappingChanged), swTestMapId));
+    public Task NotifySwTestToCellMappingChangedAsync(int swTestMapId)
+    {
+        _calls.Add((nameof(NotifySwTestToCellMappingChangedAsync), swTestMapId));
+        return Task.CompletedTask;
+    }
 
-    public void NotifyTLAChanged(string partNo)
-        => _calls.Add((nameof(NotifyTLAChanged), partNo));
+    public Task NotifyTLAChangedAsync(string partNo)
+    {
+        _calls.Add((nameof(NotifyTLAChangedAsync), partNo));
+        return Task.CompletedTask;
+    }
 
-    public void NotifyTLAToCellMappingChanged(string partNo)
-        => _calls.Add((nameof(NotifyTLAToCellMappingChanged), partNo));
+    public Task NotifyTLAToCellMappingChangedAsync(string partNo)
+    {
+        _calls.Add((nameof(NotifyTLAToCellMappingChangedAsync), partNo));
+        return Task.CompletedTask;
+    }
 
     // Assertion helpers
     public bool WasCalled(string methodName)

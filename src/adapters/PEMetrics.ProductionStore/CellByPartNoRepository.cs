@@ -37,7 +37,7 @@ public sealed class CellByPartNoRepository : ForMappingPartNumberToCells
 
             await command.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
 
-            _dataChangeNotifier.NotifyTLAToCellMappingChanged(partNo);
+            await _dataChangeNotifier.NotifyTLAToCellMappingChangedAsync(partNo).ConfigureAwait(false);
             return true;
         }
         catch (Exception ex)
@@ -62,7 +62,7 @@ public sealed class CellByPartNoRepository : ForMappingPartNumberToCells
 
             await command.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
 
-            _dataChangeNotifier.NotifyTLAToCellMappingChanged(partNo);
+            await _dataChangeNotifier.NotifyTLAToCellMappingChangedAsync(partNo).ConfigureAwait(false);
             return true;
         }
         catch (Exception ex)
@@ -87,7 +87,7 @@ public sealed class CellByPartNoRepository : ForMappingPartNumberToCells
 
             await command.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
 
-            _dataChangeNotifier.NotifyTLAToCellMappingChanged(partNo);
+            await _dataChangeNotifier.NotifyTLAToCellMappingChangedAsync(partNo).ConfigureAwait(false);
             return true;
         }
         catch (Exception ex)

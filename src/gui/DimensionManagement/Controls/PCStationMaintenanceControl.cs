@@ -128,8 +128,6 @@ public sealed class PCStationMaintenanceControl : UserControl
             var success = await _pcStationRepo.InsertAsync(pcName);
             if (success)
             {
-                // Wait for cache refresh to complete
-                await Task.Delay(500);
                 // Reload data with same search term - new item will appear as confirmation
                 await LoadDataAsync();
             }

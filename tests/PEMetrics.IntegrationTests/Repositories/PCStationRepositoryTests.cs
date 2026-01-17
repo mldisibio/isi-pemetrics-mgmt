@@ -60,8 +60,8 @@ public sealed class PCStationRepositoryTests : IDisposable
 
         await _repository.InsertAsync(pcName);
 
-        Assert.True(_notifier.WasCalled(nameof(_notifier.NotifyPCStationChanged)));
-        Assert.Equal(1, _notifier.CallCount(nameof(_notifier.NotifyPCStationChanged)));
+        Assert.True(_notifier.WasCalled(nameof(_notifier.NotifyPCStationChangedAsync)));
+        Assert.Equal(1, _notifier.CallCount(nameof(_notifier.NotifyPCStationChangedAsync)));
     }
 
     [Fact]
@@ -79,6 +79,6 @@ public sealed class PCStationRepositoryTests : IDisposable
         // Idempotent insert still fires notification
         await _repository.InsertAsync("PC-ALPHA-01");
 
-        Assert.True(_notifier.WasCalled(nameof(_notifier.NotifyPCStationChanged)));
+        Assert.True(_notifier.WasCalled(nameof(_notifier.NotifyPCStationChangedAsync)));
     }
 }

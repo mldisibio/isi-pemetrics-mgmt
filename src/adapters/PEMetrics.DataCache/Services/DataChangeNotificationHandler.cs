@@ -13,58 +13,65 @@ public sealed class DataChangeNotificationHandler : ForNotifyingDataChanges
         _refreshChannel = refreshChannel ?? throw new ArgumentNullException(nameof(refreshChannel));
     }
 
-    public void NotifyCellChanged(int cellId)
+    public Task NotifyCellChangedAsync(int cellId)
     {
         // Cell changes cascade to all tables that reference cells
-        var request = RefreshRequest.ForTables(
+        var (request, completion) = RefreshRequest.ForTablesAwaitable(
             ["Cell", "CellByPCStation", "CellBySwTest", "CellBySwTestView", "CellByPartNo", "CellByPartNoView"],
             $"CellChanged({cellId})");
         _refreshChannel.TryWrite(request);
+        return completion;
     }
 
-    public void NotifyPCStationChanged()
+    public Task NotifyPCStationChangedAsync()
     {
-        var request = RefreshRequest.ForTable("PCStation", "PCStationChanged");
+        var (request, completion) = RefreshRequest.ForTableAwaitable("PCStation", "PCStationChanged");
         _refreshChannel.TryWrite(request);
+        return completion;
     }
 
-    public void NotifyPCToCellMappingChanged(int stationMapId)
+    public Task NotifyPCToCellMappingChangedAsync(int stationMapId)
     {
-        var request = RefreshRequest.ForTable("CellByPCStation", $"PCToCellMappingChanged({stationMapId})");
+        var (request, completion) = RefreshRequest.ForTableAwaitable("CellByPCStation", $"PCToCellMappingChanged({stationMapId})");
         _refreshChannel.TryWrite(request);
+        return completion;
     }
 
-    public void NotifySwTestChanged(int swTestMapId)
+    public Task NotifySwTestChangedAsync(int swTestMapId)
     {
         // SwTestMap changes cascade to related views
-        var request = RefreshRequest.ForTables(
+        var (request, completion) = RefreshRequest.ForTablesAwaitable(
             ["SwTestMap", "CellBySwTest", "CellBySwTestView"],
             $"SwTestChanged({swTestMapId})");
         _refreshChannel.TryWrite(request);
+        return completion;
     }
 
-    public void NotifySwTestToCellMappingChanged(int swTestMapId)
+    public Task NotifySwTestToCellMappingChangedAsync(int swTestMapId)
     {
-        var request = RefreshRequest.ForTables(
+        var (request, completion) = RefreshRequest.ForTablesAwaitable(
             ["CellBySwTest", "CellBySwTestView"],
             $"SwTestToCellMappingChanged({swTestMapId})");
         _refreshChannel.TryWrite(request);
+        return completion;
     }
 
-    public void NotifyTLAChanged(string partNo)
+    public Task NotifyTLAChangedAsync(string partNo)
     {
         // TLA changes cascade to related views
-        var request = RefreshRequest.ForTables(
+        var (request, completion) = RefreshRequest.ForTablesAwaitable(
             ["TLA", "CellByPartNo", "CellByPartNoView"],
             $"TLAChanged({partNo})");
         _refreshChannel.TryWrite(request);
+        return completion;
     }
 
-    public void NotifyTLAToCellMappingChanged(string partNo)
+    public Task NotifyTLAToCellMappingChangedAsync(string partNo)
     {
-        var request = RefreshRequest.ForTables(
+        var (request, completion) = RefreshRequest.ForTablesAwaitable(
             ["CellByPartNo", "CellByPartNoView"],
             $"TLAToCellMappingChanged({partNo})");
         _refreshChannel.TryWrite(request);
+        return completion;
     }
 }

@@ -42,7 +42,7 @@ public sealed class TLARepository : ForManagingPartNumbers
 
             await command.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
 
-            _dataChangeNotifier.NotifyTLAChanged(tla.PartNo);
+            await _dataChangeNotifier.NotifyTLAChangedAsync(tla.PartNo).ConfigureAwait(false);
             return true;
         }
         catch (Exception ex)
@@ -71,7 +71,7 @@ public sealed class TLARepository : ForManagingPartNumbers
 
             await command.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
 
-            _dataChangeNotifier.NotifyTLAChanged(tla.PartNo);
+            await _dataChangeNotifier.NotifyTLAChangedAsync(tla.PartNo).ConfigureAwait(false);
             return true;
         }
         catch (Exception ex)
@@ -93,7 +93,7 @@ public sealed class TLARepository : ForManagingPartNumbers
 
             await command.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
 
-            _dataChangeNotifier.NotifyTLAChanged(partNo);
+            await _dataChangeNotifier.NotifyTLAChangedAsync(partNo).ConfigureAwait(false);
             return true;
         }
         catch (Exception ex)

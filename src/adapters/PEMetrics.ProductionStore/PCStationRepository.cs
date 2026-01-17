@@ -34,7 +34,7 @@ public sealed class PCStationRepository : ForManagingPCStations
 
             await command.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
 
-            _dataChangeNotifier.NotifyPCStationChanged();
+            await _dataChangeNotifier.NotifyPCStationChangedAsync().ConfigureAwait(false);
             return true;
         }
         catch (Exception ex)

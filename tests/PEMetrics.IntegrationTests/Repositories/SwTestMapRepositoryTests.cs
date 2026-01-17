@@ -74,7 +74,7 @@ public sealed class SwTestMapRepositoryTests : IDisposable
         var newId = await _repository.InsertAsync(test);
         if (newId > 0) _insertedTestIds.Add(newId);
 
-        Assert.True(_notifier.WasCalledWith(nameof(_notifier.NotifySwTestChanged), newId));
+        Assert.True(_notifier.WasCalledWith(nameof(_notifier.NotifySwTestChangedAsync), newId));
     }
 
     [Fact]
@@ -142,7 +142,7 @@ public sealed class SwTestMapRepositoryTests : IDisposable
 
         await _repository.UpdateAsync(test);
 
-        Assert.True(_notifier.WasCalledWith(nameof(_notifier.NotifySwTestChanged), 1002));
+        Assert.True(_notifier.WasCalledWith(nameof(_notifier.NotifySwTestChangedAsync), 1002));
     }
 
     [Fact]

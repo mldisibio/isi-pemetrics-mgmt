@@ -77,7 +77,7 @@ public sealed class CellByPCStationRepositoryTests : IDisposable
         var newId = await _repository.InsertAsync(mapping);
         if (newId > 0) _insertedMapIds.Add(newId);
 
-        Assert.True(_notifier.WasCalledWith(nameof(_notifier.NotifyPCToCellMappingChanged), newId));
+        Assert.True(_notifier.WasCalledWith(nameof(_notifier.NotifyPCToCellMappingChangedAsync), newId));
     }
 
     [Fact]
@@ -124,7 +124,7 @@ public sealed class CellByPCStationRepositoryTests : IDisposable
 
         await _repository.UpdateAsync(mapping);
 
-        Assert.True(_notifier.WasCalledWith(nameof(_notifier.NotifyPCToCellMappingChanged), 1001));
+        Assert.True(_notifier.WasCalledWith(nameof(_notifier.NotifyPCToCellMappingChangedAsync), 1001));
     }
 
     [Fact]

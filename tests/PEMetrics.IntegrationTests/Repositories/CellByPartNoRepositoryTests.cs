@@ -38,7 +38,7 @@ public sealed class CellByPartNoRepositoryTests
     {
         await _repository.SetMappingsAsync("PN-UNUSED", [1001]);
 
-        Assert.True(_notifier.WasCalledWith(nameof(_notifier.NotifyTLAToCellMappingChanged), "PN-UNUSED"));
+        Assert.True(_notifier.WasCalledWith(nameof(_notifier.NotifyTLAToCellMappingChangedAsync), "PN-UNUSED"));
 
         // Cleanup
         await _repository.SetMappingsAsync("PN-UNUSED", []);
@@ -70,7 +70,7 @@ public sealed class CellByPartNoRepositoryTests
     {
         await _repository.AddMappingAsync("PN-UNUSED", 1001);
 
-        Assert.True(_notifier.WasCalledWith(nameof(_notifier.NotifyTLAToCellMappingChanged), "PN-UNUSED"));
+        Assert.True(_notifier.WasCalledWith(nameof(_notifier.NotifyTLAToCellMappingChangedAsync), "PN-UNUSED"));
 
         // Cleanup
         await _repository.DeleteMappingAsync("PN-UNUSED", 1001);
@@ -106,7 +106,7 @@ public sealed class CellByPartNoRepositoryTests
 
         await _repository.DeleteMappingAsync("PN-UNUSED", 1002);
 
-        Assert.True(_notifier.WasCalledWith(nameof(_notifier.NotifyTLAToCellMappingChanged), "PN-UNUSED"));
+        Assert.True(_notifier.WasCalledWith(nameof(_notifier.NotifyTLAToCellMappingChangedAsync), "PN-UNUSED"));
     }
 
     [Fact]

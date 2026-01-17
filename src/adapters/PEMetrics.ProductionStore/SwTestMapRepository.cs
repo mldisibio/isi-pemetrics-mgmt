@@ -48,7 +48,7 @@ public sealed class SwTestMapRepository : ForManagingSwTests
             await command.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
             var newSwTestMapId = (int)outputParam.Value;
 
-            _dataChangeNotifier.NotifySwTestChanged(newSwTestMapId);
+            await _dataChangeNotifier.NotifySwTestChangedAsync(newSwTestMapId).ConfigureAwait(false);
             return newSwTestMapId;
         }
         catch (Exception ex)
@@ -80,7 +80,7 @@ public sealed class SwTestMapRepository : ForManagingSwTests
 
             await command.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
 
-            _dataChangeNotifier.NotifySwTestChanged(test.SwTestMapId);
+            await _dataChangeNotifier.NotifySwTestChangedAsync(test.SwTestMapId).ConfigureAwait(false);
             return true;
         }
         catch (Exception ex)

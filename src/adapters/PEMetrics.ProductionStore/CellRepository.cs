@@ -46,7 +46,7 @@ public sealed class CellRepository : ForManagingCells
             await command.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
             var newCellId = (int)outputParam.Value;
 
-            _dataChangeNotifier.NotifyCellChanged(newCellId);
+            await _dataChangeNotifier.NotifyCellChangedAsync(newCellId).ConfigureAwait(false);
             return newCellId;
         }
         catch (Exception ex)
@@ -76,7 +76,7 @@ public sealed class CellRepository : ForManagingCells
 
             await command.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
 
-            _dataChangeNotifier.NotifyCellChanged(cell.CellId);
+            await _dataChangeNotifier.NotifyCellChangedAsync(cell.CellId).ConfigureAwait(false);
             return true;
         }
         catch (Exception ex)

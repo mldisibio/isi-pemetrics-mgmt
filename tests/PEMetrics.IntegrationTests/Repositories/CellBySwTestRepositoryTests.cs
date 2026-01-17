@@ -39,7 +39,7 @@ public sealed class CellBySwTestRepositoryTests
     {
         await _repository.SetMappingsAsync(1003, [1001]);
 
-        Assert.True(_notifier.WasCalledWith(nameof(_notifier.NotifySwTestToCellMappingChanged), 1003));
+        Assert.True(_notifier.WasCalledWith(nameof(_notifier.NotifySwTestToCellMappingChangedAsync), 1003));
 
         // Cleanup
         await _repository.SetMappingsAsync(1003, []);
@@ -71,7 +71,7 @@ public sealed class CellBySwTestRepositoryTests
     {
         await _repository.AddMappingAsync(1003, 1001);
 
-        Assert.True(_notifier.WasCalledWith(nameof(_notifier.NotifySwTestToCellMappingChanged), 1003));
+        Assert.True(_notifier.WasCalledWith(nameof(_notifier.NotifySwTestToCellMappingChangedAsync), 1003));
 
         // Cleanup
         await _repository.DeleteMappingAsync(1003, 1001);
@@ -107,7 +107,7 @@ public sealed class CellBySwTestRepositoryTests
 
         await _repository.DeleteMappingAsync(1004, 1002);
 
-        Assert.True(_notifier.WasCalledWith(nameof(_notifier.NotifySwTestToCellMappingChanged), 1004));
+        Assert.True(_notifier.WasCalledWith(nameof(_notifier.NotifySwTestToCellMappingChangedAsync), 1004));
     }
 
     [Fact]

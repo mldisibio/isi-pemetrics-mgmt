@@ -93,9 +93,19 @@ public sealed class CacheRefreshService : IDisposable
     {
         await foreach (var request in _channel.Reader.ReadAllAsync(cancellationToken).ConfigureAwait(false))
         {
-            foreach (var table in request.Tables)
+            try
             {
-                await PopulateTableAsync(table, cancellationToken).ConfigureAwait(false);
+                foreach (var table in request.Tables)
+                {
+                    await PopulateTableAsync(table, cancellationToken).ConfigureAwait(false);
+                }
+                // Signal completion to any awaiting callers
+                request.Completion?.TrySetResult();
+            }
+            catch (Exception ex)
+            {
+                // Signal failure to any awaiting callers
+                request.Completion?.TrySetException(ex);
             }
         }
     }
