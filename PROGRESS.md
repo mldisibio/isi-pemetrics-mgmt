@@ -331,7 +331,7 @@ Other operations → single table refresh
 
 ## Phase 4: Windows Forms UI Layer
 
-**Status: IN PROGRESS - Software Tests Tab Complete**
+**Status: COMPLETE - All Tabs Implemented**
 
 ### Project Setup
 - [x] Update existing `DimensionManagement` project
@@ -387,14 +387,17 @@ Other operations → single table refresh
 - [x] SetMappingsAsync for atomic cell assignment updates
 - [x] Use SortableBindingList<SwTestGridItem>
 
-### Screen 5: Part Number (TLA) Management
-- [ ] TLAMaintenanceControl (follow Cell tab patterns)
-- [ ] TLA list DataGridView with IsUsed column
-- [ ] Text search filter
-- [ ] IsUsed filter
-- [ ] Detail panel with Cell checkbox list
-- [ ] Delete button (disabled when IsUsed)
-- [ ] Use SortableBindingList<TLA>
+### Screen 5: Part Number (TLA) Management - COMPLETE
+- [x] TLAMaintenanceControl with grid and detail panel
+- [x] TLA list DataGridView with 5 columns (Part No, Family, Subfamily, Description, Cells)
+- [x] "In Use" filter checkbox (default checked)
+- [x] Text filter (searches PartNo, Family, Subfamily, Description)
+- [x] Detail panel with all TLA fields
+- [x] Description generate button with formatting (`<PartNo> - [<FormalDesc>]`, commas→spaces, 40 char limit)
+- [x] Elision confirmation dialog on save when bracketed content exceeds 40 chars
+- [x] CheckedListBox for cell assignments (checked items sorted to top)
+- [x] Delete button (visible only on edit, disabled when IsUsed)
+- [x] Use SortableBindingList<TLAGridItem>
 
 ### UI Patterns (Apply to All Tabs)
 
