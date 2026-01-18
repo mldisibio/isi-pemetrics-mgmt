@@ -84,7 +84,8 @@ public sealed class CellMaintenanceControl : UserControl
             MultiSelect = false,
             AutoGenerateColumns = false,
             AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
-            Font = MonoFont
+            Font = MonoFont,
+            ColumnHeadersDefaultCellStyle = new DataGridViewCellStyle { Alignment = DataGridViewContentAlignment.MiddleCenter }
         };
         var dateStyle = new DataGridViewCellStyle
         {
