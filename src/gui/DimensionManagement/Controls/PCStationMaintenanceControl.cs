@@ -52,9 +52,11 @@ public sealed class PCStationMaintenanceControl : UserControl
 
         _clearButton = new Button
         {
-            Text = "Clear",
-            Location = new Point(280, 6),
-            Width = 60
+            Text = "×",
+            Location = new Point(272, 7),
+            Width = 23,
+            Height = 23,
+            Font = new Font(Font.FontFamily, 9f)
         };
         _clearButton.Click += (s, e) =>
         {
@@ -65,7 +67,7 @@ public sealed class PCStationMaintenanceControl : UserControl
         _addButton = new Button
         {
             Text = "Add",
-            Location = new Point(350, 6),
+            Location = new Point(305, 6),
             Width = 60,
             Enabled = false
         };

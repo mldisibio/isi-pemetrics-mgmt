@@ -331,7 +331,7 @@ Other operations → single table refresh
 
 ## Phase 4: Windows Forms UI Layer
 
-**Status: IN PROGRESS - PC to Cell Tab Complete**
+**Status: IN PROGRESS - Software Tests Tab Complete**
 
 ### Project Setup
 - [x] Update existing `DimensionManagement` project
@@ -376,12 +376,16 @@ Other operations → single table refresh
 - [x] Use SortableBindingList<CellByPCStation>
 - [x] Sort and selection preservation
 
-### Screen 4: Software Test Management
-- [ ] SwTestMaintenanceControl (follow Cell tab patterns)
-- [ ] SwTestMap list DataGridView
-- [ ] Active filter
-- [ ] Detail panel with Cell checkbox list
-- [ ] Use SortableBindingList<SwTestMap>
+### Screen 4: Software Test Management - COMPLETE
+- [x] SwTestMaintenanceControl with grid and detail panel
+- [x] SwTestMap list DataGridView with 6 columns (ID, Report Key, Test Name, Application, Last Run, Cells)
+- [x] Active Only filter checkbox
+- [x] Text filter (searches ReportKey, TestName, Application)
+- [x] Detail panel with all SwTestMap fields
+- [x] Report Key generate button (pattern: `<TestId> - [<TestName>]`)
+- [x] CheckedListBox for cell assignments (checked items sorted to top)
+- [x] SetMappingsAsync for atomic cell assignment updates
+- [x] Use SortableBindingList<SwTestGridItem>
 
 ### Screen 5: Part Number (TLA) Management
 - [ ] TLAMaintenanceControl (follow Cell tab patterns)

@@ -16,6 +16,7 @@ public partial class MainForm : Form
     CellMaintenanceControl? _cellControl;
     PCStationMaintenanceControl? _pcStationControl;
     CellByPCStationMaintenanceControl? _pcToCellControl;
+    SwTestMaintenanceControl? _swTestControl;
 
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public IServiceProvider? Services { get; set; }
@@ -88,8 +89,16 @@ public partial class MainForm : Form
         pcToCellTab.Controls.Add(_pcToCellControl);
         _tabControl.TabPages.Add(pcToCellTab);
 
-        // Placeholder tabs for other features
-        _tabControl.TabPages.Add(new TabPage("Software Tests"));
+        // Add Software Tests tab
+        var swTestTab = new TabPage("Software Tests");
+        _swTestControl = new SwTestMaintenanceControl(Services)
+        {
+            Dock = DockStyle.Fill
+        };
+        swTestTab.Controls.Add(_swTestControl);
+        _tabControl.TabPages.Add(swTestTab);
+
+        // Placeholder tab for Part Numbers
         _tabControl.TabPages.Add(new TabPage("Part Numbers"));
     }
 
@@ -111,6 +120,8 @@ public partial class MainForm : Form
                     await _pcStationControl.LoadDataAsync();
                 if (_pcToCellControl != null)
                     await _pcToCellControl.LoadDataAsync();
+                if (_swTestControl != null)
+                    await _swTestControl.LoadDataAsync();
             }
         }
         catch (Exception ex)
