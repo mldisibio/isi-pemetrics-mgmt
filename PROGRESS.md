@@ -1,5 +1,11 @@
 # Project Progress
 
+## ✅ PROJECT COMPLETE
+
+All phases delivered. Future interactions are **feature requests**, **enhancements**, or **bug fixes**.
+
+---
+
 ## Overview
 PE_Metrics Dimension Management application - A .NET 9.0 Windows Forms application for CRUD operations on star schema dimension tables.
 
@@ -389,10 +395,11 @@ Other operations → single table refresh
 
 ### Screen 5: Part Number (TLA) Management - COMPLETE
 - [x] TLAMaintenanceControl with grid and detail panel
-- [x] TLA list DataGridView with 5 columns (Part No, Family, Subfamily, Description, Cells)
-- [x] "In Use" filter checkbox (default checked)
-- [x] Text filter (searches PartNo, Family, Subfamily, Description)
+- [x] TLA list DataGridView with 5 columns (Cells, Part No, Description, Family, Subfamily)
+- [x] Dual filter toggles: "In Use" and "Unused" (both checked = show all, both unchecked = recheck In Use)
+- [x] Text filter (searches PartNo, Family, Subfamily, FormalDescription, Description)
 - [x] Detail panel with all TLA fields
+- [x] Multiline Formal Description field (2 lines visible)
 - [x] Description generate button with formatting (`<PartNo> - [<FormalDesc>]`, commas→spaces, 40 char limit)
 - [x] Elision confirmation dialog on save when bracketed content exceeds 40 chars
 - [x] CheckedListBox for cell assignments (checked items sorted to top)

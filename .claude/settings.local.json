@@ -13,7 +13,23 @@
       "Bash(git add:*)",
       "Bash(Select-Object -Last 20)",
       "Bash(findstr:*)",
-      "Bash(powershell -Command \"$input | Select-Object -Last 15\")"
+      "Bash(powershell -Command \"$input | Select-Object -Last 15\")",
+      "Bash(powershell -Command \"Get-ChildItem *.cs | ForEach-Object { \\(Get-Content $_FullName\\) -replace ''NotifyCellChanged\\\\\\)'', ''NotifyCellChangedAsync\\)'' -replace ''NotifyPCStationChanged\\\\\\)'', ''NotifyPCStationChangedAsync\\)'' -replace ''NotifyPCToCellMappingChanged\\\\\\)'', ''NotifyPCToCellMappingChangedAsync\\)'' -replace ''NotifySwTestChanged\\\\\\)'', ''NotifySwTestChangedAsync\\)'' -replace ''NotifySwTestToCellMappingChanged\\\\\\)'', ''NotifySwTestToCellMappingChangedAsync\\)'' -replace ''NotifyTLAChanged\\\\\\)'', ''NotifyTLAChangedAsync\\)'' -replace ''NotifyTLAToCellMappingChanged\\\\\\)'', ''NotifyTLAToCellMappingChangedAsync\\)'' | Set-Content $_FullName }\")",
+      "Bash(\"$USERPROFILE\\\\tools\\\\omnisharp\\\\OmniSharp.exe\" --version)",
+      "Bash(csharp-ls:*)",
+      "Bash(powershell -Command \"[Environment]::GetEnvironmentVariable\\(''Path'', ''User''\\)\")",
+      "Bash(where OmniSharp)",
+      "Bash(npx tweakcc --apply)",
+      "Bash(wsl npx tweakcc --apply)",
+      "Bash(wsl bash -ic \"npx tweakcc --apply\")",
+      "Bash(\"C:\\\\Program Files\\\\nodejs\\\\npx.cmd\" tweakcc --apply)",
+      "Bash(npx tweakcc:*)",
+      "WebFetch(domain:github.com)",
+      "mcp__cclsp__find_references",
+      "mcp__cclsp__restart_server",
+      "mcp__cclsp__get_diagnostics",
+      "mcp__cclsp__find_definition",
+      "mcp__cclsp__rename_symbol"
     ]
   }
 }
