@@ -53,7 +53,5 @@ CodeCoverage/
 TestResult.xml
 nunit-*.xml
 .vs/
-/PROGRESS.md
-/STATE.md
 *.csproj.user
 /src/gui/DimensionManagement/DimensionManagement.csproj.user
