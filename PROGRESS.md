@@ -331,7 +331,7 @@ Other operations → single table refresh
 
 ## Phase 4: Windows Forms UI Layer
 
-**Status: IN PROGRESS - Cell Tab Complete**
+**Status: IN PROGRESS - PC to Cell Tab Complete**
 
 ### Project Setup
 - [x] Update existing `DimensionManagement` project
@@ -359,18 +359,22 @@ Other operations → single table refresh
 - [x] Background thread for cache initialization (responsive UI)
 - [x] Integration with cache and data API
 
-### Screen 2: PC Station Management
-- [ ] PCStationMaintenanceControl (follow Cell tab patterns)
-- [ ] PC name input
-- [ ] Add functionality (idempotent insert)
-- [ ] Use SortableBindingList<PCStation>
+### Screen 2: PC Station Management - COMPLETE
+- [x] PCStationMaintenanceControl with inline search/add UX
+- [x] Filter-as-you-type search (no separate search button)
+- [x] Add button enables when search text has zero matches
+- [x] Idempotent insert via ForManagingPCStations
+- [x] Simple ListBox display (no grid needed for single-column data)
+- [x] Lucida Console 8pt font
 
-### Screen 3: PC to Cell Mapping Management
-- [ ] CellByPCStationMaintenanceControl (follow Cell tab patterns)
-- [ ] Mapping list DataGridView
-- [ ] Active Only filter
-- [ ] Detail panel with Cell picker
-- [ ] Use SortableBindingList<CellByPCStation>
+### Screen 3: PC to Cell Mapping Management - COMPLETE
+- [x] CellByPCStationMaintenanceControl (follow Cell tab patterns)
+- [x] Mapping list DataGridView with 7 columns (ID, PC Name, Cell, Purpose, Active From, Active To, Ext. Name)
+- [x] Active Only filter checkbox
+- [x] Detail panel with Cell dropdown picker
+- [x] PC Station type-ahead picker (TextBox + ListBox, top 5 matches sorted alphabetically)
+- [x] Use SortableBindingList<CellByPCStation>
+- [x] Sort and selection preservation
 
 ### Screen 4: Software Test Management
 - [ ] SwTestMaintenanceControl (follow Cell tab patterns)
@@ -462,6 +466,29 @@ Other operations → single table refresh
   - 37 DuckDB cache layer tests (Phase 3 validation)
 - DuckDB cache tests verify nanodbc extension, cache population, and query operations
 - Cache tests use same SQL Server container via ODBC connection
+
+## Awaitable Notifications Refactoring (2026-01-16)
+
+**Problem:** Fire-and-forget notifications caused race conditions between UI refresh and cache update.
+
+**Solution:** Make `ForNotifyingDataChanges` methods return `Task` that completes when cache is refreshed.
+
+**Changes:**
+- [x] `ForNotifyingDataChanges` - All 7 methods return `Task` with `Async` suffix
+- [x] `RefreshRequest` - Added `TaskCompletionSource` and `ForTableAwaitable`/`ForTablesAwaitable` factory methods
+- [x] `DataChangeNotificationHandler` - Returns Task that completes when cache refresh is done
+- [x] `CacheRefreshService` - Calls `TrySetResult()` or `TrySetException()` after processing
+- [x] `NoOpDataChangeNotifier` - Returns `Task.CompletedTask`
+- [x] All 7 command repositories - Now `await` notification calls with `.ConfigureAwait(false)`
+- [x] UI controls - Removed `Task.Delay(500)` hacks
+- [x] `RecordingNotifier` test fixture - Updated for async interface
+- [x] All test assertions - Updated to use `Async` method names
+
+**Commits:**
+- `fc942b5` - PE-20753 Add PC Stations tab with inline search/add
+- `6554a38` - PE-20753 Make data change notifications awaitable
+
+---
 
 ## Phase 4 Implementation Notes (2026-01-16)
 

@@ -15,6 +15,7 @@ public partial class MainForm : Form
     bool _isOffline;
     CellMaintenanceControl? _cellControl;
     PCStationMaintenanceControl? _pcStationControl;
+    CellByPCStationMaintenanceControl? _pcToCellControl;
 
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public IServiceProvider? Services { get; set; }
@@ -78,8 +79,16 @@ public partial class MainForm : Form
         pcStationsTab.Controls.Add(_pcStationControl);
         _tabControl.TabPages.Add(pcStationsTab);
 
+        // Add PC to Cell Mapping tab
+        var pcToCellTab = new TabPage("PC to Cell");
+        _pcToCellControl = new CellByPCStationMaintenanceControl(Services)
+        {
+            Dock = DockStyle.Fill
+        };
+        pcToCellTab.Controls.Add(_pcToCellControl);
+        _tabControl.TabPages.Add(pcToCellTab);
+
         // Placeholder tabs for other features
-        _tabControl.TabPages.Add(new TabPage("PC to Cell"));
         _tabControl.TabPages.Add(new TabPage("Software Tests"));
         _tabControl.TabPages.Add(new TabPage("Part Numbers"));
     }
@@ -100,6 +109,8 @@ public partial class MainForm : Form
                     await _cellControl.LoadDataAsync();
                 if (_pcStationControl != null)
                     await _pcStationControl.LoadDataAsync();
+                if (_pcToCellControl != null)
+                    await _pcToCellControl.LoadDataAsync();
             }
         }
         catch (Exception ex)
