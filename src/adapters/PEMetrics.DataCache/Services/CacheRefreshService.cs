@@ -23,15 +23,15 @@ public sealed class CacheRefreshService : IDisposable
     /// <summary>SQL Server view names mapped to DuckDB tables.</summary>
     static readonly Dictionary<string, string> TableViewMappings = new(StringComparer.OrdinalIgnoreCase)
     {
+        ["TLA"] = "mgmt.vw_TLA",
+        ["CellByPartNo"] = "mgmt.vw_CellByPartNo",
+        ["CellByPartNoView"] = "mgmt.vw_CellByPartNo",
+        ["CellBySwTestView"] = "mgmt.vw_CellBySwTest",
+        ["CellBySwTest"] = "mgmt.vw_CellBySwTest",
+        ["SwTestMap"] = "mgmt.vw_SwTestMap",
         ["Cell"] = "mgmt.vw_Cell",
         ["PCStation"] = "mgmt.vw_PCStation",
         ["CellByPCStation"] = "mgmt.vw_CellByPCStation",
-        ["SwTestMap"] = "mgmt.vw_SwTestMap",
-        ["CellBySwTest"] = "mgmt.vw_CellBySwTest",
-        ["CellBySwTestView"] = "mgmt.vw_CellBySwTest",
-        ["TLA"] = "mgmt.vw_TLA",
-        ["CellByPartNo"] = "mgmt.vw_CellByPartNo",
-        ["CellByPartNoView"] = "mgmt.vw_CellByPartNo"
     };
 
     public CacheRefreshService(
