@@ -32,7 +32,7 @@ public sealed class NanodbcConnectionTests : IDisposable
         command.CommandText = "SELECT extension_name FROM duckdb_extensions() WHERE loaded = true AND extension_name = 'nanodbc'";
         await using var reader = await command.ExecuteReaderAsync();
 
-        Assert.True(await reader.ReadAsync().ConfigureAwait(false));
+        Assert.True(await reader.ReadAsync());
         Assert.Equal("nanodbc", reader.GetString(0));
     }
 
@@ -51,7 +51,7 @@ public sealed class NanodbcConnectionTests : IDisposable
                 read_only=true
             )";
 
-        var count = Convert.ToInt64(await command.ExecuteScalarAsync().ConfigureAwait(false));
+        var count = Convert.ToInt64(await command.ExecuteScalarAsync());
 
         Assert.True(count > 0, "Expected at least one cell from SQL Server");
     }
@@ -71,7 +71,7 @@ public sealed class NanodbcConnectionTests : IDisposable
                 read_only=true
             )";
 
-        var count = Convert.ToInt64(await command.ExecuteScalarAsync().ConfigureAwait(false));
+        var count = Convert.ToInt64(await command.ExecuteScalarAsync());
 
         Assert.True(count > 0, "Expected at least one PC station from SQL Server");
     }
@@ -91,7 +91,7 @@ public sealed class NanodbcConnectionTests : IDisposable
                 read_only=true
             )";
 
-        var count = Convert.ToInt64(await command.ExecuteScalarAsync().ConfigureAwait(false));
+        var count = Convert.ToInt64(await command.ExecuteScalarAsync());
 
         Assert.True(count > 0, "Expected at least one software test from SQL Server");
     }
@@ -111,7 +111,7 @@ public sealed class NanodbcConnectionTests : IDisposable
                 read_only=true
             )";
 
-        var count = Convert.ToInt64(await command.ExecuteScalarAsync().ConfigureAwait(false));
+        var count = Convert.ToInt64(await command.ExecuteScalarAsync());
 
         Assert.True(count > 0, "Expected at least one TLA from SQL Server");
     }
@@ -136,7 +136,7 @@ public sealed class NanodbcConnectionTests : IDisposable
 
         // Verify data was inserted
         command.CommandText = "SELECT COUNT(*) FROM Cell";
-        var count = Convert.ToInt64(await command.ExecuteScalarAsync().ConfigureAwait(false));
+        var count = Convert.ToInt64(await command.ExecuteScalarAsync());
 
         Assert.True(count > 0, "Expected cells to be populated in DuckDB table");
     }
