@@ -12,6 +12,9 @@ public sealed class CacheConfiguration
     /// <summary>If true, delete the cache file on application exit.</summary>
     public bool DeleteOnExit { get; set; }
 
+    /// <summary>If true, compact the cache file on application exit.</summary>
+    public bool CompactOnExit { get; set; }
+
     /// <summary>Path to DuckDB initialization SQL script. Supports MyDocuments prefix, absolute, or relative paths.</summary>
     public string InitSqlPath { get; set; } = "MyDocuments\\PEDimMgmnt\\duckdb_init.sql";
 

@@ -33,7 +33,10 @@ static class Program
 
         // Cleanup on exit
         services.GetService<CacheRefreshService>()?.Dispose();
+        // will close connection and compact database if so configured
         (services.GetService<ForCreatingDuckDbConnections>() as IDisposable)?.Dispose();
+        // will delete file if so configured
+        services.GetService<DuckDbInitializer>()?.Dispose();
     }
 
     static IServiceProvider ConfigureServices(IConfiguration configuration, MainForm mainForm)

@@ -37,9 +37,6 @@ public sealed class DuckDbInitializer : IDisposable
             var connection = await _connectionFactory.GetOpenConnectionAsync(cancellationToken).ConfigureAwait(false) as DuckDBConnection
                 ?? throw new InvalidOperationException("Connection factory did not return a DuckDBConnection.");
 
-            // Install and load nanodbc community extension (already done for opened connection)
-            //await InstallNanodbcExtensionAsync(connection, cancellationToken).ConfigureAwait(false);
-
             // Execute initialization SQL if specified
             await ExecuteInitScriptAsync(connection, cancellationToken).ConfigureAwait(false);
 
@@ -50,19 +47,6 @@ public sealed class DuckDbInitializer : IDisposable
             _errorNotifier.UnexpectedError("DuckDB initialization", ex);
             return false;
         }
-    }
-
-    async Task InstallNanodbcExtensionAsync(DuckDBConnection connection, CancellationToken cancellationToken)
-    {
-        await using var command = connection.CreateCommand();
-
-        // Install nanodbc from community extensions
-        command.CommandText = "INSTALL nanodbc FROM community;";
-        await command.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
-
-        // Load the extension
-        command.CommandText = "LOAD nanodbc;";
-        await command.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
     }
 
     async Task ExecuteInitScriptAsync(DuckDBConnection connection, CancellationToken cancellationToken)

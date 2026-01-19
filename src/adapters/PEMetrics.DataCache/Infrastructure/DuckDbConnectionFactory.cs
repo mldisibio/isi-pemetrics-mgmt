@@ -13,19 +13,20 @@ namespace PEMetrics.DataCache.Infrastructure;
 /// </remarks>
 public sealed class DuckDbConnectionFactory : ForCreatingDuckDbConnections, IDisposable
 {
+    readonly CacheConfiguration _configuration;
     readonly string _connectionString;
     readonly object _lock = new();
+    readonly string _resolvedPath;
     DuckDBConnection? _connection;
     bool _nanodbcLoaded;
     bool _disposed;
 
     public DuckDbConnectionFactory(CacheConfiguration configuration, CachePathResolver pathResolver)
     {
-        ArgumentNullException.ThrowIfNull(configuration);
         ArgumentNullException.ThrowIfNull(pathResolver);
-
-        var resolvedPath = pathResolver.ResolvePathAndEnsureDirectory(configuration.CachePath);
-        _connectionString = $"Data Source={resolvedPath}";
+        _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+        _resolvedPath = pathResolver.ResolvePathAndEnsureDirectory(_configuration.CachePath);
+        _connectionString = $"Data Source={_resolvedPath}";
     }
 
     public async Task<DbConnection> GetOpenConnectionAsync(CancellationToken cancellationToken = default)
@@ -74,6 +75,24 @@ public sealed class DuckDbConnectionFactory : ForCreatingDuckDbConnections, IDis
         _nanodbcLoaded = true;
     }
 
+    string CompactDatabase()
+    {
+        using var dbConnection = new DuckDBConnection($"Data Source={DuckDBConnectionStringBuilder.InMemoryDataSource}");
+        dbConnection.Open();
+        using var cmd = dbConnection.CreateCommand();
+        cmd.CommandText = $@"
+ATTACH '{_resolvedPath}' AS existingDb;
+ATTACH '{_resolvedPath}.tmp' AS tempDb;
+COPY FROM DATABASE existingDb TO tempDb;
+";
+        cmd.ExecuteNonQuery();
+        dbConnection.Close();
+        // Replace original database file with compacted version
+        File.Delete(_resolvedPath);
+        File.Move($"{_resolvedPath}.tmp", _resolvedPath);
+        return _resolvedPath;
+    }
+
     public void Dispose()
     {
         if (_disposed)
@@ -82,5 +101,17 @@ public sealed class DuckDbConnectionFactory : ForCreatingDuckDbConnections, IDis
         _disposed = true;
         _connection?.Dispose();
         _connection = null;
+
+        if (_configuration.CompactOnExit && File.Exists(_resolvedPath))
+        {
+            try
+            {
+                CompactDatabase();
+            }
+            catch
+            {
+                // Ignore cleanup errors on exit
+            }
+        }
     }
 }
