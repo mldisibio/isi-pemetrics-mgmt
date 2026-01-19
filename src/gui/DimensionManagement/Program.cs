@@ -17,11 +17,19 @@ static class Program
     [STAThread]
     static void Main()
     {
+
+        var environment =
+#if DEBUG
+            "Development";
+#else
+            "Production";
+#endif
         ApplicationConfiguration.Initialize();
 
         var configuration = new ConfigurationBuilder()
             .SetBasePath(AppContext.BaseDirectory)
-            .AddJsonFile("appsettings.json", optional: false)
+            .AddJsonFile("appSettings.json", optional: false, reloadOnChange: true)
+            .AddJsonFile($"appSettings.{environment}.json", optional: true)
             .Build();
 
         var mainForm = new MainForm();

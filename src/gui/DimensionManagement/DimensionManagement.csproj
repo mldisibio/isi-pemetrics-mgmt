@@ -21,8 +21,25 @@
     <ProjectReference Include="..\..\adapters\PEMetrics.DataCache\PEMetrics.DataCache.csproj" />
   </ItemGroup>
 
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+    <EnvironmentVariables>
+      <DOTNET_ENVIRONMENT>Development</DOTNET_ENVIRONMENT>
+    </EnvironmentVariables>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <EnvironmentVariables>
+      <DOTNET_ENVIRONMENT>Production</DOTNET_ENVIRONMENT>
+    </EnvironmentVariables>
+  </PropertyGroup>
+
   <ItemGroup>
-    <None Update="appsettings.json">
+    <None Update="appSettings.Development.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="appSettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="appSettings.Production.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="..\..\..\docs\duckdb\duckdb_init.sql" Link="DuckDbScripts\duckdb_init.sql">
