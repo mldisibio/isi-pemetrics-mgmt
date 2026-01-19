@@ -49,11 +49,8 @@ public sealed class DuckDbQueryRepositoryTests : IAsyncLifetime
     public async Task InitializeAsync()
     {
         // Initialize DuckDB with nanodbc and tables
-        await _duckDbFactory.InstallNanodbcAsync();
-        await using (var conn = await _duckDbFactory.OpenConnectionAsync())
-        {
-            await DuckDbSchemaCreator.CreateTablesAsync(conn);
-        }
+        var conn = await _duckDbFactory.GetOpenConnectionAsync();
+        await DuckDbSchemaCreator.CreateTablesAsync(conn);
 
         // Populate all tables from SQL Server
         await _refreshService.PopulateAllTablesAsync();

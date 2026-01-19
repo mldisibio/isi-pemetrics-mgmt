@@ -1,5 +1,4 @@
 using System.Collections.Immutable;
-using System.Data.Common;
 using PEMetrics.DataApi.Infrastructure;
 using PEMetrics.DataApi.Infrastructure.Mapping;
 using PEMetrics.DataApi.Models;
@@ -34,7 +33,7 @@ public sealed class DuckDbQueryRepository : ForReadingPEMetricsDimensions
         {
             await _populationTracker.WaitForTableAsync("Cell", cancellationToken).ConfigureAwait(false);
 
-            await using var connection = await _connectionFactory.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
+            var connection = await _connectionFactory.GetOpenConnectionAsync(cancellationToken).ConfigureAwait(false);
             await using var command = connection.CreateCommand();
             command.CommandText = "SELECT * FROM Cell ORDER BY CellName";
 
@@ -54,7 +53,7 @@ public sealed class DuckDbQueryRepository : ForReadingPEMetricsDimensions
         {
             await _populationTracker.WaitForTableAsync("Cell", cancellationToken).ConfigureAwait(false);
 
-            await using var connection = await _connectionFactory.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
+            var connection = await _connectionFactory.GetOpenConnectionAsync(cancellationToken).ConfigureAwait(false);
             await using var command = connection.CreateCommand();
             command.CommandText = "SELECT * FROM Cell WHERE CellId = ?";
             var param = command.CreateParameter();
@@ -77,7 +76,7 @@ public sealed class DuckDbQueryRepository : ForReadingPEMetricsDimensions
         {
             await _populationTracker.WaitForTableAsync("PCStation", cancellationToken).ConfigureAwait(false);
 
-            await using var connection = await _connectionFactory.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
+            var connection = await _connectionFactory.GetOpenConnectionAsync(cancellationToken).ConfigureAwait(false);
             await using var command = connection.CreateCommand();
             command.CommandText = "SELECT * FROM PCStation ORDER BY PcName";
 
@@ -97,7 +96,7 @@ public sealed class DuckDbQueryRepository : ForReadingPEMetricsDimensions
         {
             await _populationTracker.WaitForTableAsync("PCStation", cancellationToken).ConfigureAwait(false);
 
-            await using var connection = await _connectionFactory.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
+            var connection = await _connectionFactory.GetOpenConnectionAsync(cancellationToken).ConfigureAwait(false);
             await using var command = connection.CreateCommand();
             command.CommandText = "SELECT * FROM PCStation WHERE PcName LIKE ? || '%' ORDER BY PcName";
             var param = command.CreateParameter();
@@ -120,7 +119,7 @@ public sealed class DuckDbQueryRepository : ForReadingPEMetricsDimensions
         {
             await _populationTracker.WaitForTableAsync("CellByPCStation", cancellationToken).ConfigureAwait(false);
 
-            await using var connection = await _connectionFactory.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
+            var connection = await _connectionFactory.GetOpenConnectionAsync(cancellationToken).ConfigureAwait(false);
             await using var command = connection.CreateCommand();
             command.CommandText = "SELECT * FROM CellByPCStation ORDER BY CellName, PcName";
 
@@ -140,7 +139,7 @@ public sealed class DuckDbQueryRepository : ForReadingPEMetricsDimensions
         {
             await _populationTracker.WaitForTableAsync("CellByPCStation", cancellationToken).ConfigureAwait(false);
 
-            await using var connection = await _connectionFactory.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
+            var connection = await _connectionFactory.GetOpenConnectionAsync(cancellationToken).ConfigureAwait(false);
             await using var command = connection.CreateCommand();
             command.CommandText = "SELECT * FROM CellByPCStation WHERE StationMapId = ?";
             var param = command.CreateParameter();
@@ -163,7 +162,7 @@ public sealed class DuckDbQueryRepository : ForReadingPEMetricsDimensions
         {
             await _populationTracker.WaitForTableAsync("SwTestMap", cancellationToken).ConfigureAwait(false);
 
-            await using var connection = await _connectionFactory.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
+            var connection = await _connectionFactory.GetOpenConnectionAsync(cancellationToken).ConfigureAwait(false);
             await using var command = connection.CreateCommand();
             command.CommandText = "SELECT * FROM SwTestMap ORDER BY ReportKey, TestName";
 
@@ -183,7 +182,7 @@ public sealed class DuckDbQueryRepository : ForReadingPEMetricsDimensions
         {
             await _populationTracker.WaitForTableAsync("SwTestMap", cancellationToken).ConfigureAwait(false);
 
-            await using var connection = await _connectionFactory.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
+            var connection = await _connectionFactory.GetOpenConnectionAsync(cancellationToken).ConfigureAwait(false);
             await using var command = connection.CreateCommand();
             command.CommandText = "SELECT * FROM SwTestMap WHERE SwTestMapId = ?";
             var param = command.CreateParameter();
@@ -206,7 +205,7 @@ public sealed class DuckDbQueryRepository : ForReadingPEMetricsDimensions
         {
             await _populationTracker.WaitForTableAsync("CellBySwTestView", cancellationToken).ConfigureAwait(false);
 
-            await using var connection = await _connectionFactory.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
+            var connection = await _connectionFactory.GetOpenConnectionAsync(cancellationToken).ConfigureAwait(false);
             await using var command = connection.CreateCommand();
             command.CommandText = "SELECT * FROM CellBySwTestView ORDER BY ConfiguredTestId, CellName";
 
@@ -226,7 +225,7 @@ public sealed class DuckDbQueryRepository : ForReadingPEMetricsDimensions
         {
             await _populationTracker.WaitForTableAsync("CellBySwTest", cancellationToken).ConfigureAwait(false);
 
-            await using var connection = await _connectionFactory.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
+            var connection = await _connectionFactory.GetOpenConnectionAsync(cancellationToken).ConfigureAwait(false);
             await using var command = connection.CreateCommand();
             command.CommandText = "SELECT * FROM CellBySwTest WHERE SwTestMapId = ?";
             var param = command.CreateParameter();
@@ -249,7 +248,7 @@ public sealed class DuckDbQueryRepository : ForReadingPEMetricsDimensions
         {
             await _populationTracker.WaitForTableAsync("TLA", cancellationToken).ConfigureAwait(false);
 
-            await using var connection = await _connectionFactory.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
+            var connection = await _connectionFactory.GetOpenConnectionAsync(cancellationToken).ConfigureAwait(false);
             await using var command = connection.CreateCommand();
             command.CommandText = "SELECT * FROM TLA ORDER BY PartNo";
 
@@ -269,7 +268,7 @@ public sealed class DuckDbQueryRepository : ForReadingPEMetricsDimensions
         {
             await _populationTracker.WaitForTableAsync("TLA", cancellationToken).ConfigureAwait(false);
 
-            await using var connection = await _connectionFactory.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
+            var connection = await _connectionFactory.GetOpenConnectionAsync(cancellationToken).ConfigureAwait(false);
             await using var command = connection.CreateCommand();
             command.CommandText = "SELECT * FROM TLA WHERE PartNo = ?";
             var param = command.CreateParameter();
@@ -292,7 +291,7 @@ public sealed class DuckDbQueryRepository : ForReadingPEMetricsDimensions
         {
             await _populationTracker.WaitForTableAsync("CellByPartNoView", cancellationToken).ConfigureAwait(false);
 
-            await using var connection = await _connectionFactory.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
+            var connection = await _connectionFactory.GetOpenConnectionAsync(cancellationToken).ConfigureAwait(false);
             await using var command = connection.CreateCommand();
             command.CommandText = "SELECT * FROM CellByPartNoView ORDER BY PartNo, CellName";
 
@@ -312,7 +311,7 @@ public sealed class DuckDbQueryRepository : ForReadingPEMetricsDimensions
         {
             await _populationTracker.WaitForTableAsync("CellByPartNo", cancellationToken).ConfigureAwait(false);
 
-            await using var connection = await _connectionFactory.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
+            var connection = await _connectionFactory.GetOpenConnectionAsync(cancellationToken).ConfigureAwait(false);
             await using var command = connection.CreateCommand();
             command.CommandText = "SELECT * FROM CellByPartNo WHERE PartNo = ?";
             var param = command.CreateParameter();

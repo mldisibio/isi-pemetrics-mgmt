@@ -34,11 +34,11 @@ public sealed class DuckDbInitializer : IDisposable
     {
         try
         {
-            await using var connection = await _connectionFactory.OpenConnectionAsync(cancellationToken).ConfigureAwait(false) as DuckDBConnection
+            var connection = await _connectionFactory.GetOpenConnectionAsync(cancellationToken).ConfigureAwait(false) as DuckDBConnection
                 ?? throw new InvalidOperationException("Connection factory did not return a DuckDBConnection.");
 
-            // Install and load nanodbc community extension
-            await InstallNanodbcExtensionAsync(connection, cancellationToken).ConfigureAwait(false);
+            // Install and load nanodbc community extension (already done for opened connection)
+            //await InstallNanodbcExtensionAsync(connection, cancellationToken).ConfigureAwait(false);
 
             // Execute initialization SQL if specified
             await ExecuteInitScriptAsync(connection, cancellationToken).ConfigureAwait(false);

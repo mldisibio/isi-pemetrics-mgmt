@@ -178,6 +178,30 @@ public partial class MainForm : Form
         _statusLabel.Text = message;
     }
 
+    public void ShowUnexpectedError(string errorMsg)
+    {
+        if (InvokeRequired)
+        {
+            Invoke(() => ShowUnexpectedError(errorMsg));
+            return;
+        }
+
+        _statusLabel.Text = errorMsg;
+
+        var result = MessageBox.Show(
+            this,
+            $"{errorMsg}\n\nSelect OK to continue or Cancel to abort the application.",
+            "Critical Error",
+            MessageBoxButtons.OKCancel,
+            MessageBoxIcon.Error,
+            MessageBoxDefaultButton.Button2);
+
+        if (result == DialogResult.Cancel)
+        {
+            Close();
+        }
+    }
+
     public void SetOfflineMode(bool offline)
     {
         if (InvokeRequired)

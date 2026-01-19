@@ -1,6 +1,7 @@
 using System.Data.Common;
 using DuckDB.NET.Data;
 using PEMetrics.DataApi.Infrastructure;
+using PEMetrics.DataCache.Infrastructure;
 
 namespace PEMetrics.IntegrationTests.Fixtures;
 
@@ -9,6 +10,8 @@ public sealed class TestDuckDbConnectionFactory : ForCreatingDuckDbConnections, 
 {
     readonly string _dbPath;
     readonly string _connectionString;
+    readonly object _lock = new();
+    DuckDBConnection? _connection;
     bool _nanodbcInstalled;
     bool _disposed;
 
@@ -20,34 +23,50 @@ public sealed class TestDuckDbConnectionFactory : ForCreatingDuckDbConnections, 
 
     public string DatabasePath => _dbPath;
 
-    /// <summary>Installs nanodbc extension (call once before using odbc_scan).</summary>
-    public async Task InstallNanodbcAsync(CancellationToken cancellationToken = default)
+    public async Task<DbConnection> GetOpenConnectionAsync(CancellationToken cancellationToken = default)
     {
-        if (_nanodbcInstalled)
-            return;
+        if (_disposed)
+            throw new ObjectDisposedException(nameof(DuckDbConnectionFactory));
 
-        await using var connection = new DuckDBConnection(_connectionString);
-        await connection.OpenAsync(cancellationToken);
-        await using var command = connection.CreateCommand();
-        command.CommandText = "INSTALL nanodbc FROM community;";
-        await command.ExecuteNonQueryAsync(cancellationToken);
-        _nanodbcInstalled = true;
-    }
-
-    public async Task<DbConnection> OpenConnectionAsync(CancellationToken cancellationToken = default)
-    {
-        var connection = new DuckDBConnection(_connectionString);
-        await connection.OpenAsync(cancellationToken);
-
-        // Auto-load nanodbc if it was installed
-        if (_nanodbcInstalled)
+        // Double-checked locking for thread-safe lazy initialization
+        if (_connection == null)
         {
-            await using var command = connection.CreateCommand();
-            command.CommandText = "LOAD nanodbc;";
-            await command.ExecuteNonQueryAsync(cancellationToken);
+            lock (_lock)
+            {
+                _connection ??= new DuckDBConnection(_connectionString);
+            }
         }
 
-        return connection;
+        if (_connection.State != System.Data.ConnectionState.Open)
+        {
+            await _connection.OpenAsync(cancellationToken).ConfigureAwait(false);
+            await InstallAndLoadNanodbcAsync(cancellationToken).ConfigureAwait(false);
+        }
+
+        // Install and load nanodbc extension once
+        if (!_nanodbcInstalled)
+        {
+            await InstallAndLoadNanodbcAsync(cancellationToken).ConfigureAwait(false);
+        }
+
+        // Return a wrapper that prevents disposal of the shared connection
+        return _connection;
+    }
+
+    async Task InstallAndLoadNanodbcAsync(CancellationToken cancellationToken)
+    {
+        if (_connection == null)
+            return;
+
+        await using var installCmd = _connection.CreateCommand();
+        installCmd.CommandText = "INSTALL nanodbc FROM community;";
+        await installCmd.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
+
+        await using var loadCmd = _connection.CreateCommand();
+        loadCmd.CommandText = "LOAD nanodbc;";
+        await loadCmd.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
+
+        _nanodbcInstalled = true;
     }
 
     public void Dispose()
@@ -56,6 +75,8 @@ public sealed class TestDuckDbConnectionFactory : ForCreatingDuckDbConnections, 
             return;
 
         _disposed = true;
+        _connection?.Dispose();
+        _connection = null;
 
         // Clean up temp database files
         try

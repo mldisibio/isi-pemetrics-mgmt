@@ -28,7 +28,7 @@ public sealed class DuckDbConnectionFactory : ForCreatingDuckDbConnections, IDis
         _connectionString = $"Data Source={resolvedPath}";
     }
 
-    public async Task<DbConnection> OpenConnectionAsync(CancellationToken cancellationToken = default)
+    public async Task<DbConnection> GetOpenConnectionAsync(CancellationToken cancellationToken = default)
     {
         if (_disposed)
             throw new ObjectDisposedException(nameof(DuckDbConnectionFactory));
@@ -45,6 +45,7 @@ public sealed class DuckDbConnectionFactory : ForCreatingDuckDbConnections, IDis
         if (_connection.State != System.Data.ConnectionState.Open)
         {
             await _connection.OpenAsync(cancellationToken).ConfigureAwait(false);
+            await InstallAndLoadNanodbcAsync(cancellationToken).ConfigureAwait(false);
         }
 
         // Install and load nanodbc extension once
@@ -54,7 +55,7 @@ public sealed class DuckDbConnectionFactory : ForCreatingDuckDbConnections, IDis
         }
 
         // Return a wrapper that prevents disposal of the shared connection
-        return new NonDisposingConnectionWrapper(_connection);
+        return _connection;
     }
 
     async Task InstallAndLoadNanodbcAsync(CancellationToken cancellationToken)

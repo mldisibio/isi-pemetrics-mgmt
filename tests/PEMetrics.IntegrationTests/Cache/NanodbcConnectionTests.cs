@@ -23,7 +23,7 @@ public sealed class NanodbcConnectionTests : IDisposable
     [Fact]
     public async Task NanodbcExtension_InstallsAndLoads()
     {
-        await using var connection = await _duckDbFactory.OpenConnectionAsync();
+        var connection = await _duckDbFactory.GetOpenConnectionAsync();
 
         await DuckDbSchemaCreator.InstallNanodbcAsync(connection);
 
@@ -39,7 +39,7 @@ public sealed class NanodbcConnectionTests : IDisposable
     [Fact]
     public async Task OdbcScan_CanQuerySqlServerCell()
     {
-        await using var connection = await _duckDbFactory.OpenConnectionAsync();
+        var connection = await _duckDbFactory.GetOpenConnectionAsync();
         await DuckDbSchemaCreator.InstallNanodbcAsync(connection);
 
         await using var command = connection.CreateCommand();
@@ -59,7 +59,7 @@ public sealed class NanodbcConnectionTests : IDisposable
     [Fact]
     public async Task OdbcScan_CanQuerySqlServerPCStation()
     {
-        await using var connection = await _duckDbFactory.OpenConnectionAsync();
+        var connection = await _duckDbFactory.GetOpenConnectionAsync();
         await DuckDbSchemaCreator.InstallNanodbcAsync(connection);
 
         await using var command = connection.CreateCommand();
@@ -79,7 +79,7 @@ public sealed class NanodbcConnectionTests : IDisposable
     [Fact]
     public async Task OdbcScan_CanQuerySqlServerSwTestMap()
     {
-        await using var connection = await _duckDbFactory.OpenConnectionAsync();
+        var connection = await _duckDbFactory.GetOpenConnectionAsync();
         await DuckDbSchemaCreator.InstallNanodbcAsync(connection);
 
         await using var command = connection.CreateCommand();
@@ -99,7 +99,7 @@ public sealed class NanodbcConnectionTests : IDisposable
     [Fact]
     public async Task OdbcScan_CanQuerySqlServerTLA()
     {
-        await using var connection = await _duckDbFactory.OpenConnectionAsync();
+        var connection = await _duckDbFactory.GetOpenConnectionAsync();
         await DuckDbSchemaCreator.InstallNanodbcAsync(connection);
 
         await using var command = connection.CreateCommand();
@@ -119,7 +119,7 @@ public sealed class NanodbcConnectionTests : IDisposable
     [Fact]
     public async Task OdbcScan_CanInsertIntoLocalTable()
     {
-        await using var connection = await _duckDbFactory.OpenConnectionAsync();
+        var connection = await _duckDbFactory.GetOpenConnectionAsync();
         await DuckDbSchemaCreator.InstallNanodbcAsync(connection);
         await DuckDbSchemaCreator.CreateTablesAsync(connection);
 

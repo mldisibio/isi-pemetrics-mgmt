@@ -122,7 +122,7 @@ public sealed class CacheRefreshService : IDisposable
             // Parse schema.view format into separate components
             var (schemaName, objectName) = ParseSchemaAndObject(viewName);
 
-            await using var connection = await _connectionFactory.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
+            var connection = await _connectionFactory.GetOpenConnectionAsync(cancellationToken).ConfigureAwait(false);
             await using var command = connection.CreateCommand();
 
             // Delete existing data

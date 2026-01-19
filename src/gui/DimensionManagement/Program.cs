@@ -46,7 +46,7 @@ static class Program
         services.AddSingleton(cacheConfig);
 
         // Error notifier (wired to MainForm status bar)
-        var errorNotifier = new UIErrorNotifier(mainForm.ShowStatusMessage, mainForm.SetOfflineMode);
+        var errorNotifier = new UIErrorNotifier(mainForm.ShowUnexpectedError, mainForm.SetOfflineMode);
         services.AddSingleton<ForNotifyingDataCommunicationErrors>(errorNotifier);
 
         // Mappers

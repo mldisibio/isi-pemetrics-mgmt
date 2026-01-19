@@ -45,11 +45,8 @@ public sealed class CacheRefreshServiceTests : IAsyncLifetime
     public async Task InitializeAsync()
     {
         // Initialize DuckDB with nanodbc and tables
-        await _duckDbFactory.InstallNanodbcAsync();
-        await using (var conn = await _duckDbFactory.OpenConnectionAsync())
-        {
-            await DuckDbSchemaCreator.CreateTablesAsync(conn);
-        }
+        var conn = await _duckDbFactory.GetOpenConnectionAsync();
+        await DuckDbSchemaCreator.CreateTablesAsync(conn);
     }
 
     public Task DisposeAsync()
@@ -64,7 +61,7 @@ public sealed class CacheRefreshServiceTests : IAsyncLifetime
     {
         await _refreshService.PopulateAllTablesAsync();
 
-        await using var connection = await _duckDbFactory.OpenConnectionAsync();
+        var connection = await _duckDbFactory.GetOpenConnectionAsync();
         await using var command = connection.CreateCommand();
         command.CommandText = "SELECT COUNT(*) FROM Cell";
         var count = Convert.ToInt64(await command.ExecuteScalarAsync());
@@ -77,7 +74,7 @@ public sealed class CacheRefreshServiceTests : IAsyncLifetime
     {
         await _refreshService.PopulateAllTablesAsync();
 
-        await using var connection = await _duckDbFactory.OpenConnectionAsync();
+        var connection = await _duckDbFactory.GetOpenConnectionAsync();
         await using var command = connection.CreateCommand();
         command.CommandText = "SELECT COUNT(*) FROM PCStation";
         var count = Convert.ToInt64(await command.ExecuteScalarAsync());
@@ -90,7 +87,7 @@ public sealed class CacheRefreshServiceTests : IAsyncLifetime
     {
         await _refreshService.PopulateAllTablesAsync();
 
-        await using var connection = await _duckDbFactory.OpenConnectionAsync();
+        var connection = await _duckDbFactory.GetOpenConnectionAsync();
         await using var command = connection.CreateCommand();
         command.CommandText = "SELECT COUNT(*) FROM CellByPCStation";
         var count = Convert.ToInt64(await command.ExecuteScalarAsync());
@@ -103,7 +100,7 @@ public sealed class CacheRefreshServiceTests : IAsyncLifetime
     {
         await _refreshService.PopulateAllTablesAsync();
 
-        await using var connection = await _duckDbFactory.OpenConnectionAsync();
+        var connection = await _duckDbFactory.GetOpenConnectionAsync();
         await using var command = connection.CreateCommand();
         command.CommandText = "SELECT COUNT(*) FROM SwTestMap";
         var count = Convert.ToInt64(await command.ExecuteScalarAsync());
@@ -116,7 +113,7 @@ public sealed class CacheRefreshServiceTests : IAsyncLifetime
     {
         await _refreshService.PopulateAllTablesAsync();
 
-        await using var connection = await _duckDbFactory.OpenConnectionAsync();
+        var connection = await _duckDbFactory.GetOpenConnectionAsync();
         await using var command = connection.CreateCommand();
         command.CommandText = "SELECT COUNT(*) FROM CellBySwTest";
         var count = Convert.ToInt64(await command.ExecuteScalarAsync());
@@ -129,7 +126,7 @@ public sealed class CacheRefreshServiceTests : IAsyncLifetime
     {
         await _refreshService.PopulateAllTablesAsync();
 
-        await using var connection = await _duckDbFactory.OpenConnectionAsync();
+        var connection = await _duckDbFactory.GetOpenConnectionAsync();
         await using var command = connection.CreateCommand();
         command.CommandText = "SELECT COUNT(*) FROM TLA";
         var count = Convert.ToInt64(await command.ExecuteScalarAsync());
@@ -142,7 +139,7 @@ public sealed class CacheRefreshServiceTests : IAsyncLifetime
     {
         await _refreshService.PopulateAllTablesAsync();
 
-        await using var connection = await _duckDbFactory.OpenConnectionAsync();
+        var connection = await _duckDbFactory.GetOpenConnectionAsync();
         await using var command = connection.CreateCommand();
         command.CommandText = "SELECT COUNT(*) FROM CellByPartNo";
         var count = Convert.ToInt64(await command.ExecuteScalarAsync());
@@ -165,7 +162,7 @@ public sealed class CacheRefreshServiceTests : IAsyncLifetime
         // First population
         await _refreshService.PopulateAllTablesAsync();
 
-        await using var connection = await _duckDbFactory.OpenConnectionAsync();
+        var connection = await _duckDbFactory.GetOpenConnectionAsync();
         await using var command = connection.CreateCommand();
         command.CommandText = "SELECT COUNT(*) FROM Cell";
         var firstCount = Convert.ToInt64(await command.ExecuteScalarAsync());

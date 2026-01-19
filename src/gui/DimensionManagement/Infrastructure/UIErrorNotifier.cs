@@ -17,11 +17,12 @@ public sealed class UIErrorNotifier : ForNotifyingDataCommunicationErrors
     public void ProductionStoreNotReachable(Exception exception)
     {
         _setOfflineMode(true);
-        _showError($"SQL Server unavailable: {exception.Message}");
+        _showError($"SQL Server unavailable: {nameof(exception)}:{exception.Message}");
     }
 
     public void UnexpectedError(string operation, Exception exception)
     {
-        _showError($"Error in {operation}: {exception.Message}");
+        _showError($"Error in {operation}: {nameof(exception)}:{exception.Message}");
+
     }
 }
