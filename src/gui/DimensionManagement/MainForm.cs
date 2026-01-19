@@ -156,13 +156,16 @@ public partial class MainForm : Form
         }
 
         ShowStatusMessage("Initializing cache...");
-        await duckDbInitializer.InitializeAsync();
+        bool initialized = await duckDbInitializer.InitializeAsync();
+        // TODO this is where functional 'Result' would be valid
+        if (initialized)
+        {
+            ShowStatusMessage("Populating cache from SQL Server...");
+            await cacheRefreshService.PopulateAllTablesAsync();
 
-        ShowStatusMessage("Populating cache from SQL Server...");
-        await cacheRefreshService.PopulateAllTablesAsync();
-
-        cacheRefreshService.Start();
-        ShowStatusMessage("Ready");
+            cacheRefreshService.Start();
+            ShowStatusMessage("Ready");
+        }
     }
 
     public void ShowStatusMessage(string message)

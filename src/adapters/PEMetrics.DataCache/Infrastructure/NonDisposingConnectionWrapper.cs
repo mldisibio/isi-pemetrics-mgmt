@@ -1,5 +1,6 @@
 using System.Data;
 using System.Data.Common;
+using DuckDB.NET.Data;
 
 namespace PEMetrics.DataCache.Infrastructure;
 
@@ -7,11 +8,11 @@ namespace PEMetrics.DataCache.Infrastructure;
 /// Wraps a DbConnection and prevents disposal. Used to share a single long-lived
 /// DuckDB connection across multiple consumers without premature disposal.
 /// </summary>
-internal sealed class NonDisposingConnectionWrapper : DbConnection
+internal sealed class NonDisposingConnectionWrapper : DuckDBConnection
 {
-    readonly DbConnection _inner;
+    readonly DuckDBConnection _inner;
 
-    public NonDisposingConnectionWrapper(DbConnection inner)
+    public NonDisposingConnectionWrapper(DuckDBConnection inner)
     {
         _inner = inner ?? throw new ArgumentNullException(nameof(inner));
     }

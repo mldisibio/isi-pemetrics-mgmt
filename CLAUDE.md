@@ -87,7 +87,7 @@ dotnet restore PE_Metrics_DataMgmt.sln
 This project follows async patterns throughout the data layer. When implementing new features:
 
 - **Prefer async over sync**: Use async methods even if not explicitly stated in requirements
-- **Use `.ConfigureAwait(false)`**: All `await` calls in library code should use `.ConfigureAwait(false)` per Microsoft best practices
+- **Use `.ConfigureAwait(false)`**: All `await` calls in library code, but NOT xUnit tests, should use `.ConfigureAwait(false)` per Microsoft best practices
 - **Propagate CancellationToken**: All async methods should accept `CancellationToken cancellationToken = default`
 - **Use async disposal**: Prefer `await using` over `using` for disposable async resources
 - **Async ADO.NET methods**: Use `OpenAsync`, `ExecuteReaderAsync`, `ExecuteNonQueryAsync`, `ExecuteScalarAsync`
