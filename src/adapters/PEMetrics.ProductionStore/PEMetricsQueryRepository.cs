@@ -1,6 +1,5 @@
 using System.Collections.Immutable;
 using System.Data;
-using System.Data.Common;
 using Microsoft.Data.SqlClient;
 using PEMetrics.DataApi.Infrastructure;
 using PEMetrics.DataApi.Infrastructure.Mapping;

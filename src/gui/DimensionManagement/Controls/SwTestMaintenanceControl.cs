@@ -237,13 +237,20 @@ public sealed class SwTestMaintenanceControl : UserControl
         Controls.Add(toolbarPanel);
     }
 
+    public async Task RefreshLookupsAsync()
+    {
+        var cellsTask = _queryRepo.GetCellsAsync();
+        await Task.WhenAll(cellsTask).ConfigureAwait(true);
+        _allCells = cellsTask.Result;
+    }
+
     public async Task LoadDataAsync(int? selectTestId = null)
     {
         var testsTask = _queryRepo.GetSwTestsAsync();
         var cellMappingsTask = _queryRepo.GetSwTestToCellMappingsAsync();
-        var cellsTask = _queryRepo.GetCellsAsync();
+        var lookupsTask = RefreshLookupsAsync();
 
-        await Task.WhenAll(testsTask, cellMappingsTask, cellsTask).ConfigureAwait(true);
+        await Task.WhenAll(testsTask, cellMappingsTask, lookupsTask).ConfigureAwait(true);
 
         _allTests = testsTask.Result;
         _allCellMappings = cellMappingsTask.Result
@@ -255,7 +262,6 @@ public sealed class SwTestMaintenanceControl : UserControl
                 CellName = m.CellName
             }))
             .ToImmutableList();
-        _allCells = cellsTask.Result;
 
         ApplyFilter(selectTestId);
     }

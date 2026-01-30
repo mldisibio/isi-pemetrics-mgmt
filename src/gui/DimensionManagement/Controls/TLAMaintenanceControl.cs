@@ -235,13 +235,21 @@ public sealed class TLAMaintenanceControl : UserControl
         Controls.Add(toolbarPanel);
     }
 
+
+    public async Task RefreshLookupsAsync()
+    {
+        var cellsTask = _queryRepo.GetCellsAsync();
+        await Task.WhenAll(cellsTask).ConfigureAwait(true);
+        _allCells = cellsTask.Result;
+    }
+
     public async Task LoadDataAsync(string? selectPartNo = null)
     {
         var tlasTask = _queryRepo.GetTLACatalogAsync();
         var cellMappingsTask = _queryRepo.GetTLAToCellMappingsAsync();
-        var cellsTask = _queryRepo.GetCellsAsync();
+        var refreshLookupsTask = RefreshLookupsAsync();
 
-        await Task.WhenAll(tlasTask, cellMappingsTask, cellsTask).ConfigureAwait(true);
+        await Task.WhenAll(tlasTask, cellMappingsTask, refreshLookupsTask).ConfigureAwait(true);
 
         _allTLAs = tlasTask.Result;
         _allCellMappings = cellMappingsTask.Result
@@ -253,7 +261,6 @@ public sealed class TLAMaintenanceControl : UserControl
                 CellName = m.CellName
             }))
             .ToImmutableList();
-        _allCells = cellsTask.Result;
 
         ApplyFilter(selectPartNo);
     }

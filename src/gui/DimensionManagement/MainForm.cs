@@ -107,6 +107,27 @@ public partial class MainForm : Form
         };
         tlaTab.Controls.Add(_tlaControl);
         _tabControl.TabPages.Add(tlaTab);
+        // Hook up tab selection to refresh reference data
+        _tabControl.SelectedIndexChanged += TabControl_SelectedIndexChanged;
+    }
+
+    async void TabControl_SelectedIndexChanged(object? sender, EventArgs e)
+    {
+        switch (_tabControl.SelectedTab?.Controls[0])
+        {
+            case CellByPCStationMaintenanceControl pcToCellControl:
+                // refresh cell and pc lookups when switching to PC-to-Cell tab
+                await pcToCellControl.RefreshLookupsAsync();
+                break;
+            case SwTestMaintenanceControl swTestControl:
+                // refresh cell lookups when switching to Software Tests tab
+                await swTestControl.RefreshLookupsAsync();
+                break;
+            case TLAMaintenanceControl tlaControl:
+                // refresh cell lookups when switching to Part Numbers tab
+                await tlaControl.RefreshLookupsAsync();
+                break;
+        }
     }
 
     async void MainForm_Shown(object? sender, EventArgs e)

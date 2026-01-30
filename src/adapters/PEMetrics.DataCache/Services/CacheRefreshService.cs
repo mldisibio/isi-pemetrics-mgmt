@@ -99,8 +99,10 @@ public sealed class CacheRefreshService : IDisposable
                 {
                     await PopulateTableAsync(table, cancellationToken).ConfigureAwait(false);
                 }
-                // reclaim space after deletions
-                await ReclaimDeleteSpace(cancellationToken).ConfigureAwait(false);
+
+                // reclaim space after deletions by invoking 'CHECKPOINT'; but throws error when called after each request;
+                //await ReclaimDeleteSpace(cancellationToken).ConfigureAwait(false);
+
                 // Signal completion to any awaiting callers
                 request.Completion?.TrySetResult();
             }
@@ -130,7 +132,8 @@ public sealed class CacheRefreshService : IDisposable
             // Delete existing data
             command.CommandText = @$"
 TRUNCATE {tableName};
-CHECKPOINT;";
+--CHECKPOINT;
+";
             await command.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
 
             // Use nanodbc odbc_scan to populate from SQL Server view
@@ -148,16 +151,6 @@ SELECT * FROM odbc_scan(
         {
             _errorNotifier.UnexpectedError($"PopulateTable({tableName})", ex);
         }
-    }
-
-    async Task<int> ReclaimDeleteSpace(CancellationToken cancellationToken)
-    {
-        var connection = await _connectionFactory.GetOpenConnectionAsync(cancellationToken).ConfigureAwait(false);
-        await using var command = connection.CreateCommand();
-
-        // Delete existing data
-        command.CommandText = $"CHECKPOINT";
-        return await command.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
     }
 
     static (string Schema, string Object) ParseSchemaAndObject(string qualifiedName)

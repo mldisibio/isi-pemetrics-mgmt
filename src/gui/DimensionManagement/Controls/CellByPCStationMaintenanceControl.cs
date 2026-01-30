@@ -209,17 +209,26 @@ public sealed class CellByPCStationMaintenanceControl : UserControl
         Controls.Add(toolbarPanel);
     }
 
-    public async Task LoadDataAsync(int? selectMapId = null)
+    public async Task RefreshLookupsAsync()
     {
         // Load reference data for pickers
         var pcStationsTask = _queryRepo.GetPCStationsAsync();
         var cellsTask = _queryRepo.GetCellsAsync();
-        var mappingsTask = _queryRepo.GetPcToCellMappingsAsync();
 
-        await Task.WhenAll(pcStationsTask, cellsTask, mappingsTask).ConfigureAwait(true);
+        await Task.WhenAll(pcStationsTask, cellsTask).ConfigureAwait(true);
 
         _allPCStations = pcStationsTask.Result;
         _allCells = cellsTask.Result;
+    }
+
+    public async Task LoadDataAsync(int? selectMapId = null)
+    {
+        // Load reference data for pickers
+        var lookupsTask = RefreshLookupsAsync();
+        var mappingsTask = _queryRepo.GetPcToCellMappingsAsync();
+
+        await Task.WhenAll(lookupsTask, mappingsTask).ConfigureAwait(true);
+
         _allMappings = mappingsTask.Result;
 
         // Populate Cell dropdown with active cells
@@ -345,7 +354,7 @@ public sealed class CellByPCStationMaintenanceControl : UserControl
         _purposeTextBox.Text = "";
         _extendedNameTextBox.Text = "";
         _activeFromTextBox.Text = DateTime.Today.ToString("yyyy-MM-dd");
-        _activeToTextBox.Text = "";
+        _activeToTextBox.Text = "2050-12-31";
 
         _detailPanel.Visible = true;
         _pcStationTextBox.Focus();
